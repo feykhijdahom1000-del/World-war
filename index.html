@@ -74,6 +74,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .tile span{position:absolute;top:12px;inset-inline-end:12px;font-size:34px}
 .tile.army{background:linear-gradient(160deg,#16314f,#101a2a)}
 .tile.war{background:linear-gradient(160deg,#4a1f24,#1d1216)}
+.tile.eco{background:linear-gradient(160deg,#17402f,#0f1a18)}
+.tile.dip{background:linear-gradient(160deg,#3a2a63,#15131f)}
+.tile.mkt{background:linear-gradient(160deg,#5a4318,#1c1710)}
+.tile.inf{background:linear-gradient(160deg,#17454f,#0f1a1f)}
+.tile.mini{height:90px;font-size:18px}
+.tile.mini span{font-size:28px}
 nav{position:fixed;inset-inline:0;bottom:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:#0d1626;border-top:1px solid var(--line)}
 nav div{max-width:460px;margin:auto;display:flex;justify-content:space-between}
 nav button{width:auto;flex:1;margin:0;padding:8px 2px;background:transparent;color:var(--mut);font-size:12px;font-weight:600}
@@ -157,11 +163,18 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
       <div class="lbl">شناسه بازیکن: <span id="pno" dir="ltr"></span></div>
       <div class="stats">
         <div><span class="lbl">قدرت نظامی</span><b id="power"></b></div>
+        <div><span class="lbl">الماس</span><b id="crystals"></b></div>
       </div>
     </div>
     <div class="tiles">
       <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
       <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
+      <button class="tile eco" onclick="soon()"><span>📈</span>اقتصاد</button>
+      <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
+      <button class="tile mkt" onclick="soon()"><span>🏪</span>بازار جهانی</button>
+      <button class="tile inf" onclick="soon()"><span>🏗️</span>زیرساخت</button>
+      <button class="tile mini" onclick="soon()"><span>📊</span>آمار کشور</button>
+      <button class="tile mini" onclick="soon()"><span>💵</span>وام</button>
     </div>
   </section>
 
@@ -438,6 +451,7 @@ function render() {
   const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
   $("treasury").textContent = "$" + live.toLocaleString("en-US");
+  $("crystals").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
 }
 // route ها پشت‌سرهم اجرا می‌شن تا رویداد تکراری auth چیزی را دوبار ثبت نکند
 let routeQ = Promise.resolve();
