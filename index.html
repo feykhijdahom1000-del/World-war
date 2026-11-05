@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>World War</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
 :root{--bg:#0a111d;--card:#142033;--line:#27364b;--gold:#d4a73a;--txt:#eef2f7;--mut:#8b9bb0;--err:#ff8a8a;--ok:#3ddc97}
 *{box-sizing:border-box}
@@ -79,6 +80,10 @@ nav button{width:auto;flex:1;margin:0;padding:8px 2px;background:transparent;col
 nav button i{display:block;font-style:normal;font-size:22px}
 nav button.on{color:var(--gold)}
 #toast{position:fixed;bottom:84px;inset-inline:0;text-align:center;color:var(--txt);font-size:14px;pointer-events:none}
+/* world map */
+#worldmap{position:fixed;inset-inline:0;top:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:1;background:var(--bg)}
+#mapbox{width:100%;height:100%;background:var(--bg)}
+nav{z-index:10}
 /* shop */
 .sec{margin:22px 0 10px;font-size:18px}
 .vip{background:linear-gradient(150deg,#6b5320,#2a2008 75%);border:1px solid var(--gold);border-radius:18px;padding:18px}
@@ -205,15 +210,19 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
   <div id="msg"></div>
 </div>
 
+<!-- ۵. نقشه جهان -->
+<section id="worldmap" hidden><div id="mapbox" dir="ltr"></div></section>
+
 <nav id="nav" hidden><div>
   <button onclick="soon()"><i>💬</i>ارتباطات</button>
   <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
   <button data-t="home" class="on" onclick="screen('home')"><i>🏠</i>خانه</button>
-  <button onclick="soon()"><i>🌍</i>نقشه جهان</button>
+  <button data-t="worldmap" onclick="screen('worldmap')"><i>🌍</i>نقشه جهان</button>
   <button data-t="shop" onclick="screen('shop')"><i>🛒</i>فروشگاه</button>
 </div></nav>
 <div id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
 const sb = supabase.createClient("https://ojvafaquuzfvnpyfqady.supabase.co", "sb_publishable_KCBs5O_32ERi2QCWXwsVjw__stzJt9L");
@@ -222,11 +231,27 @@ const msg = (t) => ($("msg").textContent = t || "");
 const flagOf = (code) => String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt()));
 let country = null, picked = null;
 
+let lmap = null;
+function showMap() {
+  if (!lmap) {
+    lmap = L.map("mapbox", {
+      center: [30, 40], zoom: 3, minZoom: 2, maxZoom: 10,
+      maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1
+    });
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      subdomains: "abcd", noWrap: true, maxZoom: 10,
+      attribution: "© OpenStreetMap © CARTO"
+    }).addTo(lmap);
+  }
+  setTimeout(() => lmap.invalidateSize(), 0);
+}
+
 function screen(n) {
-  for (const s of ["auth", "pick", "home", "shop"]) $(s).hidden = s !== n;
-  $("nav").hidden = n !== "home" && n !== "shop";
+  for (const s of ["auth", "pick", "home", "shop", "worldmap"]) $(s).hidden = s !== n;
+  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
   window.scrollTo(0, 0);
+  if (n === "worldmap") showMap();
 }
 function flash(t, ms) {
   $("toast").textContent = t;
