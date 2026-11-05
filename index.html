@@ -998,7 +998,7 @@ function renderEco() {
       return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>🔨 در حال ساخت</small></div></div>
         <div class="chips"><span class="chp">⏱️ تکمیل تا <b class="cd" dir="ltr">${dur(rdy - now)}</b></span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز پس از ساخت</span></div>
         <div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
-        <button class="up" disabled>⏳ در حال ساخت…</button></div>`;
+        <button class="buy" onclick="speedUp('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(rdy - now))}</span> 💎</button></div>`;
     }
     return `<div class="bc${has ? "" : " no"}">${head}
         <div class="bi">${has ? `<b>${fmt(b.income)}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
@@ -1007,6 +1007,23 @@ function renderEco() {
             : `<button class="buy${t < b.price ? " poor" : ""}" onclick="buyBuilding('${b.id}',this)">شروع ساخت — <span dir="ltr">${fmt(b.price)}</span></button>`}
     </div>`;
   }).join("");
+}
+// هزینه‌ی تکمیل سریع: هر ۵ دقیقه (یا کسری از آن) = ۱ الماس، حداقل ۱
+const spCost = (ms) => Math.max(1, Math.ceil(ms / 300000));
+async function speedUp(id, btn) {
+  const cost = spCost((pending[id] || 0) - Date.now());
+  if (!confirm("ساخت با " + faNum(cost) + " الماس همین حالا تمام شود؟")) return;
+  btn.disabled = true;
+  const { error } = await sb.rpc("speedup_building", { p_id: id });
+  if (error) {
+    btn.disabled = false;
+    const E = { NO_COUNTRY: "شما کشوری ندارید", NOT_PENDING: "این ساختمان در حال ساخت نیست", NO_CRYSTALS: "الماس کافی ندارید" };
+    return flash(E[error.message] || error.message, 5000);
+  }
+  flash("⚡ ساخت تمام شد", 2000);
+  await loadCountry();
+  render();
+  await loadEco();
 }
 async function buyBuilding(id, btn) {
   btn.disabled = true;
@@ -1029,6 +1046,8 @@ function ecoTick() {
     const rdy = +el.dataset.rdy, st = +el.dataset.st;
     const cd = el.querySelector(".cd"), pg = el.querySelector(".pg");
     if (cd) cd.textContent = dur(rdy - now);
+    const sc = el.querySelector(".spc");
+    if (sc) sc.textContent = faNum(spCost(rdy - now));
     if (pg) pg.style.width = Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100)) + "%";
   });
   if (!settling && ids.some((id) => pending[id] <= now)) {
