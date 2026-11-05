@@ -80,9 +80,17 @@ nav button{width:auto;flex:1;margin:0;padding:8px 2px;background:transparent;col
 nav button i{display:block;font-style:normal;font-size:22px}
 nav button.on{color:var(--gold)}
 #toast{position:fixed;bottom:84px;inset-inline:0;text-align:center;color:var(--txt);font-size:14px;pointer-events:none}
+/* admin */
+.adm .u{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 10px}
+.adm .u b{display:block;direction:ltr;text-align:start;word-break:break-all}
+.adm .u small{display:block;color:var(--mut);line-height:1.8;margin-bottom:6px}
+.adm .u.ban{border-color:var(--err)}
+.adm .f{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.adm .f input{margin:4px 0;padding:10px;font-size:14px}
 /* world map */
 #worldmap{position:fixed;inset-inline:0;top:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:1;background:var(--bg)}
 #mapbox{width:100%;height:100%;background:var(--bg)}
+#mapbox .leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.9) saturate(.7)}
 nav{z-index:10}
 /* shop */
 .sec{margin:22px 0 10px;font-size:18px}
@@ -144,6 +152,7 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
     <div class="top">
       <div class="flag" id="flag"></div>
       <div class="sp"></div>
+      <button class="ic" id="admBtn" onclick="openAdmin()" aria-label="پنل ادمین" hidden>🛠️</button>
       <button class="ic" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
       <button class="ic" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
       <button class="ic" onclick="logout()" aria-label="خروج">⚙️</button>
@@ -207,6 +216,13 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
     </div>
   </section>
 
+  <!-- پنل ادمین -->
+  <section id="admin" class="adm" hidden>
+    <div class="phead"><span>🛠️</span><b>پنل ادمین</b><button class="ghost" onclick="screen('home')">بازگشت</button></div>
+    <input id="aq" type="search" placeholder="جستجو با ایمیل یا نام کشور…" oninput="adminSearchSoon()" autocomplete="off">
+    <div id="alist"></div>
+  </section>
+
   <div id="msg"></div>
 </div>
 
@@ -238,16 +254,16 @@ function showMap() {
       center: [30, 40], zoom: 3, minZoom: 2, maxZoom: 10,
       maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1
     });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd", noWrap: true, maxZoom: 10,
-      attribution: "© OpenStreetMap © CARTO"
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      noWrap: true, maxZoom: 10,
+      attribution: "© OpenStreetMap"
     }).addTo(lmap);
   }
   setTimeout(() => lmap.invalidateSize(), 0);
 }
 
 function screen(n) {
-  for (const s of ["auth", "pick", "home", "shop", "worldmap"]) $(s).hidden = s !== n;
+  for (const s of ["auth", "pick", "home", "shop", "worldmap", "admin"]) $(s).hidden = s !== n;
   $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
   window.scrollTo(0, 0);
@@ -384,10 +400,74 @@ function render() {
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
   $("treasury").textContent = "$" + live.toLocaleString("en-US");
 }
+let aTimer = null;
+function adminSearchSoon() { clearTimeout(aTimer); aTimer = setTimeout(adminSearch, 350); }
+async function openAdmin() { screen("admin"); await adminSearch(); }
+
+async function adminSearch() {
+  const { data, error } = await sb.rpc("admin_search", { p_q: $("aq").value.trim() });
+  if (error) return msg(error.message);
+  msg("");
+  const box = $("alist");
+  box.replaceChildren();
+  if (!data.length) {
+    const e = document.createElement("div"); e.className = "empty"; e.textContent = "کاربری پیدا نشد";
+    return box.append(e);
+  }
+  data.forEach((u) => box.append(adminCard(u)));
+}
+
+function adminCard(u) {
+  const d = document.createElement("div");
+  d.className = "u" + (u.banned ? " ban" : "");
+  const e = document.createElement("b"); e.textContent = u.email;
+  const s = document.createElement("small");
+  const vipOn = u.vip_until && new Date(u.vip_until) > new Date();
+  const vip = vipOn ? new Date(u.vip_until).toLocaleDateString("fa-IR") : "ندارد";
+  s.textContent = (u.banned ? "⛔ بن شده · " : "") +
+    (u.country ? u.country + " · خزانه " + fmt(u.treasury) + " · 💎" + u.crystals + " · VIP: " + vip : "هنوز کشور انتخاب نکرده");
+  d.append(e, s);
+
+  if (u.country) {
+    const mk = (ph) => { const i = document.createElement("input"); i.type = "number"; i.inputMode = "numeric"; i.placeholder = ph; return i; };
+    const f = document.createElement("div"); f.className = "f";
+    const t = mk("پول"), c = mk("الماس"), v = mk("روز VIP");
+    f.append(t, c, v);
+    const ok = document.createElement("button");
+    ok.textContent = "اعمال";
+    ok.onclick = async () => {
+      const a = { p_user: u.user_id, p_treasury: Number(t.value || 0), p_crystals: Number(c.value || 0), p_vip_days: Number(v.value || 0) };
+      if (!a.p_treasury && !a.p_crystals && !a.p_vip_days) return flash("مقداری وارد نشده");
+      ok.disabled = true;
+      const { error } = await sb.rpc("admin_grant", a);
+      ok.disabled = false;
+      if (error) return flash(error.message, 3000);
+      flash("انجام شد");
+      adminSearch();
+    };
+    d.append(f, ok);
+  }
+
+  const bb = document.createElement("button");
+  bb.className = "ghost";
+  bb.textContent = u.banned ? "رفع بن" : "بن کردن";
+  bb.onclick = async () => {
+    if (!confirm((u.banned ? "رفع بن " : "بن کردن ") + u.email + "؟")) return;
+    const { error } = await sb.rpc("admin_ban", { p_user: u.user_id, p_ban: !u.banned });
+    if (error) return flash(error.message, 3000);
+    flash("انجام شد");
+    adminSearch();
+  };
+  d.append(bb);
+  return d;
+}
+
 async function route(session) {
-  if (!session) { country = null; msg(""); return screen("auth"); }
+  if (!session) { country = null; $("admBtn").hidden = true; msg(""); return screen("auth"); }
   await loadCountry();
   if (country) {
+    const adm = await sb.rpc("is_admin");
+    $("admBtn").hidden = !adm.data;
     $("flag").textContent = flagOf(country.code);
     $("name").textContent = country.name;
     $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
