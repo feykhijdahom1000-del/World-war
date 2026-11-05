@@ -2,49 +2,128 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>World War</title>
 <style>
-body{font-family:sans-serif;background:#0d1520;color:#eee;margin:0;padding:20px}
-.box{max-width:420px;margin:auto;background:#17212f;padding:20px;border-radius:12px}
-input,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:0;font-size:16px;box-sizing:border-box}
-button{background:#d4a73a;font-weight:bold}
-.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a3647}
-#msg{color:#ff8a8a;min-height:20px}
+:root{--bg:#0a111d;--card:#142033;--line:#27364b;--gold:#d4a73a;--txt:#eef2f7;--mut:#8b9bb0;--err:#ff8a8a;--ok:#3ddc97}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Tahoma,sans-serif}
+.wrap{max-width:460px;margin:auto;padding:18px 16px 110px}
+h1,h2{margin:0 0 14px}
+input,button{width:100%;padding:13px;margin:6px 0;border-radius:10px;border:0;font:inherit;font-size:16px}
+input{background:#0e1828;color:var(--txt);border:1px solid var(--line)}
+button{background:var(--gold);color:#1b1405;font-weight:700;cursor:pointer}
+button.ghost{background:transparent;color:var(--mut);border:1px solid var(--line)}
+button:disabled{opacity:.4}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#msg{color:var(--err);min-height:22px;text-align:center}
+/* country list */
+#list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.c{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);color:var(--txt);border:1px solid var(--line);font-weight:600;padding:14px 8px}
+.c .f{font-size:34px}.c small{color:var(--mut);font-weight:400}
+.c.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+/* home */
+.top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.top .sp{flex:1}
+.ic{width:42px;height:42px;padding:0;margin:0;border-radius:50%;background:var(--card);color:var(--txt);border:1px solid var(--line);font-size:18px}
+.flag{width:54px;height:54px;border-radius:50%;border:3px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:30px}
+.main{background:linear-gradient(160deg,#1a2b44,#0f1826 70%);border:1px solid var(--line);border-radius:18px;padding:18px}
+.main .name{font-size:19px;font-weight:700;margin-bottom:14px}
+.lbl{color:var(--mut);font-size:14px}
+.big{font-size:34px;font-weight:800;margin:2px 0 6px;direction:ltr;text-align:right}
+.stats{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.stats b{display:block;font-size:24px;margin-top:2px;direction:ltr;text-align:right}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.tile{height:120px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:16px;font-size:20px;position:relative}
+.tile span{position:absolute;top:12px;inset-inline-end:12px;font-size:34px}
+.tile.army{background:linear-gradient(160deg,#16314f,#101a2a)}
+.tile.war{background:linear-gradient(160deg,#4a1f24,#1d1216)}
+nav{position:fixed;inset-inline:0;bottom:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:#0d1626;border-top:1px solid var(--line)}
+nav div{max-width:460px;margin:auto;display:flex;justify-content:space-between}
+nav button{width:auto;flex:1;margin:0;padding:8px 2px;background:transparent;color:var(--mut);font-size:12px;font-weight:600}
+nav button i{display:block;font-style:normal;font-size:22px}
+nav button.on{color:var(--gold)}
+#toast{position:fixed;bottom:84px;inset-inline:0;text-align:center;color:var(--txt);font-size:14px;pointer-events:none}
 </style>
 </head>
 <body>
-<div class="box">
-  <h2>World War</h2>
-  <div id="auth">
-    <input id="email" type="email" placeholder="ایمیل">
-    <input id="pass" type="password" placeholder="رمز (حداقل ۶ حرف)">
-    <button onclick="login()">ورود</button>
+<div class="wrap">
+
+  <!-- ۱. ورود و ثبت‌نام -->
+  <section id="auth" hidden>
+    <h1>World War</h1>
+    <input id="email" type="email" placeholder="ایمیل" autocomplete="email">
+    <input id="pass" type="password" placeholder="رمز عبور (حداقل ۶ حرف)" autocomplete="current-password">
     <button onclick="signup()">ثبت‌نام</button>
-  </div>
-  <div id="game" style="display:none">
-    <div class="row"><span>کشور</span><b id="name"></b></div>
-    <div class="row"><span>خزانه</span><b id="treasury"></b></div>
-    <div class="row"><span>درآمد روزانه</span><b id="income"></b></div>
-    <div class="row"><span>قدرت نظامی</span><b id="power"></b></div>
-    <button onclick="logout()">خروج</button>
-  </div>
+    <button class="ghost" onclick="login()">ورود</button>
+  </section>
+
+  <!-- ۲. انتخاب کشور -->
+  <section id="pick" hidden>
+    <h2>کشور خودت را انتخاب کن</h2>
+    <div class="lbl">هر کشور فقط یک فرمانده دارد و بعداً قابل تغییر نیست.</div>
+    <div id="list"></div>
+    <button id="go" onclick="confirmPick()" disabled>شروع بازی</button>
+    <button class="ghost" onclick="logout()">خروج</button>
+  </section>
+
+  <!-- ۳. صفحه اصلی -->
+  <section id="home" hidden>
+    <div class="top">
+      <div class="flag" id="flag"></div>
+      <div class="sp"></div>
+      <button class="ic" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
+      <button class="ic" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
+      <button class="ic" onclick="logout()" aria-label="خروج">⚙️</button>
+    </div>
+    <div class="main">
+      <div class="name" id="name"></div>
+      <div class="lbl">موجودی خزانه</div>
+      <div class="big" id="treasury"></div>
+      <div class="lbl">درآمد روزانه: <span id="income" dir="ltr"></span></div>
+      <div class="stats">
+        <div><span class="lbl">قدرت نظامی</span><b id="power"></b></div>
+      </div>
+    </div>
+    <div class="tiles">
+      <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
+      <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
+    </div>
+  </section>
+
   <div id="msg"></div>
 </div>
 
+<nav id="nav" hidden><div>
+  <button onclick="soon()"><i>💬</i>ارتباطات</button>
+  <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
+  <button class="on"><i>🏠</i>خانه</button>
+  <button onclick="soon()"><i>🌍</i>نقشه جهان</button>
+  <button onclick="soon()"><i>🛒</i>فروشگاه</button>
+</div></nav>
+<div id="toast"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
-const sb = supabase.createClient(
-  "https://ojvafaquuzfvnpyfqady.supabase.co",
-  "sb_publishable_KCBs5O_32ERi2QCWXwsVjw__stzJt9L"
-);
-let country = null;
+const sb = supabase.createClient("https://ojvafaquuzfvnpyfqady.supabase.co", "sb_publishable_KCBs5O_32ERi2QCWXwsVjw__stzJt9L");
 const $ = (id) => document.getElementById(id);
 const msg = (t) => ($("msg").textContent = t || "");
+const flagOf = (code) => String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt()));
+let country = null, picked = null;
+
+function screen(n) {
+  for (const s of ["auth", "pick", "home"]) $(s).hidden = s !== n;
+  $("nav").hidden = n !== "home";
+}
+function soon() {
+  $("toast").textContent = "به‌زودی";
+  setTimeout(() => ($("toast").textContent = ""), 1200);
+}
 
 async function signup() {
   const { error } = await sb.auth.signUp({ email: $("email").value, password: $("pass").value });
-  msg(error ? error.message : "ثبت‌نام شد. اگه ایمیل تأیید خواست، ایمیلتان را چک کنید.");
+  msg(error ? error.message : "ثبت‌نام انجام شد. اگر ایمیل تأیید آمد، اول تأیید کن و بعد وارد شو.");
 }
 async function login() {
   const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("pass").value });
@@ -52,27 +131,68 @@ async function login() {
 }
 async function logout() { await sb.auth.signOut(); }
 
+async function loadPick() {
+  const { data, error } = await sb.rpc("list_countries");
+  if (error) return msg(error.message);
+  const box = $("list");
+  box.replaceChildren();
+  picked = null;
+  $("go").disabled = true;
+  data.forEach((c) => {
+    const b = document.createElement("button");
+    b.className = "c";
+    b.disabled = c.taken;
+    const f = document.createElement("span"); f.className = "f"; f.textContent = flagOf(c.code);
+    const n = document.createElement("span"); n.textContent = c.name_fa;
+    const s = document.createElement("small"); s.textContent = c.taken ? "گرفته شده" : "درآمد روزانه $" + Number(c.start_income).toLocaleString("en-US");
+    b.append(f, n, s);
+    b.onclick = () => {
+      picked = c.code;
+      [...box.children].forEach((x) => x.classList.remove("on"));
+      b.classList.add("on");
+      $("go").disabled = false;
+    };
+    box.append(b);
+  });
+}
+async function confirmPick() {
+  const { error } = await sb.rpc("choose_country", { p_code: picked });
+  if (error) { msg(error.message); return loadPick(); }
+  msg("");
+  route(true);
+}
+
 async function loadCountry() {
-  const { data, error } = await sb.from("countries").select("*").single();
+  const { data, error } = await sb.from("countries").select("*").maybeSingle();
   if (error) return msg(error.message);
   country = data;
 }
 function render() {
   if (!country) return;
   const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
-  const live = Math.floor(Number(country.treasury) + Number(country.daily_income) * secs / 86400);
-  $("name").textContent = country.name;
-  $("treasury").textContent = "$" + live.toLocaleString();
-  $("income").textContent = "$" + Number(country.daily_income).toLocaleString();
-  $("power").textContent = country.military_power;
+  const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
+  $("treasury").textContent = "$" + live.toLocaleString("en-US");
 }
-async function show(session) {
-  $("auth").style.display = session ? "none" : "block";
-  $("game").style.display = session ? "block" : "none";
-  if (session) { await loadCountry(); render(); } else { country = null; }
+async function route(session) {
+  if (!session) { country = null; msg(""); return screen("auth"); }
+  await loadCountry();
+  if (country) {
+    $("flag").textContent = flagOf(country.code);
+    $("name").textContent = country.name;
+    $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
+    $("power").textContent = country.military_power;
+    render();
+    screen("home");
+  } else {
+    await loadPick();
+    screen("pick");
+  }
 }
-sb.auth.onAuthStateChange((_e, s) => show(s));
-sb.auth.getSession().then(({ data }) => show(data.session));
+
+sb.auth.onAuthStateChange((e, s) => {
+  if (e === "TOKEN_REFRESHED") return;
+  setTimeout(() => route(s), 0); // جلوگیری از قفل شدن supabase داخل callback
+});
 setInterval(render, 1000);
 setInterval(() => { if (country) loadCountry(); }, 30000);
 </script>
