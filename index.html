@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>World War</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.css">
 <style>
 :root{--bg:#0a111d;--card:#142033;--line:#27364b;--gold:#d4a73a;--txt:#eef2f7;--mut:#8b9bb0;--err:#ff8a8a;--ok:#3ddc97}
 *{box-sizing:border-box}
@@ -97,9 +97,54 @@ body.set-open #setSheet{transform:none;visibility:visible;transition:transform .
 @media (prefers-reduced-motion:reduce){#setBack,#setSheet{transition:none!important}}
 /* world map */
 #worldmap{position:fixed;inset-inline:0;top:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:1;background:var(--bg)}
-#mapbox{width:100%;height:100%;background:var(--bg)}
-#mapbox .leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.9) saturate(.7)}
+#mapbox{width:100%;height:100%;background:#04080f}
 nav{z-index:10}
+#mapSheet{position:absolute;inset-inline:0;bottom:0;z-index:1100;background:#0d1626f2;border-top:1px solid var(--gold);border-radius:18px 18px 0 0;padding:14px 16px 16px;box-shadow:0 -10px 30px #000a}
+#mapSheet .in{max-width:460px;margin:auto}
+#mapSheet .hd{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+#mapSheet .hd>div:nth-child(2){flex:1}
+#mapSheet .hd b{font-size:20px;display:block;margin-bottom:4px}
+#mapSheet .ic{width:36px;height:36px;font-size:15px;flex:none}
+#mapSheet .stats{margin-top:10px;padding-top:10px}
+#mapSheet .stats b{font-size:18px}
+#mapSheet .perk{color:var(--mut);font-size:13px;line-height:1.8;margin:10px 0 0}
+.bd.mine{background:var(--gold);color:#1b1405}
+.bd.taken{border-color:#6f7cf2;color:#a3acff}
+.bd.free{border-color:var(--line);color:var(--mut)}
+.maplibregl-map{-webkit-tap-highlight-color:transparent}
+.maplibregl-ctrl-attrib{font-size:10px}
+#mapHud{position:absolute;top:12px;inset-inline:12px;z-index:900;display:flex;align-items:center;gap:10px;background:#0d1626d9;border:1px solid var(--line);border-radius:18px;padding:7px 8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#mapHud .hm{flex:1;min-width:0;display:flex;flex-direction:column}
+#mapHud .hm b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mapHud .hm span{font-size:13px;color:var(--gold);font-weight:700;text-align:right}
+#mapHud .hc{font-size:13px;font-weight:700;color:#9fd8ff;white-space:nowrap}
+.ic.gold{background:var(--gold);color:#1b1405;border:0}
+.mctl{position:absolute;left:12px;bottom:16px;z-index:900;display:flex;flex-direction:column;gap:4px;background:#0d1626e6;border:1px solid var(--line);border-radius:28px;padding:6px}
+.mctl .ic{position:relative;background:transparent;border:0;width:44px;height:44px;font-size:20px}
+.cb{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;border-radius:11px;background:#1f5d7a;color:#fff;border:1px solid #7fd0ff;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+#fPanel{position:absolute;left:76px;bottom:16px;z-index:900;background:#0d1626f2;border:1px solid var(--line);border-radius:16px;padding:8px 14px;display:flex;flex-direction:column}
+#fPanel label{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:14px;white-space:nowrap}
+#fPanel input{width:20px;height:20px;margin:0;padding:0;accent-color:var(--gold)}
+#worldmap.sheet-open .mctl,#worldmap.sheet-open #fPanel{display:none}
+.mk{cursor:pointer}
+.mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
+.hx{position:relative;width:38px;height:42px;display:grid;place-items:center;transition:transform .15s;--rc:#8b9bb0}
+.hx i,.hx b{position:absolute;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.hx i{inset:0;background:var(--rc)}
+.hx b{inset:3px;background:#0b1424;display:grid;place-items:center;font-size:19px;font-weight:400;line-height:1}
+.hx em{position:absolute;top:-7px;right:-7px;font-size:13px;font-style:normal}
+.hx.taken{--rc:#6f7cf2}
+.hx.free{--rc:#66758d}
+.hx.free b{opacity:.8}
+.hx.mine{--rc:#d4a73a;filter:drop-shadow(0 0 8px #d4a73a)}
+.hx.pp{--rc:#d4a73a}
+.hx.pr{--rc:#c3a24a}
+.hx.strait{--rc:#d4a73a}
+.hx.strait b{background:#2a2208;font-size:17px}
+.hx.sel{transform:scale(1.25)}
+.hx.mine::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #d4a73a;opacity:0;animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){.hx.mine::after{animation:none}.hx{transition:none}}
 /* shop */
 .sec{margin:22px 0 10px;font-size:18px}
 .vip{background:linear-gradient(150deg,#6b5320,#2a2008 75%);border:1px solid var(--gold);border-radius:18px;padding:18px}
@@ -226,7 +271,38 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
 </div>
 
 <!-- ۵. نقشه جهان -->
-<section id="worldmap" hidden><div id="mapbox" dir="ltr"></div></section>
+<section id="worldmap" hidden>
+  <div id="mapbox" dir="ltr"></div>
+  <div id="mapHud">
+    <button class="ic" id="hFlag" onclick="flyHome(true)" aria-label="کشور من"></button>
+    <div class="hm"><b id="hName"></b><span id="hT" dir="ltr"></span></div>
+    <span class="hc" id="hC" dir="ltr"></span>
+    <button class="ic gold" onclick="openMine()" aria-label="کشور شما">🛡️</button>
+  </div>
+  <div class="mctl">
+    <button class="ic" onclick="toggleFilter()" aria-label="فیلتر نقشه">🎚️<span class="cb" id="fCnt">0</span></button>
+    <button class="ic" onclick="flyHome(true)" aria-label="رفتن به کشور من">🏠</button>
+  </div>
+  <div id="fPanel" hidden>
+    <label><input type="checkbox" checked onchange="setFilter('flags',this.checked)"> پرچم‌ها</label>
+    <label><input type="checkbox" checked onchange="setFilter('labels',this.checked)"> نام کشورها</label>
+    <label><input type="checkbox" checked onchange="setFilter('straits',this.checked)"> تنگه‌ها و کانال‌ها</label>
+    <label><input type="checkbox" checked onchange="setFilter('taken',this.checked)"> کشورهای گرفته‌شده</label>
+    <label><input type="checkbox" checked onchange="setFilter('free',this.checked)"> کشورهای آزاد</label>
+  </div>
+  <div id="mapSheet" hidden><div class="in">
+    <div class="hd">
+      <div class="fl" id="mf"></div>
+      <div><b id="mn"></b><span class="bd" id="mb"></span></div>
+      <button class="ic" onclick="closeMapSheet()" aria-label="بستن">✕</button>
+    </div>
+    <div class="stats">
+      <div><span class="lbl" id="mpl">قدرت نظامی</span><b id="mp"></b></div>
+      <div id="mst2"><span class="lbl" id="mil">درآمد روزانه</span><b id="mi"></b></div>
+    </div>
+    <div class="perk" id="mperk"></div>
+  </div></div>
+</section>
 
 <nav id="nav" hidden><div>
   <button onclick="soon()"><i>💬</i>ارتباطات</button>
@@ -247,7 +323,7 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
 <div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2 id="notgT">این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl" id="notgP">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
 const sb = supabase.createClient("https://ojvafaquuzfvnpyfqady.supabase.co", "sb_publishable_KCBs5O_32ERi2QCWXwsVjw__stzJt9L");
@@ -256,19 +332,298 @@ const msg = (t) => ($("msg").textContent = t || "");
 const flagOf = (code) => String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt()));
 let country = null, picked = null;
 
-let lmap = null;
+let lmap = null, mapReady = null;
+const FILTER = { labels: true, flags: true, straits: true, taken: true, free: true };
+const STRAITS = [
+  { id: "hormuz", ll: [56.4, 26.6], fa: "تنگه‌ی هرمز", kind: "تنگه", by: ["IR", "OM", "AE"], note: "گذرگاه اصلی نفت خلیج فارس به اقیانوس" },
+  { id: "bab", ll: [43.3, 12.6], fa: "تنگه‌ی باب‌المندب", kind: "تنگه", by: ["YE", "DJ", "ER"], note: "مدخل دریای سرخ و کانال سوئز" },
+  { id: "malacca", ll: [101.2, 2.9], fa: "تنگه‌ی مالاکا", kind: "تنگه", by: ["ID", "MY", "SG"], note: "کوتاه‌ترین مسیر اقیانوس هند به اقیانوس آرام" },
+  { id: "suez", ll: [32.55, 30.4], fa: "کانال سوئز", kind: "کانال", by: ["EG"], note: "اتصال دریای مدیترانه به دریای سرخ" },
+  { id: "gib", ll: [-5.6, 36.0], fa: "تنگه‌ی جبل‌الطارق", kind: "تنگه", by: ["ES", "MA"], note: "دروازه‌ی مدیترانه به اقیانوس اطلس" },
+  { id: "bos", ll: [29.05, 41.1], fa: "تنگه‌ی بسفر", kind: "تنگه", by: ["TR"], note: "اتصال دریای سیاه به مدیترانه" },
+  { id: "panama", ll: [-79.7, 9.1], fa: "کانال پاناما", kind: "کانال", by: ["PA"], note: "اتصال اقیانوس اطلس به اقیانوس آرام" },
+  { id: "taiwan", ll: [119.5, 24.5], fa: "تنگه‌ی تایوان", kind: "تنگه", by: ["TW", "CN"], note: "مسیر اصلی تجارت دریایی شرق آسیا" },
+  { id: "dover", ll: [1.45, 51.0], fa: "تنگه‌ی دوور", kind: "تنگه", by: ["GB", "FR"], note: "یکی از پرتردد‌ترین راه‌های دریایی جهان" }
+];
+
 function showMap() {
   if (!lmap) {
-    lmap = L.map("mapbox", {
-      center: [30, 40], zoom: 3, minZoom: 2, maxZoom: 10,
-      maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1
+    lmap = new maplibregl.Map({
+      container: "mapbox",
+      style: {
+        version: 8,
+        projection: { type: "globe" },
+        sky: { "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] },
+        sources: {
+          sat: {
+            type: "raster", tileSize: 256, maxzoom: 12,
+            tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+            attribution: "Imagery © Esri, Maxar, Earthstar Geographics"
+          }
+        },
+        layers: [{ id: "sat", type: "raster", source: "sat", paint: { "raster-brightness-max": 0.85, "raster-saturation": -0.2, "raster-contrast": 0.1 } }]
+      },
+      center: [35, 30], zoom: 1.4, minZoom: 0.6, maxZoom: 8,
+      dragRotate: false, pitchWithRotate: false, attributionControl: { compact: true }
     });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      noWrap: true, maxZoom: 10,
-      attribution: "© OpenStreetMap"
-    }).addTo(lmap);
+    lmap.touchZoomRotate.disableRotation();
+    mapReady = new Promise((r) => lmap.once("load", r));
+    lmap.on("click", (e) => {
+      const t = e.originalEvent && e.originalEvent.target;
+      if (t && t.closest && t.closest(".mk")) return; // کلیک روی نشانگر را خود نشانگر مدیریت می‌کند
+      $("fPanel").hidden = true;
+      if (!lmap.getLayer("c-fill")) return;
+      const f = lmap.queryRenderedFeatures(e.point, { layers: ["c-fill"] });
+      if (f.length) pickOnMap(f[0].properties.code); else closeMapSheet();
+    });
+    lmap.on("move", scheduleDeclutter);
+    lmap.on("resize", scheduleDeclutter);
   }
-  setTimeout(() => lmap.invalidateSize(), 0);
+  setTimeout(() => lmap.resize(), 0);
+  drawGeo().catch(() => flash("بارگذاری مرز کشورها ناموفق بود", 3000));
+}
+
+/* ---------- داده و لایه کشورها ---------- */
+const GEO_URL = "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_50m_admin_0_countries.geojson";
+const TIER_LABEL = { normal: "عادی", premium: "Premium", premium_plus: "Premium Plus" };
+let geoP = null, geoData = null, byCode = {}, selCode = null, flownFor = null;
+let ents = [], marks = [];
+
+function loadGeo() {
+  if (!geoP) geoP = fetch(GEO_URL).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { geoP = null; throw e; });
+  return geoP;
+}
+// Natural Earth برای فرانسه و نروژ و… در ISO_A2 مقدار -99 دارد؛ ISO_A2_EH درستش است
+function geoCode(f) {
+  const p = f.properties || {};
+  const c = p.ISO_A2_EH && p.ISO_A2_EH !== "-99" ? p.ISO_A2_EH : p.ISO_A2;
+  return c && c !== "-99" ? c : null;
+}
+function statusOf(c) {
+  if (!c) return "none";
+  if (country && c.code === country.code) return "mine";
+  return c.taken ? "taken" : "free";
+}
+function ringCentroid(r) {
+  let a = 0, cx = 0, cy = 0;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const k = r[j][0] * r[i][1] - r[i][0] * r[j][1];
+    a += k; cx += (r[j][0] + r[i][0]) * k; cy += (r[j][1] + r[i][1]) * k;
+  }
+  a /= 2;
+  return Math.abs(a) < 1e-9 ? null : [cx / (6 * a), cy / (6 * a)];
+}
+// بزرگ‌ترین تکه خاک کشور (برای روسیه/آمریکا که از خط تاریخ عبور می‌کنند کل جهان کادر نشود)
+function bigPoly(f) {
+  const g = f.geometry, polys = g.type === "MultiPolygon" ? g.coordinates : [g.coordinates];
+  let best = null, area = -1;
+  polys.forEach((p) => {
+    let w = 180, e = -180, s = 90, n = -90;
+    p[0].forEach(([x, y]) => { if (x < w) w = x; if (x > e) e = x; if (y < s) s = y; if (y > n) n = y; });
+    const a = (e - w) * (n - s);
+    if (a > area) { area = a; best = { ring: p[0], box: [[w, s], [e, n]], area: a }; }
+  });
+  return best;
+}
+
+async function drawGeo() {
+  const [g, cs] = await Promise.all([loadGeo(), sb.rpc("list_countries"), mapReady]);
+  if (!cs.error && cs.data) all = cs.data;
+  byCode = Object.fromEntries(all.map((c) => [c.code, c]));
+  g.features.forEach((f) => {
+    const code = geoCode(f), c = byCode[code];
+    f.properties = { code: code || "", st: statusOf(c), tier: c ? c.tier : "normal" };
+  });
+  geoData = { type: "FeatureCollection", features: g.features.filter((f) => f.properties.code) };
+  const src = lmap.getSource("countries");
+  if (src) src.setData(geoData);
+  else {
+    lmap.addSource("countries", { type: "geojson", data: geoData, promoteId: "code" });
+    const sel = ["boolean", ["feature-state", "sel"], false];
+    const stCol = ["match", ["get", "st"], "mine", "#d4a73a", "taken", "#6f7cf2", "#8b9bb0"];
+    lmap.addLayer({
+      id: "c-fill", type: "fill", source: "countries",
+      paint: { "fill-color": stCol, "fill-opacity": ["case", sel, 0.65, ["match", ["get", "st"], "mine", 0.42, "taken", 0.3, "free", 0.04, 0.0]] }
+    });
+    lmap.addLayer({
+      id: "c-glow", type: "line", source: "countries", layout: { "line-join": "round" },
+      paint: { "line-color": stCol, "line-width": 5, "line-blur": 4, "line-opacity": ["match", ["get", "st"], "mine", 0.7, "taken", 0.5, 0] }
+    });
+    lmap.addLayer({
+      id: "c-line", type: "line", source: "countries",
+      paint: {
+        "line-color": ["case", sel, "#ffffff",
+          ["==", ["get", "tier"], "premium_plus"], "#d4a73a",
+          ["==", ["get", "st"], "mine"], "#d4a73a",
+          ["==", ["get", "tier"], "premium"], "#c3a24a", "#a9bde0"],
+        "line-width": ["case", sel, 2.5, ["any", ["!=", ["get", "tier"], "normal"], ["==", ["get", "st"], "mine"]], 1.6, 0.7],
+        "line-opacity": 0.9
+      }
+    });
+  }
+  applyFilter(true);
+  buildMarkers();
+  flyHome(false);
+}
+
+/* ---------- نشانگرهای شش‌ضلعی و برچسب فارسی ---------- */
+function hexEl(icon, cls) {
+  const m = document.createElement("div"); m.className = "mk";
+  const h = document.createElement("div"); h.className = "hx " + cls;
+  const i = document.createElement("i"), b = document.createElement("b");
+  b.textContent = icon;
+  h.append(i, b);
+  m.append(h);
+  return { m, h };
+}
+function addMarker(el, ll, opts) {
+  marks.push(new maplibregl.Marker(Object.assign({ element: el }, opts || {})).setLngLat(ll).addTo(lmap));
+}
+function buildMarkers() {
+  marks.forEach((m) => m.remove());
+  marks = []; ents = [];
+  geoData.features.forEach((f) => {
+    const code = f.properties.code, c = byCode[code];
+    if (!c) return;
+    const bp = bigPoly(f);
+    const ll = (bp && ringCentroid(bp.ring)) || (bp && [(bp.box[0][0] + bp.box[1][0]) / 2, (bp.box[0][1] + bp.box[1][1]) / 2]);
+    if (!ll) return;
+    const st = f.properties.st, pp = c.tier === "premium_plus", pr = c.tier === "premium";
+    const { m, h } = hexEl(flagOf(code), st + (pp ? " pp" : pr ? " pr" : ""));
+    if (pp || pr) { const e = document.createElement("em"); e.textContent = pp ? "💎" : "👑"; h.append(e); }
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); pickOnMap(code); });
+    const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa;
+    addMarker(m, ll); addMarker(lb, ll, { anchor: "top", offset: [0, 23] });
+    const prio = { mine: 1000, taken: 300, free: 100, none: 0 }[st] + (pp ? 200 : pr ? 100 : 0) + Math.min(bp.area, 400) / 10;
+    ents.push({ kind: "c", code, st, ll, prio, m, lb, lw: c.name_fa.length * 7.5 + 12, h });
+  });
+  STRAITS.forEach((s) => {
+    const { m, h } = hexEl("⚓", "strait");
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); openStrait(s); });
+    const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = s.fa;
+    addMarker(m, s.ll); addMarker(lb, s.ll, { anchor: "top", offset: [0, 23] });
+    ents.push({ kind: "s", code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 7.5 + 12, h });
+  });
+  ents.sort((a, b) => b.prio - a.prio);
+  ents.forEach((e) => { e.m.style.display = "none"; e.lb.style.display = "none"; });
+  declutter();
+}
+
+// جلوگیری از روی‌هم‌افتادن: اولویت با کشور خودت، بعد Premium، بعد گرفته‌شده‌ها؛ پشت کره پنهان می‌شود
+const rad = Math.PI / 180;
+function angDist(a, b) {
+  const x = Math.sin((b[1] - a.lat) * rad / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b[1] * rad) * Math.sin((b[0] - a.lng) * rad / 2) ** 2;
+  return 2 * Math.asin(Math.min(1, Math.sqrt(x))) / rad;
+}
+const hit = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+let dq = false;
+function scheduleDeclutter() {
+  if (dq) return;
+  dq = true;
+  requestAnimationFrame(() => { dq = false; declutter(); });
+}
+function declutter() {
+  if (!lmap || !ents.length) return;
+  const cv = lmap.getCanvas(), W = cv.clientWidth, H = cv.clientHeight, z = lmap.getZoom(), ctr = lmap.getCenter();
+  const placed = [];
+  let shown = 0;
+  for (const e of ents) {
+    let on = e.kind === "s" ? FILTER.straits : FILTER.flags && (e.st === "mine" || (e.st === "taken" ? FILTER.taken : FILTER.free));
+    let lbl = false;
+    if (on && angDist(ctr, e.ll) > 78) on = false;
+    if (on) {
+      const p = lmap.project(e.ll);
+      if (p.x < -40 || p.y < -40 || p.x > W + 40 || p.y > H + 40) on = false;
+      else {
+        const hr = { x: p.x - 20, y: p.y - 22, w: 40, h: 44 };
+        const lr = { x: p.x - e.lw / 2, y: p.y + 22, w: e.lw, h: 17 };
+        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : 2.2);
+        if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; }
+        else if (!placed.some((q) => hit(q, hr))) placed.push(hr);
+        else on = false;
+      }
+    }
+    e.m.style.display = on ? "" : "none";
+    e.lb.style.display = on && lbl ? "" : "none";
+    if (on) shown++;
+  }
+  $("fCnt").textContent = shown;
+}
+
+/* ---------- فیلتر و دکمه‌های نقشه ---------- */
+function toggleFilter() { $("fPanel").hidden = !$("fPanel").hidden; }
+function setFilter(k, v) { FILTER[k] = v; applyFilter(false); }
+function applyFilter(initial) {
+  if (!lmap || !lmap.getLayer("c-fill")) return;
+  const allowed = ["mine", "none"];
+  if (FILTER.taken) allowed.push("taken");
+  if (FILTER.free) allowed.push("free");
+  const f = ["in", ["get", "st"], ["literal", allowed]];
+  ["c-fill", "c-glow", "c-line"].forEach((id) => lmap.setFilter(id, f));
+  if (!initial) declutter();
+}
+function flyHome(force) {
+  if (!country || !geoData || (!force && flownFor === country.code)) return;
+  const f = geoData.features.find((x) => x.properties.code === country.code);
+  const bp = f && bigPoly(f);
+  if (!bp) return;
+  flownFor = country.code;
+  lmap.fitBounds(bp.box, { padding: 90, maxZoom: 5, duration: 2200 });
+}
+function openMine() {
+  if (!country) return;
+  flyHome(true);
+  pickOnMap(country.code);
+}
+
+/* ---------- انتخاب و کارت اطلاعات ---------- */
+function setSel(code) {
+  if (selCode) lmap.setFeatureState({ source: "countries", id: selCode }, { sel: false });
+  selCode = code;
+  if (code) lmap.setFeatureState({ source: "countries", id: code }, { sel: true });
+  ents.forEach((e) => e.h.classList.toggle("sel", e.kind === "c" && e.code === code));
+}
+function pickOnMap(code) {
+  const c = byCode[code];
+  if (!c) return;
+  setSel(code);
+  openMapSheet(c);
+}
+function showSheet() {
+  $("mapSheet").hidden = false;
+  $("worldmap").classList.add("sheet-open");
+  $("fPanel").hidden = true;
+}
+function openMapSheet(c) {
+  const s = statusOf(c), mine = s === "mine";
+  $("mf").textContent = flagOf(c.code);
+  $("mn").textContent = c.name_fa;
+  $("mb").className = "bd " + s;
+  $("mb").textContent = mine ? "کشور شما ⭐" : c.taken ? "گرفته شده" : "آزاد";
+  $("mpl").textContent = mine ? "قدرت نظامی" : "قدرت پایه";
+  $("mp").textContent = mine ? country.military_power : c.start_power;
+  $("mil").textContent = "درآمد روزانه";
+  $("mi").textContent = fmt(mine ? country.daily_income : c.start_income);
+  $("mst2").hidden = false;
+  $("mperk").textContent = seaText(c) + (c.tier !== "normal" ? " · " + TIER_LABEL[c.tier] + TIER_ICON[c.tier] : "");
+  showSheet();
+}
+function openStrait(s) {
+  if (selCode) setSel(null);
+  $("mf").textContent = "⚓";
+  $("mn").textContent = s.fa;
+  $("mb").className = "bd free";
+  $("mb").textContent = s.kind + " راهبردی";
+  $("mpl").textContent = "کشورهای مجاور";
+  $("mp").textContent = s.by.map(flagOf).join(" ");
+  $("mst2").hidden = true;
+  $("mperk").textContent = s.note;
+  showSheet();
+}
+function closeMapSheet() {
+  if (lmap && lmap.getSource("countries")) setSel(null);
+  $("mapSheet").hidden = true;
+  $("worldmap").classList.remove("sheet-open");
 }
 
 function screen(n) {
@@ -276,6 +631,7 @@ function screen(n) {
   $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
   closeSettings();
+  if (n !== "worldmap") closeMapSheet();
   window.scrollTo(0, 0);
   if (n === "worldmap") showMap();
 }
@@ -321,6 +677,7 @@ async function leaveCountry() {
   if (error) return flash(error.message, 3500);
   closeSettings();
   country = null;
+  flownFor = null;
   route(true);
 }
 
@@ -452,6 +809,10 @@ function render() {
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
   $("treasury").textContent = "$" + live.toLocaleString("en-US");
   $("crystals").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
+  $("hFlag").textContent = flagOf(country.code);
+  $("hName").textContent = country.name;
+  $("hT").textContent = "$" + live.toLocaleString("en-US");
+  $("hC").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
 }
 // route ها پشت‌سرهم اجرا می‌شن تا رویداد تکراری auth چیزی را دوبار ثبت نکند
 let routeQ = Promise.resolve();
