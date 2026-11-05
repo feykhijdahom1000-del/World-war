@@ -163,6 +163,15 @@ async function search() {
   data.forEach((u) => box.append(card(u)));
 }
 
+async function notifyUser(body) {
+  try {
+    const { data, error } = await sb.functions.invoke("notify-user", { body });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} return m; }
+    if (data && data.ok === false) return data.detail || "ارسال ناموفق";
+    return null;
+  } catch (e) { return e.message; }
+}
+
 function card(u) {
   const who = u.username ? "@" + u.username : (u.email || "—");
   const d = document.createElement("div");
@@ -179,12 +188,15 @@ function card(u) {
     d.append(w);
   }
 
-  const run = async (name, args, okText, btn) => {
+  const run = async (name, args, okText, btn, note) => {
     if (btn) btn.disabled = true;
     const { error } = await sb.rpc(name, args);
     if (btn) btn.disabled = false;
     if (error) return flash(error.message, 3500);
-    flash(okText || "انجام شد");
+    if (note) {
+      const m = await notifyUser(note);
+      flash(m ? "انجام شد، اما پیام به کاربر نرفت: " + m : "انجام شد و پیام به کاربر رفت", 3500);
+    } else flash(okText || "انجام شد");
     await loadFree();
     search();
     stats();
@@ -205,7 +217,7 @@ function card(u) {
     const go = (sign, btn) => {
       const a = { p_user: u.user_id, p_treasury: Math.abs(Number(t.value || 0)) * sign, p_crystals: Math.abs(Number(c.value || 0)) * sign, p_vip_days: Math.abs(Number(v.value || 0)) * sign };
       if (!a.p_treasury && !a.p_crystals && !a.p_vip_days) return flash("مقداری وارد نشده");
-      run("admin_grant", a, "انجام شد", btn);
+      run("admin_grant", a, "انجام شد", btn, { kind: "grant", user_id: u.user_id, treasury: a.p_treasury, crystals: a.p_crystals, vip_days: a.p_vip_days });
     };
     add.onclick = () => go(1, add);
     sub.onclick = () => go(-1, sub);
@@ -247,7 +259,8 @@ function card(u) {
       reason = prompt("دلیل بن " + who + " (اختیاری):");
       if (reason === null) return;
     }
-    run("admin_ban", { p_user: u.user_id, p_ban: !u.banned, p_reason: reason.trim() || null }, "انجام شد", bb);
+    run("admin_ban", { p_user: u.user_id, p_ban: !u.banned, p_reason: reason.trim() || null }, "انجام شد", bb,
+      { kind: u.banned ? "unban" : "ban", user_id: u.user_id, reason: reason.trim() || null });
   };
   d.append(bb);
   return d;
