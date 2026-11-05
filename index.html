@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World War</title>
+<style>
+body{font-family:sans-serif;background:#0d1520;color:#eee;margin:0;padding:20px}
+.box{max-width:420px;margin:auto;background:#17212f;padding:20px;border-radius:12px}
+input,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:0;font-size:16px;box-sizing:border-box}
+button{background:#d4a73a;font-weight:bold}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a3647}
+#msg{color:#ff8a8a;min-height:20px}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>World War</h2>
+  <div id="auth">
+    <input id="email" type="email" placeholder="ایمیل">
+    <input id="pass" type="password" placeholder="رمز (حداقل ۶ حرف)">
+    <button onclick="login()">ورود</button>
+    <button onclick="signup()">ثبت‌نام</button>
+  </div>
+  <div id="game" style="display:none">
+    <div class="row"><span>کشور</span><b id="name"></b></div>
+    <div class="row"><span>خزانه</span><b id="treasury"></b></div>
+    <div class="row"><span>درآمد روزانه</span><b id="income"></b></div>
+    <div class="row"><span>قدرت نظامی</span><b id="power"></b></div>
+    <button onclick="logout()">خروج</button>
+  </div>
+  <div id="msg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+const sb = supabase.createClient(
+  "https://ojvafaquuzfvnpyfqady.supabase.co",
+  "sb_publishable_KCBs5O_32ERi2QCWXwsVjw__stzJt9L"
+);
+let country = null;
+const $ = (id) => document.getElementById(id);
+const msg = (t) => ($("msg").textContent = t || "");
+
+async function signup() {
+  const { error } = await sb.auth.signUp({ email: $("email").value, password: $("pass").value });
+  msg(error ? error.message : "ثبت‌نام شد. اگه ایمیل تأیید خواست، ایمیلتان را چک کنید.");
+}
+async function login() {
+  const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("pass").value });
+  msg(error ? error.message : "");
+}
+async function logout() { await sb.auth.signOut(); }
+
+async function loadCountry() {
+  const { data, error } = await sb.from("countries").select("*").single();
+  if (error) return msg(error.message);
+  country = data;
+}
+function render() {
+  if (!country) return;
+  const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
+  const live = Math.floor(Number(country.treasury) + Number(country.daily_income) * secs / 86400);
+  $("name").textContent = country.name;
+  $("treasury").textContent = "$" + live.toLocaleString();
+  $("income").textContent = "$" + Number(country.daily_income).toLocaleString();
+  $("power").textContent = country.military_power;
+}
+async function show(session) {
+  $("auth").style.display = session ? "none" : "block";
+  $("game").style.display = session ? "block" : "none";
+  if (session) { await loadCountry(); render(); } else { country = null; }
+}
+sb.auth.onAuthStateChange((_e, s) => show(s));
+sb.auth.getSession().then(({ data }) => show(data.session));
+setInterval(render, 1000);
+setInterval(() => { if (country) loadCountry(); }, 30000);
+</script>
+</body>
+</html>
