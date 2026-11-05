@@ -127,22 +127,22 @@ nav{z-index:10}
 #fPanel input{width:20px;height:20px;margin:0;padding:0;accent-color:var(--gold)}
 #worldmap.sheet-open .mctl,#worldmap.sheet-open #fPanel{display:none}
 .mk{cursor:pointer}
-.mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
-.hx{position:relative;width:38px;height:42px;display:grid;place-items:center;transition:transform .15s;--rc:#8b9bb0}
+.mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:10.5px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
+.hx{position:relative;width:27px;height:30px;display:grid;place-items:center;transition:transform .15s;--rc:#8b9bb0}
 .hx i,.hx b{position:absolute;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
 .hx i{inset:0;background:var(--rc)}
-.hx b{inset:3px;background:#0b1424;display:grid;place-items:center;font-size:19px;font-weight:400;line-height:1}
-.hx em{position:absolute;top:-7px;right:-7px;font-size:13px;font-style:normal}
+.hx b{inset:2px;background:#0b1424;display:grid;place-items:center;font-size:13px;font-weight:400;line-height:1}
+.hx em{position:absolute;top:-8px;right:-6px;font-size:11px;font-style:normal;line-height:1}
 .hx.taken{--rc:#6f7cf2}
 .hx.free{--rc:#66758d}
 .hx.free b{opacity:.8}
-.hx.mine{--rc:#d4a73a;filter:drop-shadow(0 0 8px #d4a73a)}
+.hx.mine{--rc:#d4a73a;filter:drop-shadow(0 0 6px #d4a73a)}
 .hx.pp{--rc:#d4a73a}
 .hx.pr{--rc:#c3a24a}
 .hx.strait{--rc:#d4a73a}
-.hx.strait b{background:#2a2208;font-size:17px}
-.hx.sel{transform:scale(1.25)}
-.hx.mine::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #d4a73a;opacity:0;animation:pulse 2.4s ease-out infinite}
+.hx.strait b{background:#2a2208;font-size:12px}
+.hx.sel{transform:scale(1.2)}
+.hx.mine::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #d4a73a;opacity:0;animation:pulse 2.4s ease-out infinite}
 @keyframes pulse{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.5);opacity:0}}
 @media (prefers-reduced-motion:reduce){.hx.mine::after{animation:none}.hx{transition:none}}
 /* shop */
@@ -490,19 +490,19 @@ function buildMarkers() {
     if (!ll) return;
     const st = f.properties.st, pp = c.tier === "premium_plus", pr = c.tier === "premium";
     const { m, h } = hexEl(flagOf(code), st + (pp ? " pp" : pr ? " pr" : ""));
-    if (pp || pr) { const e = document.createElement("em"); e.textContent = pp ? "💎" : "👑"; h.append(e); }
+    if (pp) { const e = document.createElement("em"); e.textContent = "👑"; h.append(e); }
     m.addEventListener("click", (ev) => { ev.stopPropagation(); pickOnMap(code); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa;
-    addMarker(m, ll); addMarker(lb, ll, { anchor: "top", offset: [0, 23] });
+    addMarker(m, ll); addMarker(lb, ll, { anchor: "top", offset: [0, 17] });
     const prio = { mine: 1000, taken: 300, free: 100, none: 0 }[st] + (pp ? 200 : pr ? 100 : 0) + Math.min(bp.area, 400) / 10;
-    ents.push({ kind: "c", code, st, ll, prio, m, lb, lw: c.name_fa.length * 7.5 + 12, h });
+    ents.push({ kind: "c", code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h });
   });
   STRAITS.forEach((s) => {
     const { m, h } = hexEl("⚓", "strait");
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openStrait(s); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = s.fa;
-    addMarker(m, s.ll); addMarker(lb, s.ll, { anchor: "top", offset: [0, 23] });
-    ents.push({ kind: "s", code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 7.5 + 12, h });
+    addMarker(m, s.ll); addMarker(lb, s.ll, { anchor: "top", offset: [0, 17] });
+    ents.push({ kind: "s", code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 6.5 + 10, h });
   });
   ents.sort((a, b) => b.prio - a.prio);
   ents.forEach((e) => { e.m.style.display = "none"; e.lb.style.display = "none"; });
@@ -535,8 +535,8 @@ function declutter() {
       const p = lmap.project(e.ll);
       if (p.x < -40 || p.y < -40 || p.x > W + 40 || p.y > H + 40) on = false;
       else {
-        const hr = { x: p.x - 20, y: p.y - 22, w: 40, h: 44 };
-        const lr = { x: p.x - e.lw / 2, y: p.y + 22, w: e.lw, h: 17 };
+        const hr = { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
+        const lr = { x: p.x - e.lw / 2, y: p.y + 16, w: e.lw, h: 14 };
         const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : 2.2);
         if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; }
         else if (!placed.some((q) => hit(q, hr))) placed.push(hr);
