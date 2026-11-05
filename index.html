@@ -86,6 +86,8 @@ nav button{width:auto;flex:1;margin:0;padding:8px 2px;background:transparent;col
 nav button i{display:block;font-style:normal;font-size:22px}
 nav button.on{color:var(--gold)}
 #toast{position:fixed;bottom:84px;inset-inline:0;text-align:center;color:var(--txt);font-size:14px;pointer-events:none;z-index:30}
+#toast:empty{display:none}
+#toast{margin:0 16px;padding:10px 14px;border-radius:12px;background:#0d1626;border:1px solid var(--gold);line-height:1.8}
 /* settings sheet */
 button.danger{background:#b3372f;color:#fff}
 #setBack{position:fixed;inset:0;z-index:20;background:#000a;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -778,8 +780,8 @@ function blockScreen(t, p) {
   $("notgT").textContent = t; $("notgP").textContent = p || "";
   $("notg").hidden = false;
 }
-async function tgLogin() {
-  const fail = (t) => { $("go").disabled = false; msg(t); flash(t, 3500); return false; };
+async function tgLogin(quiet) {
+  const fail = (t) => { $("go").disabled = false; if (!quiet) { msg(t); flash(t, 3500); } return false; };
   const { data, error } = await sb.functions.invoke("telegram-auth-", { body: { initData: TG.initData } });
   if (error || !data || !data.access_token) {
     try { if (error.context.status === 403) { const j = await error.context.json(); blockScreen("⛔ حساب شما مسدود است", j.error || ""); return "blocked"; } } catch (_) {}
@@ -912,7 +914,12 @@ async function confirmPick() {
   }
   const { error } = await sb.rpc("choose_country", { p_code: code });
   $("go").disabled = false;
-  if (error) { await loadPick(); return flash(error.message, 3500); }
+  if (error) {
+    // شاید کشور از قبل دارید و فقط صفحه اشتباهی بالا آمده؛ در این حالت مستقیم برو خانه
+    if ((await loadCountry()) && country) { hideSheet(); msg(""); return route(true); }
+    await loadPick();
+    return flash(error.message, 6000);
+  }
   msg("");
   hideSheet();
   if (TG) sb.functions.invoke("Notify_Country", { body: { initData: TG.initData } }).then(async ({ data, error }) => {
@@ -987,11 +994,27 @@ async function loginLoop() {
 async function boot() {
   booting = true; authed = false;
   $("bootBtn").hidden = true; $("bootT").textContent = "در حال ورود…"; $("boot").hidden = false;
+  // ۱) اول نشست ذخیره‌شده را امتحان کن. initData تلگرام وقتی بازی از حالت پس‌زمینه برمی‌گردد
+  //    ممکن است قدیمی/منقضی باشد و ورود تازه رد شود؛ این‌جا نباید بازیکن به انتخاب کشور برود.
+  try {
+    const { data: ss } = await sb.auth.getSession();
+    if (ss.session) {
+      const { error } = await sb.auth.getUser(); // سرور توکن را تأیید می‌کند
+      if (!error) {
+        const { data: s2 } = await sb.auth.getSession();
+        booting = false;
+        route(s2.session);
+        tgLogin(true).catch(() => {}); // ورود تازه در پس‌زمینه (برای بررسی بن)؛ شکستش مهم نیست
+        return;
+      }
+    }
+  } catch (_) {}
+  // ۲) نشست معتبر نبود: ورود تازه
   try { await sb.auth.signOut({ scope: "local" }); } catch (_) {}
   const r = await loginLoop();
   booting = false;
   if (r === true || r === "blocked") return; // در حالت true، onAuthStateChange صفحه را نشان می‌دهد
-  $("bootT").textContent = "ورود انجام نشد. اینترنت/VPN را بررسی کنید."; $("bootBtn").hidden = false;
+  $("bootT").textContent = "ورود انجام نشد. اگر مشکل ادامه داشت، بازی را دوباره از داخل ربات باز کنید."; $("bootBtn").hidden = false;
 }
 
 if (!TG) {
