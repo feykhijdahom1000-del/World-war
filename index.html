@@ -145,6 +145,23 @@ nav{z-index:10}
 .hx.mine::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #d4a73a;opacity:0;animation:pulse 2.4s ease-out infinite}
 @keyframes pulse{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.5);opacity:0}}
 @media (prefers-reduced-motion:reduce){.hx.mine::after{animation:none}.hx{transition:none}}
+#resSheet{position:absolute;inset-inline:0;bottom:0;z-index:1100;background:#0d1423f5;border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:16px 16px 18px;box-shadow:0 -10px 30px #000a}
+#resSheet .in{max-width:460px;margin:auto;position:relative}
+#resSheet .x{position:absolute;top:-2px;left:0;width:34px;height:34px;font-size:14px}
+#resSheet h3{margin:0 0 12px;font-size:19px;padding-left:44px;line-height:1.7}
+#resSheet .own{display:flex;align-items:center;gap:10px;color:var(--mut);margin-bottom:10px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #3a4c66;border-radius:24px;padding:4px 14px 4px 5px;background:#0e1828;color:var(--txt)}
+.chip b{font-size:15px}
+.cf{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#0b1424;border:2px solid #3a4c66;font-size:18px}
+#resSheet .out{font-size:17px;margin:4px 0 10px}
+#resSheet .def{color:var(--mut);font-size:13.5px;line-height:1.9;margin-bottom:12px}
+#resSheet .gb{background:#2a2410;color:var(--gold);border:1px solid #6b5a2a;border-radius:14px;font-weight:600;padding:15px;margin:0}
+#resSheet .hint2{color:var(--mut);font-size:14px;line-height:1.9;margin:14px 0 12px}
+.hx.res.u{--rc:#3ddc97}
+.hx.res.s{--rc:#9fb4d6}
+.hx.res.o{--rc:#e0913a}
+.hx.nown i{opacity:.55}
+.hx em.fb{top:auto;bottom:-7px;right:-8px;font-size:10px}
 /* shop */
 .sec{margin:22px 0 10px;font-size:18px}
 .vip{background:linear-gradient(150deg,#6b5320,#2a2008 75%);border:1px solid var(--gold);border-radius:18px;padding:18px}
@@ -287,9 +304,20 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
     <label><input type="checkbox" checked onchange="setFilter('flags',this.checked)"> پرچم‌ها</label>
     <label><input type="checkbox" checked onchange="setFilter('labels',this.checked)"> نام کشورها</label>
     <label><input type="checkbox" checked onchange="setFilter('straits',this.checked)"> تنگه‌ها و کانال‌ها</label>
+    <label><input type="checkbox" checked onchange="setFilter('resources',this.checked)"> معادن و سکوهای نفتی</label>
     <label><input type="checkbox" checked onchange="setFilter('taken',this.checked)"> کشورهای گرفته‌شده</label>
     <label><input type="checkbox" checked onchange="setFilter('free',this.checked)"> کشورهای آزاد</label>
   </div>
+  <div id="resSheet" hidden><div class="in">
+    <button class="ic x" onclick="closeMapSheet()" aria-label="بستن">✕</button>
+    <h3 id="rt"></h3>
+    <div class="own"><span>در اختیار</span><span class="chip"><span class="cf" id="rcf" hidden></span><b id="rcn"></b></span></div>
+    <div class="out" id="rout"></div>
+    <div class="def">🔒 دفاعش ناشناخته است؛ با شناسایی ماهواره‌ای روشن می‌شود</div>
+    <button class="gb" onclick="soon()">شناسایی ماهواره‌ای دفاع 🛰️</button>
+    <p class="hint2" id="rhint"></p>
+    <button class="gb" onclick="soon()">فرمان روی نقشه 🧭</button>
+  </div></div>
   <div id="mapSheet" hidden><div class="in">
     <div class="hd">
       <div class="fl" id="mf"></div>
@@ -333,7 +361,7 @@ const flagOf = (code) => String.fromCodePoint(...[...code].map((c) => 127397 + c
 let country = null, picked = null;
 
 let lmap = null, mapReady = null;
-const FILTER = { labels: true, flags: true, straits: true, taken: true, free: true };
+const FILTER = { labels: true, flags: true, straits: true, resources: true, taken: true, free: true };
 const STRAITS = [
   { id: "hormuz", ll: [56.4, 26.6], fa: "تنگه‌ی هرمز", kind: "تنگه", by: ["IR", "OM", "AE"], note: "گذرگاه اصلی نفت خلیج فارس به اقیانوس" },
   { id: "bab", ll: [43.3, 12.6], fa: "تنگه‌ی باب‌المندب", kind: "تنگه", by: ["YE", "DJ", "ER"], note: "مدخل دریای سرخ و کانال سوئز" },
@@ -344,6 +372,47 @@ const STRAITS = [
   { id: "panama", ll: [-79.7, 9.1], fa: "کانال پاناما", kind: "کانال", by: ["PA"], note: "اتصال اقیانوس اطلس به اقیانوس آرام" },
   { id: "taiwan", ll: [119.5, 24.5], fa: "تنگه‌ی تایوان", kind: "تنگه", by: ["TW", "CN"], note: "مسیر اصلی تجارت دریایی شرق آسیا" },
   { id: "dover", ll: [1.45, 51.0], fa: "تنگه‌ی دوور", kind: "تنگه", by: ["GB", "FR"], note: "یکی از پرتردد‌ترین راه‌های دریایی جهان" }
+];
+
+const RES = {
+  u: { label: "معدن اورانیوم", unit: "اورانیوم", icon: "☢️", attacker: "تانک" },
+  s: { label: "معدن فولاد", unit: "فولاد", icon: "⛏️", attacker: "تانک" },
+  o: { label: "سکوی نفتی", unit: "نفت", icon: "🛢️", attacker: "ناو جنگی" }
+};
+let owners = {};
+const SITES = [
+  { id: "ur-ba", type: "u", fa: "معدن اورانیوم بوسنی", ll: [17.8, 44.0], rate: 17 },
+  { id: "ur-kz", type: "u", fa: "معدن اورانیوم کازاخستان جنوبی", ll: [66.5, 44.5], rate: 19 },
+  { id: "ur-ca", type: "u", fa: "معدن اورانیوم ساسکاچوان", ll: [-104.0, 58.0], rate: 18 },
+  { id: "ur-au", type: "u", fa: "معدن اورانیوم استرالیای جنوبی", ll: [136.8, -30.5], rate: 15 },
+  { id: "ur-na", type: "u", fa: "معدن اورانیوم نامیبیا", ll: [15.0, -22.6], rate: 12 },
+  { id: "ur-ne", type: "u", fa: "معدن اورانیوم نیجر", ll: [7.4, 18.7], rate: 11 },
+  { id: "ur-uz", type: "u", fa: "معدن اورانیوم ازبکستان", ll: [64.5, 41.6], rate: 13 },
+  { id: "ur-ru", type: "u", fa: "معدن اورانیوم سیبری شرقی", ll: [118.0, 50.1], rate: 14 },
+  { id: "ur-ir", type: "u", fa: "معدن اورانیوم یزد", ll: [55.3, 32.7], rate: 10 },
+  { id: "st-gl", type: "s", fa: "معدن فولاد گرینلند مرکزی", ll: [-40.0, 72.0], rate: 14 },
+  { id: "st-br", type: "s", fa: "معدن فولاد کاراژاس", ll: [-50.1, -6.1], rate: 20 },
+  { id: "st-au", type: "s", fa: "معدن فولاد پیلبارا", ll: [118.6, -23.4], rate: 19 },
+  { id: "st-in", type: "s", fa: "معدن فولاد جارکند", ll: [85.5, 22.5], rate: 16 },
+  { id: "st-cn", type: "s", fa: "معدن فولاد آنشان", ll: [123.0, 41.1], rate: 18 },
+  { id: "st-ru", type: "s", fa: "معدن فولاد اورال", ll: [59.0, 53.4], rate: 15 },
+  { id: "st-ua", type: "s", fa: "معدن فولاد کریوی‌ریه", ll: [33.4, 47.9], rate: 13 },
+  { id: "st-za", type: "s", fa: "معدن فولاد سیشن", ll: [22.9, -27.8], rate: 14 },
+  { id: "st-se", type: "s", fa: "معدن فولاد کیرونا", ll: [20.2, 67.85], rate: 12 },
+  { id: "st-ir", type: "s", fa: "معدن فولاد گل‌گهر", ll: [55.4, 29.3], rate: 13 },
+  { id: "st-ca", type: "s", fa: "معدن فولاد لابرادور", ll: [-66.9, 52.9], rate: 14 },
+  { id: "st-us", type: "s", fa: "معدن فولاد مسابی", ll: [-92.5, 47.5], rate: 15 },
+  { id: "oi-cv", type: "o", fa: "سکوی کیپ‌ورد", ll: [-24.0, 16.0], rate: 55 },
+  { id: "oi-ng", type: "o", fa: "سکوی دلتای نیجر", ll: [4.5, 4.0], rate: 58 },
+  { id: "oi-ns", type: "o", fa: "سکوی دریای شمال", ll: [3.2, 56.5], rate: 52 },
+  { id: "oi-gm", type: "o", fa: "سکوی خلیج مکزیک", ll: [-90.5, 27.5], rate: 60 },
+  { id: "oi-pg", type: "o", fa: "سکوی خلیج فارس", ll: [50.9, 26.9], rate: 65 },
+  { id: "oi-br", type: "o", fa: "سکوی سانتوس", ll: [-42.0, -24.5], rate: 54 },
+  { id: "oi-ao", type: "o", fa: "سکوی آنگولا", ll: [12.0, -7.5], rate: 50 },
+  { id: "oi-cs", type: "o", fa: "سکوی دریای خزر", ll: [51.0, 40.2], rate: 45 },
+  { id: "oi-sc", type: "o", fa: "سکوی دریای چین جنوبی", ll: [111.0, 18.0], rate: 48 },
+  { id: "oi-au", type: "o", fa: "سکوی شمال غربی استرالیا", ll: [114.5, -19.5], rate: 46 },
+  { id: "oi-bs", type: "o", fa: "سکوی دریای بارنتس", ll: [57.3, 69.3], rate: 44 }
 ];
 
 function showMap() {
@@ -427,9 +496,10 @@ function bigPoly(f) {
 }
 
 async function drawGeo() {
-  const [g, cs] = await Promise.all([loadGeo(), sb.rpc("list_countries"), mapReady]);
+  const [g, cs, rs] = await Promise.all([loadGeo(), sb.rpc("list_countries"), sb.rpc("list_resource_sites"), mapReady]);
   if (!cs.error && cs.data) all = cs.data;
   byCode = Object.fromEntries(all.map((c) => [c.code, c]));
+  owners = Object.fromEntries(((!rs.error && rs.data) || []).map((x) => [x.id, x.owner_code]));
   g.features.forEach((f) => {
     const code = geoCode(f), c = byCode[code];
     f.properties = { code: code || "", st: statusOf(c), tier: c ? c.tier : "normal" };
@@ -495,14 +565,23 @@ function buildMarkers() {
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa;
     addMarker(m, ll); addMarker(lb, ll, { anchor: "top", offset: [0, 17] });
     const prio = { mine: 1000, taken: 300, free: 100, none: 0 }[st] + (pp ? 200 : pr ? 100 : 0) + Math.min(bp.area, 400) / 10;
-    ents.push({ kind: "c", code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h });
+    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h });
   });
   STRAITS.forEach((s) => {
     const { m, h } = hexEl("⚓", "strait");
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openStrait(s); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = s.fa;
     addMarker(m, s.ll); addMarker(lb, s.ll, { anchor: "top", offset: [0, 17] });
-    ents.push({ kind: "s", code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 6.5 + 10, h });
+    ents.push({ kind: "s", key: "s:" + s.id, code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 6.5 + 10, h });
+  });
+  SITES.forEach((r) => {
+    const t = RES[r.type], own = owners[r.id], oc = own && byCode[own];
+    const { m, h } = hexEl(t.icon, "res " + r.type + (oc ? "" : " nown"));
+    if (oc) { const b = document.createElement("em"); b.className = "fb"; b.textContent = flagOf(own); h.append(b); }
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); openResource(r); });
+    const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = r.fa;
+    addMarker(m, r.ll); addMarker(lb, r.ll, { anchor: "top", offset: [0, 17] });
+    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 200, minZ: 3, m, lb, lw: r.fa.length * 6.5 + 10, h });
   });
   ents.sort((a, b) => b.prio - a.prio);
   ents.forEach((e) => { e.m.style.display = "none"; e.lb.style.display = "none"; });
@@ -528,8 +607,9 @@ function declutter() {
   const placed = [];
   let shown = 0;
   for (const e of ents) {
-    let on = e.kind === "s" ? FILTER.straits : FILTER.flags && (e.st === "mine" || (e.st === "taken" ? FILTER.taken : FILTER.free));
+    let on = e.kind === "s" ? FILTER.straits : e.kind === "r" ? FILTER.resources : FILTER.flags && (e.st === "mine" || (e.st === "taken" ? FILTER.taken : FILTER.free));
     let lbl = false;
+    if (on && z < (e.minZ || 0)) on = false;
     if (on && angDist(ctr, e.ll) > 78) on = false;
     if (on) {
       const p = lmap.project(e.ll);
@@ -537,7 +617,7 @@ function declutter() {
       else {
         const hr = { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
         const lr = { x: p.x - e.lw / 2, y: p.y + 16, w: e.lw, h: 14 };
-        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : 2.2);
+        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 4.5 : 2.2);
         if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; }
         else if (!placed.some((q) => hit(q, hr))) placed.push(hr);
         else on = false;
@@ -581,7 +661,10 @@ function setSel(code) {
   if (selCode) lmap.setFeatureState({ source: "countries", id: selCode }, { sel: false });
   selCode = code;
   if (code) lmap.setFeatureState({ source: "countries", id: code }, { sel: true });
-  ents.forEach((e) => e.h.classList.toggle("sel", e.kind === "c" && e.code === code));
+  markEnt(code);
+}
+function markEnt(key) {
+  ents.forEach((e) => e.h.classList.toggle("sel", e.key === key));
 }
 function pickOnMap(code) {
   const c = byCode[code];
@@ -590,6 +673,7 @@ function pickOnMap(code) {
   openMapSheet(c);
 }
 function showSheet() {
+  $("resSheet").hidden = true;
   $("mapSheet").hidden = false;
   $("worldmap").classList.add("sheet-open");
   $("fPanel").hidden = true;
@@ -610,6 +694,7 @@ function openMapSheet(c) {
 }
 function openStrait(s) {
   if (selCode) setSel(null);
+  markEnt("s:" + s.id);
   $("mf").textContent = "⚓";
   $("mn").textContent = s.fa;
   $("mb").className = "bd free";
@@ -620,8 +705,25 @@ function openStrait(s) {
   $("mperk").textContent = s.note;
   showSheet();
 }
+function openResource(r) {
+  if (selCode) setSel(null);
+  markEnt("r:" + r.id);
+  const t = RES[r.type], own = owners[r.id], oc = own && byCode[own];
+  $("rt").textContent = t.label + " — " + r.fa;
+  $("rcf").textContent = oc ? flagOf(own) : "";
+  $("rcf").hidden = !oc;
+  $("rcn").textContent = oc ? oc.name_fa : "بدون مالک";
+  $("rout").textContent = (r.rate * 86400).toLocaleString("en-US") + " " + t.unit + " در روز";
+  $("rhint").textContent = "برای تسخیر، " + t.attacker + " را روی نقشه به این‌جا بفرستید و همان‌جا نگه دارید، فرمانده؛ در ساعت جنگ به دست ما می‌افتد.";
+  $("mapSheet").hidden = true;
+  $("resSheet").hidden = false;
+  $("worldmap").classList.add("sheet-open");
+  $("fPanel").hidden = true;
+}
 function closeMapSheet() {
   if (lmap && lmap.getSource("countries")) setSel(null);
+  markEnt(null);
+  $("resSheet").hidden = true;
   $("mapSheet").hidden = true;
   $("worldmap").classList.remove("sheet-open");
 }
