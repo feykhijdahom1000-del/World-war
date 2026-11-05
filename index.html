@@ -252,6 +252,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
 .chp.g{color:var(--ok);border-color:#3ddc9755}
 .buy,.up{margin:0;border:1px solid #d4a73a;background:linear-gradient(180deg,#3a2c0a,#241b08);color:var(--gold);border-radius:16px;padding:15px}
 .buy.poor{color:#ff8a8a}.up{color:var(--mut);border-color:#ffffff2e;background:#ffffff0a}
+.pgb{height:8px;border-radius:4px;background:#ffffff1f;overflow:hidden;margin:0 0 12px}.pg{display:block;height:100%;background:linear-gradient(90deg,#c8962b,#f6d779);border-radius:4px;transition:width 1s linear}
 </style>
 </head>
 <body>
@@ -925,10 +926,22 @@ const BLD = [
   { id: "airline", fa: "شرکت هواپیمایی", cat: "trn", icon: "✈️", price: 6000000, income: 2500000 }
 ];
 const MAXLV = 5;
+// زمان ساخت سطح ۱ (دقیقه)؛ مقدار اصلی از ستون build_minutes سرور خوانده می‌شود
+const BUILD_MIN = {bank: 5, tourism: 7, insurance: 10, retail: 10, realestate: 15, telecom: 14, transport: 16, media: 18, stock: 20, shipping: 22, auto: 24, fund: 25, airline: 25, tech: 30, pharma: 30};
+BLD.forEach((b) => { b.mins = BUILD_MIN[b.id]; });
+let pending = {}, settling = false;
 let owned = {}, ecoCat = "all", ecoSort = "income";
 const SORTS = { income: "درآمد", price: "قیمت", level: "سطح", payback: "بازگشت سرمایه" };
 const faNum = (n) => Number(n).toLocaleString("fa-IR");
 const liveT = () => country ? Math.floor(Number(country.treasury) + (Number(country.daily_income) * (Date.now() - new Date(country.last_tick).getTime())) / 86400000) : 0;
+function buildText(m) {
+  const h = Math.floor(m / 60), r = m % 60;
+  return (h ? faNum(h) + " ساعت" : "") + (h && r ? " و " : "") + (r ? faNum(r) + " دقیقه" : "");
+}
+function dur(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000)), p = (x) => String(x).padStart(2, "0");
+  return (p(Math.floor(t / 3600)) + ":" + p(Math.floor((t % 3600) / 60)) + ":" + p(t % 60)).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+}
 function paybackText(b) {
   const d = b.price / b.income, days = Math.floor(d), h = Math.round((d - days) * 24);
   return faNum(days) + " روز و " + faNum(h) + " ساعت";
@@ -940,16 +953,22 @@ async function openEco() {
   await loadEco();
 }
 async function loadEco() {
-  const [cat, own] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level")]);
+  await Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}); // ساختمان‌های تمام‌شده را حساب کن
+  const [cat, own] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited")]);
+  owned = {}; pending = {};
   if (cat.error || own.error) {
-    $("eMsg").textContent = "اطلاعات اقتصاد از سرور دریافت نشد؛ مطمئن شوید اسکریپت economy.sql اجرا شده است.";
-    owned = {};
+    $("eMsg").textContent = "اطلاعات اقتصاد از سرور دریافت نشد؛ مطمئن شوید فایل‌های SQL اجرا شده‌اند.";
   } else {
     $("eMsg").textContent = "";
-    cat.data.forEach((r) => { const b = BLD.find((x) => x.id === r.id); if (b) { b.price = Number(r.price); b.income = Number(r.income); } });
-    owned = Object.fromEntries(own.data.map((r) => [r.building_id, Number(r.level)]));
+    cat.data.forEach((r) => { const x = BLD.find((y) => y.id === r.id); if (x) { x.price = Number(r.price); x.income = Number(r.income); if (r.build_minutes) x.mins = Number(r.build_minutes); } });
+    const now = Date.now();
+    own.data.forEach((r) => {
+      const t = new Date(r.ready_at).getTime();
+      if (t > now) pending[r.building_id] = t; else owned[r.building_id] = Number(r.level);
+    });
   }
   renderEco();
+  await loadCountry(); render();
 }
 function setEcoCat(c) { ecoCat = c; renderEco(); }
 function setEcoSort(k) { ecoSort = k; renderEco(); }
@@ -969,29 +988,55 @@ function renderEco() {
     level: (a, b) => (owned[b.id] || 0) - (owned[a.id] || 0) || b.income - a.income,
     payback: (a, b) => a.price / a.income - b.price / b.income
   };
-  const t = liveT();
+  const t = liveT(), now = Date.now();
   $("eList").innerHTML = BLD.filter((b) => ecoCat === "all" || b.cat === ecoCat).sort(sorters[ecoSort]).map((b) => {
-    const lv = owned[b.id] || 0, has = lv > 0;
+    const lv = owned[b.id] || 0, has = lv > 0, rdy = pending[b.id];
     const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
-    return `<div class="bc${has ? "" : " no"}">
-      <div class="bh"><div class="eic">${b.icon}</div>
-        <div class="bt"><b>${b.fa}</b><div class="dots">${dots}</div></div>
+    const head = `<div class="bh"><div class="eic">${b.icon}</div><div class="bt"><b>${b.fa}</b><div class="dots">${dots}</div></div>`;
+    if (rdy) {
+      const st = rdy - b.mins * 60000;
+      return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>🔨 در حال ساخت</small></div></div>
+        <div class="chips"><span class="chp">⏱️ تکمیل تا <b class="cd" dir="ltr">${dur(rdy - now)}</b></span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز پس از ساخت</span></div>
+        <div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
+        <button class="up" disabled>⏳ در حال ساخت…</button></div>`;
+    }
+    return `<div class="bc${has ? "" : " no"}">${head}
         <div class="bi">${has ? `<b>${fmt(b.income)}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
-      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? "" : `<span class="chp g">↑ ${fmt(b.income)} در روز</span>`}</div>
+      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? "" : `<span class="chp">🔨 ساخت: ${buildText(b.mins)}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
       ${has ? `<button class="up" disabled>⬆ ارتقا به سطح ${faNum(lv + 1)} — به‌زودی</button>`
-            : `<button class="buy${t < b.price ? " poor" : ""}" onclick="buyBuilding('${b.id}',this)">خرید — ${fmt(b.price)}</button>`}
+            : `<button class="buy${t < b.price ? " poor" : ""}" onclick="buyBuilding('${b.id}',this)">شروع ساخت — <span dir="ltr">${fmt(b.price)}</span></button>`}
     </div>`;
   }).join("");
 }
 async function buyBuilding(id, btn) {
   btn.disabled = true;
   const { error } = await sb.rpc("buy_building", { p_id: id });
-  if (error) { btn.disabled = false; return flash(error.message, 5000); }
-  flash("✅ ساختمان خریداری شد", 2000);
+  if (error) {
+    btn.disabled = false;
+    const E = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", ALREADY_OWNED: "این ساختمان را قبلاً خریده‌اید", NO_FUNDS: "موجودی کافی نیست" };
+    return flash(E[error.message] || error.message, 5000);
+  }
+  flash("🔨 ساخت شروع شد", 2000);
   await loadCountry();
   render();
   await loadEco();
 }
+function ecoTick() {
+  const ids = Object.keys(pending);
+  if (!ids.length) return;
+  const now = Date.now();
+  document.querySelectorAll("#eList [data-rdy]").forEach((el) => {
+    const rdy = +el.dataset.rdy, st = +el.dataset.st;
+    const cd = el.querySelector(".cd"), pg = el.querySelector(".pg");
+    if (cd) cd.textContent = dur(rdy - now);
+    if (pg) pg.style.width = Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100)) + "%";
+  });
+  if (!settling && ids.some((id) => pending[id] <= now)) {
+    settling = true;
+    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadEco()).catch(() => {}).then(() => { settling = false; });
+  }
+}
+setInterval(ecoTick, 1000);
 
 const fmt = (n) => "$" + Number(n).toLocaleString("en-US");
 const TIER_ICON = { normal: "", premium: " 👑", premium_plus: " 💎" };
@@ -1227,7 +1272,7 @@ if (!TG) {
     if (!country) return;
     const { error } = await sb.auth.getUser();
     if (error && (error.status === 401 || error.status === 403)) return location.reload();
-    loadCountry();
+    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry());
   }, 30000);
 }
 </script>
