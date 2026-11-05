@@ -457,7 +457,7 @@ async function confirmPick() {
   if (error) { await loadPick(); return flash(error.message, 3500); }
   msg("");
   hideSheet();
-  if (TG) sb.functions.invoke("notify-country", { body: { initData: TG.initData } }).catch(() => {});
+  if (TG) sb.functions.invoke("Notify_Country", { body: { initData: TG.initData } }).catch(() => {});
   route(true);
 }
 
