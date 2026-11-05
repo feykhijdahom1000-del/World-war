@@ -157,6 +157,9 @@ nav{z-index:10}
 #resSheet .def{color:var(--mut);font-size:13.5px;line-height:1.9;margin-bottom:12px}
 #resSheet .gb{background:#2a2410;color:var(--gold);border:1px solid #6b5a2a;border-radius:14px;font-weight:600;padding:15px;margin:0}
 #resSheet .hint2{color:var(--mut);font-size:14px;line-height:1.9;margin:14px 0 12px}
+.hx.res{width:20px;height:22px}
+.hx.res b{inset:1.5px;font-size:10px}
+.hx.res em.fb{font-size:8px;bottom:-5px;right:-6px}
 .hx.res.u{--rc:#3ddc97}
 .hx.res.s{--rc:#9fb4d6}
 .hx.res.o{--rc:#e0913a}
@@ -183,6 +186,7 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
 </head>
 <body>
 <div class="wrap">
+  <div id="boot" style="text-align:center;padding:90px 0"><div style="font-size:44px">🌍</div><p class="lbl" id="bootT">در حال ورود…</p><button id="bootBtn" class="ghost" hidden onclick="boot()">تلاش دوباره</button></div>
 
     <!-- ۲. انتخاب کشور -->
   <section id="pick" hidden>
@@ -436,7 +440,12 @@ function showMap() {
       dragRotate: false, pitchWithRotate: false, attributionControl: { compact: true }
     });
     lmap.touchZoomRotate.disableRotation();
-    mapReady = new Promise((r) => lmap.once("load", r));
+    // فقط به آماده‌شدن استایل نیاز داریم، نه دانلود کامل تایل‌ها (با VPN/نت کند «load» دیر می‌آید)
+    mapReady = new Promise((r) => {
+      const ok = () => { if (lmap.isStyleLoaded()) { lmap.off("styledata", ok); r(); } };
+      lmap.on("styledata", ok);
+      lmap.once("load", r);
+    });
     lmap.on("click", (e) => {
       const t = e.originalEvent && e.originalEvent.target;
       if (t && t.closest && t.closest(".mk")) return; // کلیک روی نشانگر را خود نشانگر مدیریت می‌کند
@@ -449,13 +458,20 @@ function showMap() {
     lmap.on("resize", scheduleDeclutter);
   }
   setTimeout(() => lmap.resize(), 0);
-  drawGeo().catch(() => flash("بارگذاری مرز کشورها ناموفق بود", 3000));
+  refreshMap();
+}
+let drawP = null;
+function refreshMap() {
+  if (!drawP) drawP = drawGeo()
+    .catch((e) => flash("بارگذاری نقشه ناموفق بود: " + ((e && e.message) || e), 3500))
+    .finally(() => { drawP = null; });
+  return drawP;
 }
 
 /* ---------- داده و لایه کشورها ---------- */
 const GEO_URL = "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_50m_admin_0_countries.geojson";
 const TIER_LABEL = { normal: "عادی", premium: "Premium", premium_plus: "Premium Plus" };
-let geoP = null, geoData = null, byCode = {}, selCode = null, flownFor = null;
+let geoP = null, geoData = null, geoBase = null, byCode = {}, selCode = null, flownFor = null;
 let ents = [], marks = [];
 
 function loadGeo() {
@@ -500,11 +516,16 @@ async function drawGeo() {
   if (!cs.error && cs.data) all = cs.data;
   byCode = Object.fromEntries(all.map((c) => [c.code, c]));
   owners = Object.fromEntries(((!rs.error && rs.data) || []).map((x) => [x.id, x.owner_code]));
-  g.features.forEach((f) => {
-    const code = geoCode(f), c = byCode[code];
-    f.properties = { code: code || "", st: statusOf(c), tier: c ? c.tier : "normal" };
-  });
-  geoData = { type: "FeatureCollection", features: g.features.filter((f) => f.properties.code) };
+  // نکته: g همان آبجکت کش‌شده است؛ properties اصلی (ISO_A2_EH) را نباید بازنویسی کرد،
+  // وگرنه بار دوم ورود به نقشه همه کدها خالی می‌شود و مرزها و پرچم‌ها ناپدید می‌شوند
+  if (!geoBase) geoBase = g.features.map((f) => ({ geometry: f.geometry, code: geoCode(f) })).filter((x) => x.code);
+  geoData = {
+    type: "FeatureCollection",
+    features: geoBase.map((x) => {
+      const c = byCode[x.code];
+      return { type: "Feature", geometry: x.geometry, properties: { code: x.code, st: statusOf(c), tier: c ? c.tier : "normal" } };
+    })
+  };
   const src = lmap.getSource("countries");
   if (src) src.setData(geoData);
   else {
@@ -580,8 +601,8 @@ function buildMarkers() {
     if (oc) { const b = document.createElement("em"); b.className = "fb"; b.textContent = flagOf(own); h.append(b); }
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openResource(r); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = r.fa;
-    addMarker(m, r.ll); addMarker(lb, r.ll, { anchor: "top", offset: [0, 17] });
-    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 200, minZ: 1.8, m, lb, lw: r.fa.length * 6.5 + 10, h });
+    addMarker(m, r.ll); addMarker(lb, r.ll, { anchor: "top", offset: [0, 13] });
+    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 350, minZ: 0, m, lb, lw: r.fa.length * 6.5 + 10, h });
   });
   ents.sort((a, b) => b.prio - a.prio);
   ents.forEach((e) => { e.m.style.display = "none"; e.lb.style.display = "none"; });
@@ -615,8 +636,9 @@ function declutter() {
       const p = lmap.project(e.ll);
       if (p.x < -40 || p.y < -40 || p.x > W + 40 || p.y > H + 40) on = false;
       else {
-        const hr = { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
-        const lr = { x: p.x - e.lw / 2, y: p.y + 16, w: e.lw, h: 14 };
+        const sm = e.kind === "r";
+        const hr = sm ? { x: p.x - 12, y: p.y - 13, w: 24, h: 26 } : { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
+        const lr = { x: p.x - e.lw / 2, y: p.y + (sm ? 12 : 16), w: e.lw, h: 14 };
         const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 3.5 : 2.2);
         if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; }
         else if (!placed.some((q) => hit(q, hr))) placed.push(hr);
@@ -729,6 +751,7 @@ function closeMapSheet() {
 }
 
 function screen(n) {
+  $("boot").hidden = true;
   for (const s of ["pick", "home", "shop", "worldmap"]) $(s).hidden = s !== n;
   $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
@@ -756,10 +779,10 @@ function blockScreen(t, p) {
   $("notg").hidden = false;
 }
 async function tgLogin() {
-  const fail = (t) => { $("go").disabled = false; msg(t); flash(t, 3500); };
+  const fail = (t) => { $("go").disabled = false; msg(t); flash(t, 3500); return false; };
   const { data, error } = await sb.functions.invoke("telegram-auth-", { body: { initData: TG.initData } });
   if (error || !data || !data.access_token) {
-    try { if (error.context.status === 403) { const j = await error.context.json(); return blockScreen("⛔ حساب شما مسدود است", j.error || ""); } } catch (_) {}
+    try { if (error.context.status === 403) { const j = await error.context.json(); blockScreen("⛔ حساب شما مسدود است", j.error || ""); return "blocked"; } } catch (_) {}
     let m = (error && error.message) || "ورود با تلگرام ناموفق بود";
     try { m = (await error.context.json()).error || m; } catch (_) {}
     return fail(m);
@@ -767,6 +790,7 @@ async function tgLogin() {
   const r = await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
   if (r.error) return fail(r.error.message);
   msg(""); // بقیه‌اش را onAuthStateChange انجام می‌دهد
+  return true;
 }
 
 function openSettings() { document.body.classList.add("set-open"); }
@@ -902,8 +926,9 @@ async function confirmPick() {
 
 async function loadCountry() {
   const { data, error } = await sb.from("countries").select("*").maybeSingle();
-  if (error) return msg(error.message);
+  if (error) { msg(error.message); return false; }
   country = data;
+  return true;
 }
 function render() {
   if (!country) return;
@@ -927,7 +952,14 @@ async function doRoute(session) {
     await loadPick();
     return screen("pick");
   }
-  await loadCountry();
+  // اگر دریافت کشور به‌خاطر خطای شبکه شکست خورد، نباید کاربر را به «انتخاب کشور» برد
+  let ok = false;
+  for (let i = 0; i < 3 && !ok; i++) { if (i) await sleep(1200 * i); ok = await loadCountry(); }
+  if (!ok) {
+    if (!$("boot").hidden) { $("bootT").textContent = "دریافت اطلاعات ناموفق بود. اینترنت/VPN را بررسی کنید."; $("bootBtn").hidden = false; }
+    return;
+  }
+  msg("");
   if (country) {
     const pf = await sb.from("profiles").select("player_no").maybeSingle();
     $("pno").textContent = pf.data ? pf.data.player_no : "—";
@@ -943,18 +975,42 @@ async function doRoute(session) {
   }
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let booting = false;
+
+async function loginLoop() {
+  let r = false;
+  for (let i = 0; i < 3 && r === false; i++) { if (i) await sleep(1500 * i); r = await tgLogin(); }
+  return r;
+}
+// ورود تازه با تلگرام (برای اجرای بن). تا پایان ورود، صفحه‌ی «در حال ورود» دیده می‌شود نه انتخاب کشور
+async function boot() {
+  booting = true; authed = false;
+  $("bootBtn").hidden = true; $("bootT").textContent = "در حال ورود…"; $("boot").hidden = false;
+  try { await sb.auth.signOut({ scope: "local" }); } catch (_) {}
+  const r = await loginLoop();
+  booting = false;
+  if (r === true || r === "blocked") return; // در حالت true، onAuthStateChange صفحه را نشان می‌دهد
+  $("bootT").textContent = "ورود انجام نشد. اینترنت/VPN را بررسی کنید."; $("bootBtn").hidden = false;
+}
+
 if (!TG) {
   // خارج از تلگرام: ورودی وجود ندارد
+  $("boot").hidden = true;
   $("notg").hidden = false;
 } else {
   sb.auth.onAuthStateChange((e, s) => {
-    if (e === "TOKEN_REFRESHED") return;
+    if (e === "TOKEN_REFRESHED" || e === "INITIAL_SESSION") return;
     if (e === "SIGNED_IN" && authed && s) return; // برگشت به تب؛ صفحه فعلی را عوض نکن
+    if (e === "SIGNED_OUT") {
+      if (booting) return; // خروج خودمان در شروع بازی
+      // خروج غیرمنتظره (مثلاً شکست رفرش توکن): بی‌صدا دوباره وارد شو، به انتخاب کشور نرو
+      if (authed) { authed = false; booting = true; loginLoop().finally(() => { booting = false; }); }
+      return;
+    }
     setTimeout(() => route(s), 0); // جلوگیری از قفل شدن supabase داخل callback
   });
-  // ورود خودکار با تلگرام
-  // هر بار که بازی باز می‌شود نشست قدیمی پاک و ورود تازه انجام می‌شود (برای اجرای بن)
-  (async () => { await sb.auth.signOut({ scope: "local" }); await tgLogin(); })();
+  boot();
   setInterval(render, 1000);
   setInterval(async () => {
     if (!country) return;
