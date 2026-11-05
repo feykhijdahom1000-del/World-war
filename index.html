@@ -220,6 +220,38 @@ nav div{pointer-events:auto;max-width:460px;align-items:flex-end;padding:6px 6px
 nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;padding:0;border-radius:50%;background:radial-gradient(circle at 30% 22%,#f6d779,#c8962b 72%);color:#1b1405;box-shadow:0 8px 22px #d4a73a66,0 0 0 6px #0a111d}
 #worldmap{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 #toast{bottom:104px}
+
+/* ===== economy ===== */
+.eh{display:flex;align-items:center;gap:12px;margin-bottom:14px}.eh h2{margin:0}
+.ecard{border-radius:24px;padding:16px;border:1px solid #d4a73a88;background:linear-gradient(180deg,#1b2233,#0e1422);box-shadow:0 12px 32px #000a,inset 0 1px 0 #ffffff26}
+.ebig{display:flex;align-items:baseline;gap:8px;margin:4px 0 12px}.ebig b{font-size:34px;color:var(--ok);direction:ltr}.ebig small{color:var(--mut)}
+.e2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.eb{background:#ffffff0d;border:1px solid #ffffff22;border-radius:16px;padding:12px}
+.eb b{display:block;font-size:20px;margin-top:4px;direction:ltr;text-align:right}.eb b.grn{color:var(--ok)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;width:auto;margin:0;padding:10px 16px;background:#ffffff0d;color:var(--txt);border:1px solid #d4a73a66;border-radius:18px;font-weight:700;text-align:center}
+.tab small{display:block;color:var(--mut);font-weight:400;margin-top:2px}
+.tab.on{background:var(--gold);color:#1b1405}.tab.on small{color:#3a2c0a}
+.sortrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.sc{width:auto;margin:0;padding:7px 14px;font-size:13px;background:transparent;color:var(--txt);border:1px solid #d4a73a66;border-radius:18px;font-weight:600}
+.sc.on{background:#d4a73a33;color:var(--gold)}
+.syn{background:#ffffff0d;border:1px solid #ffffff22;border-radius:20px;padding:14px 16px;margin-bottom:14px}
+.syn h3{margin:0 0 10px;font-size:17px}
+.sr{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #ffffff14}.sr:first-of-type{border-top:0}
+.sr span{width:96px;font-size:15px}.sr small{width:32px;color:var(--mut);text-align:left}
+.sr i{flex:1;height:7px;border-radius:4px;background:#ffffff1f;overflow:hidden}.sr u{display:block;height:100%;background:var(--gold);border-radius:4px}
+.bc{border:1px solid #ffffff2e;border-radius:22px;padding:14px;margin-bottom:12px;background:linear-gradient(180deg,#171f31,#0e1422);box-shadow:0 8px 22px #0007,inset 0 1px 0 #ffffff1f}
+.bc.no{border-style:dashed;border-color:#ffffff44}
+.bh{display:flex;align-items:center;gap:12px}
+.eic{width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:28px;border-radius:50%;background:#d4a73a22;border:2px solid #d4a73a}
+.bt{flex:1}.bt b{font-size:18px}
+.dots{display:flex;gap:5px;margin-top:8px}.dots i{width:18px;height:6px;border-radius:3px;background:#ffffff2b}.dots i.on{background:var(--gold)}
+.bi{text-align:left;direction:ltr}.bi b{display:block;color:var(--ok);font-size:20px}.bi small{color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chp{font-size:13px;padding:6px 12px;border-radius:16px;background:#ffffff0f;border:1px solid #ffffff2e}
+.chp.g{color:var(--ok);border-color:#3ddc9755}
+.buy,.up{margin:0;border:1px solid #d4a73a;background:linear-gradient(180deg,#3a2c0a,#241b08);color:var(--gold);border-radius:16px;padding:15px}
+.buy.poor{color:#ff8a8a}.up{color:var(--mut);border-color:#ffffff2e;background:#ffffff0a}
 </style>
 </head>
 <body>
@@ -281,7 +313,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
     <div class="tiles">
       <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
       <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
-      <button class="tile eco" onclick="soon()"><span>📈</span>اقتصاد</button>
+      <button class="tile eco" onclick="openEco()"><span>📈</span>اقتصاد</button>
       <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
       <button class="tile mkt" onclick="soon()"><span>🏪</span>بازار جهانی</button>
       <button class="tile inf" onclick="soon()"><span>🏗️</span>زیرساخت</button>
@@ -332,6 +364,24 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
       <div class="price">100,000 تومان</div>
       <button disabled>به‌زودی</button>
     </div>
+  </section>
+
+  <!-- اقتصاد -->
+  <section id="eco" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>اقتصاد</h2></div>
+    <div class="ecard">
+      <div class="lbl">💰 درآمد روزانه‌ی ساختمان‌ها</div>
+      <div class="ebig"><b id="eInv"></b><small>در روز</small></div>
+      <div class="e2">
+        <div class="eb"><span class="lbl">موجودی</span><b id="eBal"></b></div>
+        <div class="eb"><span class="lbl">خالص روزانه</span><b id="eNet" class="grn"></b></div>
+      </div>
+    </div>
+    <div class="tabs" id="eTabs"></div>
+    <div class="sortrow"><span class="lbl">ترتیب:</span><span id="eSort"></span></div>
+    <div class="syn" id="eSyn"></div>
+    <div id="eList"></div>
+    <div class="lbl" id="eMsg" style="text-align:center;line-height:1.9"></div>
   </section>
 
   <div id="msg"></div>
@@ -798,8 +848,8 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap"]) $(s).hidden = s !== n;
-  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap";
+  for (const s of ["pick", "home", "shop", "worldmap", "eco"]) $(s).hidden = s !== n;
+  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
   closeSettings();
   if (n !== "worldmap") closeMapSheet();
@@ -851,6 +901,96 @@ async function leaveCountry() {
   country = null;
   flownFor = null;
   route(true);
+}
+
+
+/* ---------- اقتصاد: ساختمان‌ها ---------- */
+// قیمت و درآمد اینجا فقط برای نمایش پیش‌فرض است؛ مقدار اصلی از جدول building_catalog سرور خوانده می‌شود
+const CATS = { fin: { fa: "مالی", icon: "🏛️" }, ind: { fa: "صنعت", icon: "🏭" }, srv: { fa: "خدمات", icon: "🛍️" }, trn: { fa: "حمل‌ونقل", icon: "🚚" } };
+const BLD = [
+  { id: "bank", fa: "بانک", cat: "fin", icon: "🏦", price: 400000, income: 143000 },
+  { id: "insurance", fa: "بیمه", cat: "fin", icon: "🛡️", price: 800000, income: 291000 },
+  { id: "realestate", fa: "املاک", cat: "fin", icon: "🏘️", price: 1600000, income: 593000 },
+  { id: "stock", fa: "بورس", cat: "fin", icon: "📊", price: 3200000, income: 1231000 },
+  { id: "fund", fa: "صندوق سرمایه‌گذاری", cat: "fin", icon: "💼", price: 6000000, income: 2449000 },
+  { id: "auto", fa: "خودروسازی", cat: "ind", icon: "🚗", price: 5200000, income: 2167000 },
+  { id: "tech", fa: "فناوری", cat: "ind", icon: "💻", price: 7200000, income: 3000000 },
+  { id: "pharma", fa: "داروسازی", cat: "ind", icon: "💊", price: 8800000, income: 3700000 },
+  { id: "tourism", fa: "گردشگری", cat: "srv", icon: "🏖️", price: 600000, income: 214000 },
+  { id: "retail", fa: "فروشگاه زنجیره‌ای", cat: "srv", icon: "🛒", price: 1000000, income: 364000 },
+  { id: "telecom", fa: "مخابرات", cat: "srv", icon: "📡", price: 1400000, income: 519000 },
+  { id: "media", fa: "رسانه", cat: "srv", icon: "📺", price: 2400000, income: 923000 },
+  { id: "transport", fa: "حمل‌ونقل", cat: "trn", icon: "🚆", price: 1800000, income: 679000 },
+  { id: "shipping", fa: "کشتیرانی", cat: "trn", icon: "🚢", price: 3600000, income: 1440000 },
+  { id: "airline", fa: "شرکت هواپیمایی", cat: "trn", icon: "✈️", price: 6000000, income: 2500000 }
+];
+const MAXLV = 5;
+let owned = {}, ecoCat = "all", ecoSort = "income";
+const SORTS = { income: "درآمد", price: "قیمت", level: "سطح", payback: "بازگشت سرمایه" };
+const faNum = (n) => Number(n).toLocaleString("fa-IR");
+const liveT = () => country ? Math.floor(Number(country.treasury) + (Number(country.daily_income) * (Date.now() - new Date(country.last_tick).getTime())) / 86400000) : 0;
+function paybackText(b) {
+  const d = b.price / b.income, days = Math.floor(d), h = Math.round((d - days) * 24);
+  return faNum(days) + " روز و " + faNum(h) + " ساعت";
+}
+
+async function openEco() {
+  screen("eco");
+  renderEco();
+  await loadEco();
+}
+async function loadEco() {
+  const [cat, own] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level")]);
+  if (cat.error || own.error) {
+    $("eMsg").textContent = "اطلاعات اقتصاد از سرور دریافت نشد؛ مطمئن شوید اسکریپت economy.sql اجرا شده است.";
+    owned = {};
+  } else {
+    $("eMsg").textContent = "";
+    cat.data.forEach((r) => { const b = BLD.find((x) => x.id === r.id); if (b) { b.price = Number(r.price); b.income = Number(r.income); } });
+    owned = Object.fromEntries(own.data.map((r) => [r.building_id, Number(r.level)]));
+  }
+  renderEco();
+}
+function setEcoCat(c) { ecoCat = c; renderEco(); }
+function setEcoSort(k) { ecoSort = k; renderEco(); }
+
+function renderEco() {
+  const cnt = (c) => BLD.filter((b) => (c === "all" || b.cat === c) && owned[b.id]).length;
+  const tot = (c) => BLD.filter((b) => c === "all" || b.cat === c).length;
+  $("eInv").textContent = fmt(BLD.reduce((a, b) => a + (owned[b.id] ? b.income : 0), 0));
+  $("eTabs").innerHTML = [["all", "📁", "همه"], ...Object.entries(CATS).map(([k, v]) => [k, v.icon, v.fa])]
+    .map(([k, ic, fa]) => `<button class="tab${ecoCat === k ? " on" : ""}" onclick="setEcoCat('${k}')"><span>${ic} ${fa}</span><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></button>`).join("");
+  $("eSort").innerHTML = Object.entries(SORTS).map(([k, fa]) => `<button class="sc${ecoSort === k ? " on" : ""}" onclick="setEcoSort('${k}')">${fa}</button>`).join("");
+  $("eSyn").innerHTML = "<h3>🔗 هم‌افزایی بخش‌ها</h3>" + Object.entries(CATS)
+    .map(([k, v]) => `<div class="sr"><span>${v.icon} ${v.fa}</span><i><u style="width:${(cnt(k) / tot(k)) * 100}%"></u></i><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></div>`).join("");
+  const sorters = {
+    income: (a, b) => b.income - a.income,
+    price: (a, b) => a.price - b.price,
+    level: (a, b) => (owned[b.id] || 0) - (owned[a.id] || 0) || b.income - a.income,
+    payback: (a, b) => a.price / a.income - b.price / b.income
+  };
+  const t = liveT();
+  $("eList").innerHTML = BLD.filter((b) => ecoCat === "all" || b.cat === ecoCat).sort(sorters[ecoSort]).map((b) => {
+    const lv = owned[b.id] || 0, has = lv > 0;
+    const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
+    return `<div class="bc${has ? "" : " no"}">
+      <div class="bh"><div class="eic">${b.icon}</div>
+        <div class="bt"><b>${b.fa}</b><div class="dots">${dots}</div></div>
+        <div class="bi">${has ? `<b>${fmt(b.income)}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
+      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? "" : `<span class="chp g">↑ ${fmt(b.income)} در روز</span>`}</div>
+      ${has ? `<button class="up" disabled>⬆ ارتقا به سطح ${faNum(lv + 1)} — به‌زودی</button>`
+            : `<button class="buy${t < b.price ? " poor" : ""}" onclick="buyBuilding('${b.id}',this)">خرید — ${fmt(b.price)}</button>`}
+    </div>`;
+  }).join("");
+}
+async function buyBuilding(id, btn) {
+  btn.disabled = true;
+  const { error } = await sb.rpc("buy_building", { p_id: id });
+  if (error) { btn.disabled = false; return flash(error.message, 5000); }
+  flash("✅ ساختمان خریداری شد", 2000);
+  await loadCountry();
+  render();
+  await loadEco();
 }
 
 const fmt = (n) => "$" + Number(n).toLocaleString("en-US");
@@ -990,6 +1130,9 @@ function render() {
   $("hFlag").textContent = flagOf(country.code);
   $("hName").textContent = country.name;
   $("hT").textContent = "$" + live.toLocaleString("en-US");
+  $("eBal").textContent = "$" + live.toLocaleString("en-US");
+  $("eNet").textContent = "+$" + Number(country.daily_income).toLocaleString("en-US");
+  $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
   $("hourly").textContent = "$" + Math.round(Number(country.daily_income) / 24).toLocaleString("en-US");
   $("hC").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
 }
