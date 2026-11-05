@@ -581,7 +581,7 @@ function buildMarkers() {
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openResource(r); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = r.fa;
     addMarker(m, r.ll); addMarker(lb, r.ll, { anchor: "top", offset: [0, 17] });
-    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 200, minZ: 3, m, lb, lw: r.fa.length * 6.5 + 10, h });
+    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 200, minZ: 1.8, m, lb, lw: r.fa.length * 6.5 + 10, h });
   });
   ents.sort((a, b) => b.prio - a.prio);
   ents.forEach((e) => { e.m.style.display = "none"; e.lb.style.display = "none"; });
@@ -617,7 +617,7 @@ function declutter() {
       else {
         const hr = { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
         const lr = { x: p.x - e.lw / 2, y: p.y + 16, w: e.lw, h: 14 };
-        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 4.5 : 2.2);
+        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 3.5 : 2.2);
         if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; }
         else if (!placed.some((q) => hit(q, hr))) placed.push(hr);
         else on = false;
