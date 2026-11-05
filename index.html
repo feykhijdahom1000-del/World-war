@@ -184,6 +184,42 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
 .pk small{display:block;color:var(--mut)}
 .pk ul.ft{text-align:start;min-height:84px}
 .pk button:disabled,.vip button:disabled{background:#2a2410;color:var(--mut);border:1px dashed #6b5a2a;opacity:1}
+
+/* ===== home: glass look ===== */
+body{background:radial-gradient(120% 55% at 50% -8%,#1d3560 0,transparent 62%),radial-gradient(70% 40% at 105% 35%,#3b1f5266,transparent 70%),var(--bg) fixed}
+.wrap{padding-bottom:130px}
+.top{gap:10px;margin-bottom:16px}
+.ic.g{width:46px;height:46px;font-size:20px;background:#ffffff14;border:1px solid #ffffff2e;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 #ffffff26}
+.flag{width:62px;height:62px;font-size:34px;border:3px solid #fff;box-shadow:0 0 0 2px var(--gold),0 6px 18px #000a;background:#0e1828}
+.main{position:relative;overflow:hidden;border-radius:28px;padding:16px;border:1px solid #ffffff2e;background:linear-gradient(180deg,#183059 0%,#0e1a33 55%,#0a111d 100%);box-shadow:0 14px 40px #000a,inset 0 1px 0 #ffffff26}
+.main::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 14%,#d4a73a40,transparent 34%),radial-gradient(circle at 88% 72%,#4aa3ff38,transparent 42%)}
+.main::after{content:"";position:absolute;inset-inline:0;bottom:0;height:110px;background:linear-gradient(180deg,#0a1322aa,#070d18);opacity:.9;clip-path:polygon(0 100%,0 62%,6% 62%,6% 42%,12% 42%,12% 56%,18% 56%,18% 30%,24% 30%,24% 52%,31% 52%,31% 66%,38% 66%,38% 36%,45% 36%,45% 56%,52% 56%,52% 24%,58% 24%,58% 50%,66% 50%,66% 40%,73% 40%,73% 62%,80% 62%,80% 30%,87% 30%,87% 56%,94% 56%,94% 46%,100% 46%,100% 100%)}
+.main>*{position:relative;z-index:1}
+.mh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.mh .name{margin:0;font-size:21px;font-weight:800;text-shadow:0 2px 10px #000a}
+.pill{font-size:13px;color:var(--txt);background:#ffffff14;border:1px solid #ffffff33;border-radius:20px;padding:5px 12px;white-space:nowrap}
+.gp{background:#ffffff14;border:1px solid #ffffff2e;border-radius:22px;padding:16px;-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:inset 0 1px 0 #ffffff33,0 8px 24px #0006}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 8px}
+.trow .big{margin:0;font-size:31px;text-shadow:0 2px 12px #0008}
+.trow .vl{align-self:stretch;width:1px;background:#ffffff33}
+.cr{font-size:25px;font-weight:800;color:#6fd3ff;direction:ltr;white-space:nowrap}
+.lbl.inc{padding-bottom:12px;border-bottom:1px solid #ffffff22}
+.gp .stats{border-top:0;margin-top:12px;padding-top:0}
+.gp .stats b{font-size:26px;text-shadow:0 2px 10px #0008}
+.gp .stats b.grn{color:var(--ok)}
+.tiles{gap:12px;margin-top:16px}
+.tile{position:relative;overflow:hidden;border:1px solid #ffffff2e;border-radius:22px;font-weight:800;text-shadow:0 2px 8px #000c;box-shadow:0 8px 22px #0007,inset 0 1px 0 #ffffff2e;transition:transform .12s}
+.tile:active{transform:scale(.97)}
+.tile::before{content:"";position:absolute;inset:0;background:linear-gradient(160deg,#ffffff2b 0,transparent 45%)}
+.tile span{font-size:46px;filter:drop-shadow(0 4px 8px #000a)}
+.tile.mini{height:84px}
+.tile.mini span{font-size:30px}
+/* floating glass nav */
+nav{background:none;border:0;padding:0 12px calc(10px + env(safe-area-inset-bottom,0px));pointer-events:none}
+nav div{pointer-events:auto;max-width:460px;align-items:flex-end;padding:6px 6px 4px;border-radius:32px;background:#0d1626b8;border:1px solid #ffffff2e;-webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);box-shadow:0 10px 30px #000a,inset 0 1px 0 #ffffff26}
+nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;padding:0;border-radius:50%;background:radial-gradient(circle at 30% 22%,#f6d779,#c8962b 72%);color:#1b1405;box-shadow:0 8px 22px #d4a73a66,0 0 0 6px #0a111d}
+#worldmap{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+#toast{bottom:104px}
 </style>
 </head>
 <body>
@@ -218,20 +254,28 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
   <section id="home" hidden>
     <div class="top">
       <div class="flag" id="flag"></div>
+      <button class="ic g" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
+      <button class="ic g" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
       <div class="sp"></div>
-        <button class="ic" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
-      <button class="ic" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
-      <button class="ic" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
+      <button class="ic g" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
     </div>
     <div class="main">
-      <div class="name" id="name"></div>
-      <div class="lbl">موجودی خزانه</div>
-      <div class="big" id="treasury"></div>
-      <div class="lbl">درآمد روزانه: <span id="income" dir="ltr"></span></div>
-      <div class="lbl">شناسه بازیکن: <span id="pno" dir="ltr"></span></div>
-      <div class="stats">
-        <div><span class="lbl">قدرت نظامی</span><b id="power"></b></div>
-        <div><span class="lbl">الماس</span><b id="crystals"></b></div>
+      <div class="mh">
+        <div class="name" id="name"></div>
+        <span class="pill">🆔 <span id="pno" dir="ltr"></span></span>
+      </div>
+      <div class="gp">
+        <div class="lbl">🪙 موجودی خزانه</div>
+        <div class="trow">
+          <div class="big" id="treasury"></div>
+          <i class="vl"></i>
+          <div class="cr" id="crystals"></div>
+        </div>
+        <div class="lbl inc">درآمد روزانه: <span id="income" dir="ltr"></span></div>
+        <div class="stats">
+          <div><span class="lbl">⚔️ قدرت نظامی</span><b id="power"></b></div>
+          <div><span class="lbl">⏱️ درآمد هر ساعت</span><b id="hourly" class="grn"></b></div>
+        </div>
       </div>
     </div>
     <div class="tiles">
@@ -946,6 +990,7 @@ function render() {
   $("hFlag").textContent = flagOf(country.code);
   $("hName").textContent = country.name;
   $("hT").textContent = "$" + live.toLocaleString("en-US");
+  $("hourly").textContent = "$" + Math.round(Number(country.daily_income) / 24).toLocaleString("en-US");
   $("hC").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
 }
 // route ها پشت‌سرهم اجرا می‌شن تا رویداد تکراری auth چیزی را دوبار ثبت نکند
