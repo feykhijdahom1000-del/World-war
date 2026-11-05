@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World War</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#0a111d;--card:#142033;--line:#27364b;--gold:#d4a73a;--txt:#eef2f7;--mut:#8b9bb0;--err:#ff8a8a;--ok:#3ddc97}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Tahoma,sans-serif}
+.wrap{max-width:460px;margin:auto;padding:18px 16px 110px}
+h1,h2{margin:0 0 14px}
+input,button{width:100%;padding:13px;margin:6px 0;border-radius:10px;border:0;font:inherit;font-size:16px}
+input{background:#0e1828;color:var(--txt);border:1px solid var(--line)}
+button{background:var(--gold);color:#1b1405;font-weight:700;cursor:pointer}
+button.ghost{background:transparent;color:var(--mut);border:1px solid var(--line)}
+button:disabled{opacity:.4}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#msg{color:var(--err);min-height:22px;text-align:center}
+/* country picker */
+.phead{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:12px}
+.phead b{flex:1;font-size:20px}
+.phead button{width:auto;margin:0;padding:8px 14px;font-size:14px}
+.hint{line-height:1.9;margin:0 0 14px;font-size:15px}
+.tr{display:block;width:100%;text-align:start;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 10px;font-weight:400}
+.tr .row{display:flex;justify-content:space-between;align-items:center}
+.tr .row b{font-size:17px}
+.tr .amt{font-size:26px;font-weight:800;direction:ltr}
+.tr .bonus{color:var(--ok);font-weight:700;direction:ltr;text-align:left;min-height:20px}
+.tr .perk{color:var(--mut);font-size:14px;line-height:1.7;margin:8px 0 10px}
+.tr .perk::before{content:"✓";color:var(--ok);margin-inline-end:8px}
+.tr.normal .perk::before{content:"✕"}
+.tr .cnt{border-top:1px solid var(--line);padding-top:10px;color:var(--mut);font-size:14px}
+.tr.premium{border-color:#6b5320;background:linear-gradient(160deg,#2a2208,#101318)}
+.tr.premium_plus{border-color:var(--gold);background:linear-gradient(160deg,#3a2c0a,#12120f)}
+.tr.premium .row b,.tr.premium_plus .row b{color:var(--gold)}
+.tr.on{box-shadow:0 0 0 2px var(--gold) inset}
+#q{margin:4px 0 12px;border-radius:14px}
+#list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.fl{width:54px;height:54px;border-radius:50%;border:2px solid var(--line);background:#0e1828;display:grid;place-items:center;font-size:30px;flex:none}
+.c{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:14px;font-weight:700;padding:14px;margin:0;text-align:start}
+.c small{color:var(--mut);font-weight:400;font-size:13px;line-height:1.6}
+.c.premium{border-color:#6b5320;background:linear-gradient(160deg,#241c08,#101318)}
+.c.premium_plus{border-color:var(--gold);background:linear-gradient(160deg,#33260a,#12120f)}
+.c.on{box-shadow:0 0 0 2px var(--gold) inset}
+.c:disabled{opacity:.45}
+.bd{border:1px solid var(--gold);color:var(--gold);border-radius:20px;padding:2px 12px;font-size:13px;font-weight:700}
+.c.premium_plus .bd{background:var(--gold);color:#1b1405}
+.empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:24px 0}
+/* confirm sheet */
+.has-sheet .wrap{padding-bottom:320px}
+#sheet{position:fixed;inset-inline:0;bottom:0;z-index:5;background:#0d1626;border-top:1px solid var(--gold);padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px #000a}
+#sheet .in{max-width:460px;margin:auto}
+#sheet .hd{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+#sheet .hd b{font-size:20px;display:block}
+#sheet .stats{margin-top:10px;padding-top:10px}
+#sheet .stats b{font-size:18px}
+#sheet .perk{color:var(--mut);font-size:13px;margin:10px 0 4px}
+/* home */
+.top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.top .sp{flex:1}
+.ic{width:42px;height:42px;padding:0;margin:0;border-radius:50%;background:var(--card);color:var(--txt);border:1px solid var(--line);font-size:18px}
+.flag{width:54px;height:54px;border-radius:50%;border:3px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:30px}
+.main{background:linear-gradient(160deg,#1a2b44,#0f1826 70%);border:1px solid var(--line);border-radius:18px;padding:18px}
+.main .name{font-size:19px;font-weight:700;margin-bottom:14px}
+.lbl{color:var(--mut);font-size:14px}
+.big{font-size:34px;font-weight:800;margin:2px 0 6px;direction:ltr;text-align:right}
+.stats{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.stats b{display:block;font-size:24px;margin-top:2px;direction:ltr;text-align:right}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.tile{height:120px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:16px;font-size:20px;position:relative}
+.tile span{position:absolute;top:12px;inset-inline-end:12px;font-size:34px}
+.tile.army{background:linear-gradient(160deg,#16314f,#101a2a)}
+.tile.war{background:linear-gradient(160deg,#4a1f24,#1d1216)}
+nav{position:fixed;inset-inline:0;bottom:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:#0d1626;border-top:1px solid var(--line)}
+nav div{max-width:460px;margin:auto;display:flex;justify-content:space-between}
+nav button{width:auto;flex:1;margin:0;padding:8px 2px;background:transparent;color:var(--mut);font-size:12px;font-weight:600}
+nav button i{display:block;font-style:normal;font-size:22px}
+nav button.on{color:var(--gold)}
+#toast{position:fixed;bottom:84px;inset-inline:0;text-align:center;color:var(--txt);font-size:14px;pointer-events:none;z-index:30}
+/* settings sheet */
+button.danger{background:#b3372f;color:#fff}
+#setBack{position:fixed;inset:0;z-index:20;background:#000a;opacity:0;pointer-events:none;transition:opacity .25s}
+#setSheet{position:fixed;inset-inline:0;bottom:0;z-index:21;background:#0d1626;border-top:1px solid var(--gold);border-radius:20px 20px 0 0;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px #000a;transform:translateY(100%);visibility:hidden;transition:transform .28s ease,visibility 0s linear .28s}
+#setSheet .in{max-width:460px;margin:auto}
+#setSheet .grab{width:44px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+body.set-open #setBack{opacity:1;pointer-events:auto}
+body.set-open #setSheet{transform:none;visibility:visible;transition:transform .28s ease,visibility 0s}
+@media (prefers-reduced-motion:reduce){#setBack,#setSheet{transition:none!important}}
+/* admin */
+.adm .u{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 10px}
+.adm .u b{display:block;direction:ltr;text-align:start;word-break:break-all}
+.adm .u small{display:block;color:var(--mut);line-height:1.8;margin-bottom:6px}
+.adm .u.ban{border-color:var(--err)}
+.adm .f{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.adm .f input{margin:4px 0;padding:10px;font-size:14px}
+.adm select{width:100%;padding:10px;margin:4px 0;border-radius:10px;background:#0e1828;color:var(--txt);border:1px solid var(--line);font:inherit;font-size:14px}
+.adm .st{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 12px}
+.adm .st div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.adm .st div:last-child:nth-child(3n+1){grid-column:1/-1}
+.adm .st b{display:block;font-size:17px;color:var(--gold);direction:ltr}
+.adm .st span{font-size:12px;color:var(--mut)}
+.adm .fl2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adm .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adm .two button{padding:10px;font-size:14px}
+.adm details{margin:6px 0 4px;border-top:1px solid var(--line);padding-top:6px}
+.adm summary{cursor:pointer;color:var(--gold);padding:6px 0}
+.adm .why{color:var(--err)!important;margin-bottom:6px}
+.adm .sep{height:1px;background:var(--line);margin:10px 0}
+/* world map */
+#worldmap{position:fixed;inset-inline:0;top:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:1;background:var(--bg)}
+#mapbox{width:100%;height:100%;background:var(--bg)}
+#mapbox .leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.9) saturate(.7)}
+nav{z-index:10}
+/* shop */
+.sec{margin:22px 0 10px;font-size:18px}
+.vip{background:linear-gradient(150deg,#6b5320,#2a2008 75%);border:1px solid var(--gold);border-radius:18px;padding:18px}
+.vip h3{margin:8px 0 4px;font-size:26px}.vip p{margin:0 0 12px;color:#e8d9aa}
+.tag{background:var(--gold);color:#1b1405;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700}
+ul.ft{list-style:none;padding:0;margin:0 0 12px}
+ul.ft li{padding:5px 0;font-size:14px}
+ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
+.price{color:var(--gold);font-weight:800;font-size:18px;margin:8px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pk{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.pk.plus{border-color:#7b5fd0;background:linear-gradient(160deg,#2a1f4d,#141a2b)}
+.pk .big2{font-size:22px;font-weight:800}
+.pk small{display:block;color:var(--mut)}
+.pk ul.ft{text-align:start;min-height:84px}
+.pk button:disabled,.vip button:disabled{background:#2a2410;color:var(--mut);border:1px dashed #6b5a2a;opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <!-- ۲. انتخاب کشور -->
+  <section id="pick" hidden>
+    <div class="phead"><span>🌐</span><b>انتخاب کشور</b></div>
+    <p class="lbl hint">هر کشور را بزنید تا جزئیاتش را ببینید، فرمانده؛ تا تأیید نکنید چیزی ثبت نمی‌شود. هر کشور فقط یک فرمانده دارد. اگر خواستید، بعداً می‌توانید کشور را ترک کنید و کشور دیگری بگیرید.</p>
+    <div id="tiers"></div>
+    <input id="q" type="search" placeholder="جستجوی کشور…" oninput="renderList()" autocomplete="off">
+    <div id="list"></div>
+
+    <div id="sheet" hidden><div class="in">
+      <div class="hd">
+        <div class="fl" id="sf"></div>
+        <div><b id="sn"></b><span class="bd" id="sb"></span></div>
+      </div>
+      <div class="stats">
+        <div><span class="lbl">خزانه اولیه</span><b id="st"></b></div>
+        <div><span class="lbl">درآمد روزانه</span><b id="si"></b></div>
+        <div><span class="lbl">قدرت نظامی</span><b id="sp"></b></div>
+      </div>
+      <div class="perk" id="sperk"></div>
+      <button id="go" onclick="confirmPick()">تأیید و شروع بازی</button>
+      <button class="ghost" onclick="closeSheet()">انصراف</button>
+    </div></div>
+  </section>
+
+  <!-- ۳. صفحه اصلی -->
+  <section id="home" hidden>
+    <div class="top">
+      <div class="flag" id="flag"></div>
+      <div class="sp"></div>
+      <button class="ic" id="admBtn" onclick="openAdmin()" aria-label="پنل ادمین" hidden>🛠️</button>
+      <button class="ic" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
+      <button class="ic" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
+      <button class="ic" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
+    </div>
+    <div class="main">
+      <div class="name" id="name"></div>
+      <div class="lbl">موجودی خزانه</div>
+      <div class="big" id="treasury"></div>
+      <div class="lbl">درآمد روزانه: <span id="income" dir="ltr"></span></div>
+      <div class="lbl">شناسه بازیکن: <span id="pno" dir="ltr"></span></div>
+      <div class="stats">
+        <div><span class="lbl">قدرت نظامی</span><b id="power"></b></div>
+      </div>
+    </div>
+    <div class="tiles">
+      <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
+      <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
+    </div>
+  </section>
+
+  <!-- ۴. فروشگاه -->
+  <section id="shop" hidden>
+    <h2>فروشگاه</h2>
+    <div class="vip">
+      <span class="tag">پیشنهاد ستاد</span>
+      <h3>اشتراک VIP</h3>
+      <p>پیشرفت سریع‌تر و امکانات ویژه، به مدت ۳۱ روز</p>
+      <ul class="ft"><li>پیشرفت سریع‌تر</li><li>ساخت‌وساز همزمان</li><li>تعمیر ارزان‌تر و سریع‌تر</li><li>۱۰ کریستال در روز</li></ul>
+      <div class="price">380,000 تومان</div>
+      <button disabled>به‌زودی</button>
+    </div>
+
+    <h3 class="sec">کشورها</h3>
+    <div class="grid2">
+      <div class="pk">
+        <b>کشور Premium</b>
+        <ul class="ft"><li>۲۵٪ خزانه بیشتر</li></ul>
+        <div class="price">200,000 تومان</div>
+        <button disabled>به‌زودی</button>
+      </div>
+      <div class="pk plus">
+        <b>کشور Premium Plus</b>
+        <ul class="ft"><li>۵۰٪ خزانه بیشتر</li><li>تنگه‌ی راهبردی</li></ul>
+        <div class="price">280,000 تومان</div>
+        <button disabled>به‌زودی</button>
+      </div>
+    </div>
+
+    <h3 class="sec">کریستال</h3>
+    <div class="grid3">
+      <div class="pk"><div class="big2">💎100</div><small>کریستال</small><div class="price">150,000<small>تومان</small></div><button disabled>به‌زودی</button></div>
+      <div class="pk"><div class="big2">💎300</div><small>کریستال</small><div class="price">300,000<small>تومان</small></div><button disabled>به‌زودی</button></div>
+      <div class="pk"><div class="big2">💎500</div><small>کریستال</small><div class="price">450,000<small>تومان</small></div><button disabled>به‌زودی</button></div>
+    </div>
+
+    <h3 class="sec">خزانه</h3>
+    <div class="pk">
+      <div class="big2" dir="ltr">$10,000,000</div>
+      <small>به خزانه</small>
+      <div class="price">100,000 تومان</div>
+      <button disabled>به‌زودی</button>
+    </div>
+  </section>
+
+  <!-- پنل ادمین -->
+  <section id="admin" class="adm" hidden>
+    <div class="phead"><span>🛠️</span><b>پنل ادمین</b><button class="ghost" onclick="screen('home')">بازگشت</button></div>
+    <div id="astats" class="st"></div>
+    <input id="aq" type="search" placeholder="جستجو با شناسه، نام کاربری یا نام کشور…" oninput="adminSearchSoon()" autocomplete="off">
+    <div class="fl2">
+      <select id="afilter" onchange="adminSearch()" aria-label="فیلتر">
+        <option value="all">همه</option>
+        <option value="vip">فقط VIP</option>
+        <option value="banned">فقط بن‌شده‌ها</option>
+        <option value="nocountry">بدون کشور</option>
+      </select>
+      <select id="asort" onchange="adminSearch()" aria-label="مرتب‌سازی">
+        <option value="new">جدیدترین</option>
+        <option value="treasury">بیشترین خزانه</option>
+        <option value="crystals">بیشترین الماس</option>
+        <option value="vip">VIP نزدیک به پایان</option>
+      </select>
+    </div>
+    <div id="alist"></div>
+  </section>
+
+  <div id="msg"></div>
+</div>
+
+<!-- ۵. نقشه جهان -->
+<section id="worldmap" hidden><div id="mapbox" dir="ltr"></div></section>
+
+<nav id="nav" hidden><div>
+  <button onclick="soon()"><i>💬</i>ارتباطات</button>
+  <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
+  <button data-t="home" class="on" onclick="screen('home')"><i>🏠</i>خانه</button>
+  <button data-t="worldmap" onclick="screen('worldmap')"><i>🌍</i>نقشه جهان</button>
+  <button data-t="shop" onclick="screen('shop')"><i>🛒</i>فروشگاه</button>
+</div></nav>
+<div id="setBack" onclick="closeSettings()"></div>
+<div id="setSheet" role="dialog" aria-label="تنظیمات"><div class="in">
+  <div class="grab"></div>
+  <h2>تنظیمات</h2>
+  <p class="lbl hint">با ترک کشور، فرماندهی را رها می‌کنید و به صفحه انتخاب کشور برمی‌گردید. حساب شما حفظ می‌شود و نیازی به ورود دوباره نیست.</p>
+  <button class="danger" id="leaveBtn" onclick="leaveCountry()">🚪 ترک کشور</button>
+  <button class="ghost" onclick="closeSettings()">بستن</button>
+</div></div>
+<div id="toast"></div>
+<div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2>این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+const sb = supabase.createClient("https://ojvafaquuzfvnpyfqady.supabase.co", "sb_publishable_KCBs5O_32ERi2QCWXwsVjw__stzJt9L");
+const $ = (id) => document.getElementById(id);
+const msg = (t) => ($("msg").textContent = t || "");
+const flagOf = (code) => String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt()));
+let country = null, picked = null;
+
+let lmap = null;
+function showMap() {
+  if (!lmap) {
+    lmap = L.map("mapbox", {
+      center: [30, 40], zoom: 3, minZoom: 2, maxZoom: 10,
+      maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1
+    });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      noWrap: true, maxZoom: 10,
+      attribution: "© OpenStreetMap"
+    }).addTo(lmap);
+  }
+  setTimeout(() => lmap.invalidateSize(), 0);
+}
+
+function screen(n) {
+  for (const s of ["pick", "home", "shop", "worldmap", "admin"]) $(s).hidden = s !== n;
+  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap";
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
+  closeSettings();
+  window.scrollTo(0, 0);
+  if (n === "worldmap") showMap();
+}
+function flash(t, ms) {
+  $("toast").textContent = t;
+  setTimeout(() => ($("toast").textContent = ""), ms || 1200);
+}
+function soon() { flash("به‌زودی"); }
+
+let authed = false;
+
+// داخل تلگرام؟ (initData فقط داخل Mini App پر است)
+const TG = window.Telegram && Telegram.WebApp && Telegram.WebApp.initData ? Telegram.WebApp : null;
+if (TG) {
+  TG.ready(); TG.expand();
+  try { TG.setHeaderColor("#0a111d"); TG.setBackgroundColor("#0a111d"); } catch (_) {}
+}
+async function tgLogin() {
+  const fail = (t) => { $("go").disabled = false; msg(t); flash(t, 3500); };
+  const { data, error } = await sb.functions.invoke("telegram-auth-", { body: { initData: TG.initData } });
+  if (error || !data || !data.access_token) {
+    let m = (error && error.message) || "ورود با تلگرام ناموفق بود";
+    try { m = (await error.context.json()).error || m; } catch (_) {}
+    return fail(m);
+  }
+  const r = await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+  if (r.error) return fail(r.error.message);
+  msg(""); // بقیه‌اش را onAuthStateChange انجام می‌دهد
+}
+
+function openSettings() { document.body.classList.add("set-open"); }
+function closeSettings() { document.body.classList.remove("set-open"); }
+async function leaveCountry() {
+  if (!confirm("کشور را ترک می‌کنید؟")) return;
+  $("leaveBtn").disabled = true;
+  const { error } = await sb.rpc("leave_country");
+  $("leaveBtn").disabled = false;
+  if (error) return flash(error.message, 3500);
+  closeSettings();
+  country = null;
+  route(true);
+}
+
+const fmt = (n) => "$" + Number(n).toLocaleString("en-US");
+const TIER_ICON = { normal: "", premium: " 👑", premium_plus: " 💎" };
+let tiers = {}, tierRows = [], all = [], tierFilter = null;
+
+function seaText(c) {
+  if (c.sea_access === "island") return "دسترسی دریایی · جزیره‌ای";
+  if (c.sea_access === "coastal") return "دسترسی دریایی · " + c.neighbors + " همسایه";
+  return "بدون دریا · " + c.neighbors + " همسایه";
+}
+
+async function loadPick() {
+  const [t, c] = await Promise.all([sb.rpc("list_tiers"), sb.rpc("list_countries")]);
+  if (t.error || c.error) return msg((t.error || c.error).message);
+  tierRows = t.data;
+  tiers = Object.fromEntries(t.data.map((x) => [x.tier, x]));
+  all = c.data;
+  tierFilter = null;
+  $("q").value = "";
+  $("go").disabled = false;
+  hideSheet();
+  renderTiers();
+  renderList();
+}
+
+function renderTiers() {
+  const box = $("tiers");
+  box.replaceChildren();
+  tierRows.forEach((r) => {
+    const b = document.createElement("button");
+    b.className = "tr " + r.tier + (tierFilter === r.tier ? " on" : "");
+    const row = document.createElement("div"); row.className = "row";
+    const name = document.createElement("b"); name.textContent = r.label + TIER_ICON[r.tier];
+    const amt = document.createElement("span"); amt.className = "amt"; amt.textContent = fmt(r.start_treasury);
+    row.append(name, amt);
+    const bonus = document.createElement("div"); bonus.className = "bonus";
+    bonus.textContent = r.bonus_pct ? "+" + r.bonus_pct + "%" : "";
+    const perk = document.createElement("div"); perk.className = "perk"; perk.textContent = r.perk_fa;
+    const cnt = document.createElement("div"); cnt.className = "cnt";
+    cnt.textContent = r.tier === "normal" ? r.total + " کشور" : r.open + " از " + r.total + " کشور هنوز باز است";
+    b.append(row, bonus, perk, cnt);
+    b.onclick = () => { tierFilter = tierFilter === r.tier ? null : r.tier; renderTiers(); renderList(); };
+    box.append(b);
+  });
+}
+
+function renderList() {
+  const q = $("q").value.trim();
+  const box = $("list");
+  box.replaceChildren();
+  const rows = all.filter((c) => (!tierFilter || c.tier === tierFilter) && c.name_fa.includes(q));
+  if (!rows.length) {
+    const e = document.createElement("div"); e.className = "empty"; e.textContent = "کشوری پیدا نشد";
+    return box.append(e);
+  }
+  rows.forEach((c) => {
+    const t = tiers[c.tier];
+    const b = document.createElement("button");
+    b.className = "c " + c.tier + (picked === c.code ? " on" : "");
+    b.disabled = c.taken;
+    const f = document.createElement("span"); f.className = "fl"; f.textContent = flagOf(c.code);
+    const n = document.createElement("span"); n.textContent = c.name_fa;
+    const s = document.createElement("small"); s.textContent = c.taken ? "گرفته شده" : seaText(c);
+    b.append(f, n, s);
+    if (!c.taken && c.tier !== "normal") {
+      const bd = document.createElement("span"); bd.className = "bd"; bd.textContent = t.label + TIER_ICON[c.tier];
+      const d = document.createElement("small");
+      d.textContent = "+" + t.bonus_pct + "٪ پول · " + t.assets + " دارایی از روز نخست";
+      b.append(bd, d);
+    }
+    b.onclick = () => { picked = c.code; openSheet(c); renderList(); };
+    box.append(b);
+  });
+}
+
+function openSheet(c) {
+  const t = tiers[c.tier];
+  $("sf").textContent = flagOf(c.code);
+  $("sn").textContent = c.name_fa;
+  $("sb").textContent = t.label + TIER_ICON[c.tier];
+  $("st").textContent = fmt(t.start_treasury);
+  $("si").textContent = fmt(c.start_income);
+  $("sp").textContent = c.start_power;
+  $("sperk").textContent = t.perk_fa;
+  $("go").textContent = "تأیید و شروع بازی";
+  $("sheet").hidden = false;
+  document.body.classList.add("has-sheet");
+}
+function hideSheet() {
+  picked = null;
+  $("sheet").hidden = true;
+  document.body.classList.remove("has-sheet");
+}
+function closeSheet() { hideSheet(); renderList(); }
+
+async function confirmPick() {
+  if (!picked) return;
+  const code = picked;
+  $("go").disabled = true;
+  if (!authed) {
+    await tgLogin();
+    const { data: ss } = await sb.auth.getSession();
+    if (!ss.session) { $("go").disabled = false; return; }
+  }
+  const { error } = await sb.rpc("choose_country", { p_code: code });
+  $("go").disabled = false;
+  if (error) { await loadPick(); return flash(error.message, 3500); }
+  msg("");
+  hideSheet();
+  if (TG) sb.functions.invoke("notify-country", { body: { initData: TG.initData } }).catch(() => {});
+  route(true);
+}
+
+async function loadCountry() {
+  const { data, error } = await sb.from("countries").select("*").maybeSingle();
+  if (error) return msg(error.message);
+  country = data;
+}
+function render() {
+  if (!country) return;
+  const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
+  const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
+  $("treasury").textContent = "$" + live.toLocaleString("en-US");
+}
+let aTimer = null;
+let adminFree = [];
+function adminSearchSoon() { clearTimeout(aTimer); aTimer = setTimeout(adminSearch, 350); }
+async function openAdmin() {
+  screen("admin");
+  adminStats();
+  const c = await sb.rpc("list_countries");
+  adminFree = c.error ? [] : c.data.filter((x) => !x.taken);
+  await adminSearch();
+}
+
+async function adminStats() {
+  const { data, error } = await sb.rpc("admin_stats");
+  const box = $("astats");
+  box.replaceChildren();
+  if (error || !data) return;
+  const n = (x) => Number(x).toLocaleString("en-US");
+  [
+    ["بازیکن", n(data.players)],
+    ["ثبت‌نام ۲۴ ساعت", n(data.new_24h)],
+    ["کشور گرفته‌شده", n(data.countries_taken) + "/" + n(data.countries_total)],
+    ["VIP فعال", n(data.vip_active)],
+    ["بن‌شده", n(data.banned)],
+    ["الماس کل", n(data.total_crystals)],
+    ["مجموع خزانه", "$" + n(data.total_treasury)],
+  ].forEach(([l, v]) => {
+    const d = document.createElement("div");
+    const b = document.createElement("b"); b.textContent = v;
+    const sp = document.createElement("span"); sp.textContent = l;
+    d.append(b, sp);
+    box.append(d);
+  });
+}
+
+async function adminSearch() {
+  const { data, error } = await sb.rpc("admin_search", {
+    p_q: $("aq").value.trim(), p_filter: $("afilter").value, p_sort: $("asort").value,
+  });
+  if (error) return msg(error.message);
+  msg("");
+  const box = $("alist");
+  box.replaceChildren();
+  if (!data.length) {
+    const e = document.createElement("div"); e.className = "empty"; e.textContent = "کاربری پیدا نشد";
+    return box.append(e);
+  }
+  data.forEach((u) => box.append(adminCard(u)));
+}
+
+function adminCard(u) {
+  const d = document.createElement("div");
+  d.className = "u" + (u.banned ? " ban" : "");
+  const who = u.username ? "@" + u.username : (u.email || "—");
+  const e = document.createElement("b"); e.textContent = who;
+  const s = document.createElement("small");
+  const vipOn = u.vip_until && new Date(u.vip_until) > new Date();
+  const vip = vipOn ? new Date(u.vip_until).toLocaleDateString("fa-IR") : "ندارد";
+  s.textContent = (u.banned ? "⛔ بن شده · " : "") + "شناسه " + (u.player_no || "—") + " · " +
+    (u.country ? u.country + " · خزانه " + fmt(u.treasury) + " · 💎" + u.crystals + " · VIP: " + vip : "هنوز کشور انتخاب نکرده");
+  d.append(e, s);
+  if (u.banned && u.ban_reason) {
+    const w = document.createElement("small"); w.className = "why"; w.textContent = "دلیل بن: " + u.ban_reason;
+    d.append(w);
+  }
+
+  const run = async (name, args, okText, btn) => {
+    if (btn) btn.disabled = true;
+    const { error } = await sb.rpc(name, args);
+    if (btn) btn.disabled = false;
+    if (error) return flash(error.message, 3000);
+    flash(okText || "انجام شد");
+    await openAdminRefreshFree();
+    adminSearch();
+    adminStats();
+  };
+
+  const det = document.createElement("details");
+  const sm = document.createElement("summary"); sm.textContent = "⚙️ عملیات";
+  det.append(sm);
+
+  // پول، الماس، VIP: اضافه یا کم کردن
+  const mk = (ph) => { const i = document.createElement("input"); i.type = "number"; i.inputMode = "numeric"; i.min = "0"; i.placeholder = ph; return i; };
+  if (u.country) {
+    const f = document.createElement("div"); f.className = "f";
+    const t = mk("پول"), c = mk("الماس"), v = mk("روز VIP");
+    f.append(t, c, v);
+    const two = document.createElement("div"); two.className = "two";
+    const add = document.createElement("button"); add.textContent = "➕ اضافه";
+    const sub = document.createElement("button"); sub.className = "ghost"; sub.textContent = "➖ کم کردن";
+    const go = (sign, btn) => {
+      const a = { p_user: u.user_id, p_treasury: Math.abs(Number(t.value || 0)) * sign, p_crystals: Math.abs(Number(c.value || 0)) * sign, p_vip_days: Math.abs(Number(v.value || 0)) * sign };
+      if (!a.p_treasury && !a.p_crystals && !a.p_vip_days) return flash("مقداری وارد نشده");
+      run("admin_grant", a, "انجام شد", btn);
+    };
+    add.onclick = () => go(1, add);
+    sub.onclick = () => go(-1, sub);
+    two.append(add, sub);
+    det.append(f, two);
+
+    // تغییر کشور
+    const sep = document.createElement("div"); sep.className = "sep";
+    const sel = document.createElement("select");
+    const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "تغییر کشور به…";
+    sel.append(o0);
+    adminFree.forEach((x) => {
+      const o = document.createElement("option"); o.value = x.code; o.textContent = flagOf(x.code) + " " + x.name_fa;
+      sel.append(o);
+    });
+    const mv = document.createElement("button"); mv.textContent = "تغییر کشور";
+    mv.onclick = () => {
+      if (!sel.value) return flash("کشوری انتخاب نشده");
+      const nm = sel.options[sel.selectedIndex].textContent;
+      if (!confirm(who + " به " + nm + " منتقل شود؟ درآمد و قدرت اولیه کشور جدید جایگزین می‌شود، خزانه و الماس می‌ماند.")) return;
+      run("admin_move_country", { p_user: u.user_id, p_code: sel.value }, "کشور عوض شد", mv);
+    };
+    // آزاد کردن کشور
+    const rel = document.createElement("button"); rel.className = "ghost"; rel.textContent = "آزاد کردن کشور";
+    rel.onclick = () => {
+      if (!confirm("کشور " + u.country + " از " + who + " گرفته شود؟ خزانه و الماس این کشور پاک می‌شود.")) return;
+      run("admin_release_country", { p_user: u.user_id }, "کشور آزاد شد", rel);
+    };
+    det.append(sep, sel, mv, rel);
+  }
+  d.append(det);
+
+  // بن با دلیل
+  const bb = document.createElement("button");
+  bb.className = "ghost";
+  bb.textContent = u.banned ? "رفع بن" : "بن کردن";
+  bb.onclick = () => {
+    let reason = "";
+    if (u.banned) {
+      if (!confirm("رفع بن " + who + "؟")) return;
+    } else {
+      reason = prompt("دلیل بن " + who + " (اختیاری):");
+      if (reason === null) return;
+    }
+    run("admin_ban", { p_user: u.user_id, p_ban: !u.banned, p_reason: reason.trim() || null }, "انجام شد", bb);
+  };
+  d.append(bb);
+  return d;
+}
+
+async function openAdminRefreshFree() {
+  const c = await sb.rpc("list_countries");
+  adminFree = c.error ? [] : c.data.filter((x) => !x.taken);
+}
+
+
+// route ها پشت‌سرهم اجرا می‌شن تا رویداد تکراری auth چیزی را دوبار ثبت نکند
+let routeQ = Promise.resolve();
+const route = (s) => (routeQ = routeQ.then(() => doRoute(s)).catch((e) => msg(e.message || String(e))));
+
+async function doRoute(session) {
+  authed = !!session;
+  if (!session) {
+    country = null; $("admBtn").hidden = true; msg("");
+    await loadPick();
+    return screen("pick");
+  }
+  await loadCountry();
+  if (country) {
+    const pf = await sb.from("profiles").select("player_no").maybeSingle();
+    $("pno").textContent = pf.data ? pf.data.player_no : "—";
+    const adm = await sb.rpc("is_admin");
+    $("admBtn").hidden = !adm.data;
+    $("flag").textContent = flagOf(country.code);
+    $("name").textContent = country.name;
+    $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
+    $("power").textContent = country.military_power;
+    render();
+    screen("home");
+  } else {
+    await loadPick();
+    screen("pick");
+  }
+}
+
+if (!TG) {
+  // خارج از تلگرام: ورودی وجود ندارد
+  $("notg").hidden = false;
+} else {
+  sb.auth.onAuthStateChange((e, s) => {
+    if (e === "TOKEN_REFRESHED") return;
+    if (e === "SIGNED_IN" && authed && s) return; // برگشت به تب؛ صفحه فعلی را عوض نکن
+    setTimeout(() => route(s), 0); // جلوگیری از قفل شدن supabase داخل callback
+  });
+  // ورود خودکار با تلگرام
+  sb.auth.getSession().then(({ data }) => { if (!data.session) tgLogin(); });
+  setInterval(render, 1000);
+  setInterval(() => { if (country) loadCountry(); }, 30000);
+}
+</script>
+</body>
+</html>
