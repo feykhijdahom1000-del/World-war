@@ -562,35 +562,10 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .pkh button{width:auto;margin:0;padding:6px 14px}
 #chPkL{overflow-y:auto;overscroll-behavior:contain;flex:1;min-height:120px}
 /* ================= END UPGRADE LAYER ================= */
-
-/* ===== UK-style home ===== */
-.li{display:inline-grid;place-items:center;width:18px;height:18px;margin-inline-end:6px;vertical-align:-3px;font-style:normal;color:#9fb4d0}
-.li.gold{color:var(--gold)}.li svg{width:100%;height:100%}
-.pill{display:inline-flex;align-items:center}
-.ic.g svg{width:22px;height:22px;color:var(--gold)}
-.ic.g{background:#0d1626b3;border-color:#ffffff26}
-.flag{width:68px;height:68px;font-size:38px;border:3px solid #fff;box-shadow:0 0 0 3px var(--gold),0 10px 24px #000b}
-.main{background:linear-gradient(180deg,#0a111dcc,#0a111dee),linear-gradient(180deg,#183059,#0a111d)}
-.main::after{height:150px;opacity:.55;background:linear-gradient(180deg,#1b3560aa,#070d18)}
-.gp{background:#070d1acc}
-.gp .stats>div{min-width:0}.gp .stats .lbl{white-space:nowrap;font-size:13px}
-.cr{display:flex;align-items:center;gap:6px}.cr .gm{width:26px;height:26px;color:#5fd0ff;flex:none}
-nav button i svg{width:26px;height:26px;display:block;margin:0 auto 2px}
-nav button[data-t=home].on i svg{width:30px;height:30px;margin:0 auto}
-nav button i{font-size:0}nav button.on{color:var(--gold)}
-nav button[data-t=home].on{font-size:12px}
-.bdg{font-size:10px}
-.tile{--t1:#16314f;--t2:#0a111d;height:132px;padding:0;display:block;border-radius:22px;border:1px solid #ffffff26;text-shadow:none;
- background:radial-gradient(120% 80% at 85% 0,color-mix(in srgb,var(--ta) 35%,transparent),transparent 60%),repeating-linear-gradient(0deg,#ffffff08 0 1px,transparent 1px 14px),linear-gradient(160deg,var(--t1),var(--t2))}
-.tile::before{background:linear-gradient(0deg,#050a14e6 0,#050a1455 55%,transparent)}
-.tile.army{--t1:#17365a}.tile.war{--t1:#5a2227}.tile.eco{--t1:#144a37}.tile.dip{--t1:#3d2d6e}.tile.mkt{--t1:#6a4c14}.tile.inf{--t1:#15505a}
-.tile .tl{position:absolute;left:16px;bottom:14px;font-size:19px;font-weight:800;z-index:1;direction:rtl}
-.tile .tb{position:absolute;right:12px;bottom:12px;width:52px;height:58px;display:grid;place-items:center;z-index:1;font-style:normal;color:var(--ta);
- background:linear-gradient(160deg,#1a2a46,#0b1426);border:1.5px solid var(--ta);border-radius:14px 14px 26px 26px;box-shadow:0 4px 14px #0009,0 0 14px color-mix(in srgb,var(--ta) 40%,transparent)}
-.tile .tb svg{width:28px;height:28px}
-.tile.mini{height:88px}.tile.mini .tb{width:40px;height:44px;border-radius:12px;bottom:10px}.tile.mini .tb svg{width:22px;height:22px}
-.tile.mini .tl{font-size:16px;bottom:12px}
-.tile.ref{--ta:var(--gold)}.tile.mini:not(.ref){--ta:#7aa7ff}
+.mil-t{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.mil-t span{font-size:22px;font-weight:800;color:var(--gold)}
+.mil-gr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mil-s{background:#ffffff0a;border:1px solid #ffffff14;border-radius:16px;padding:12px}.mil-s.no{opacity:.6}
+.mil-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:14px}.mil-h i{font-style:normal;font-size:22px}.mil-s b{display:block;font-size:22px}.mil-s small{color:var(--mut);font-size:12px}
+.mil-g{display:flex;align-items:center;gap:10px;margin:18px 2px 10px;color:var(--mut);font-size:14px}.mil-g::after{content:"";flex:1;height:1px;background:var(--line)}
 </style>
 </head>
 <body>
@@ -637,19 +612,19 @@ nav button[data-t=home].on{font-size:12px}
   <section id="home" hidden>
     <div class="top">
       <div class="flag" id="flag"></div>
-      <button class="ic g" onclick="soon()" aria-label="رتبه‌بندی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M12 14v4M8 21h8M9.5 18h5"/></svg></button>
-      <button class="ic g" onclick="soon()" aria-label="اعلان‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg></button>
+      <button class="ic g" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
+      <button class="ic g" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
       <div class="sp"></div>
-      <button class="ic g" onclick="openSettings()" aria-label="تنظیمات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8l1.5 2.4 2.8-.6.9 2.7 2.7.9-.6 2.8 2.4 1.5-2.4 1.5.6 2.8-2.7.9-.9 2.7-2.8-.6L12 21.2l-1.5-2.4-2.8.6-.9-2.7-2.7-.9.6-2.8L2.3 12l2.4-1.5-.6-2.8 2.7-.9.9-2.7 2.8.6z"/></svg></button>
+      <button class="ic g" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
     </div>
     <div class="main">
       <div class="mh">
         <div class="name" id="name"></div>
-        <span class="pill"><i class="li"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></i><span id="pno" dir="ltr"></span></span>
+        <span class="pill">🆔 <span id="pno" dir="ltr"></span></span>
       </div>
       <div class="vipbd" id="vipBd" hidden onclick="openVip()"><span class="vbc">👑</span><div><b>VIP</b><small id="vipBdT"></small></div></div>
       <div class="gp">
-        <div class="lbl"><i class="li gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.5"/></svg></i>موجودی خزانه</div>
+        <div class="lbl">🪙 موجودی خزانه</div>
         <div class="trow">
           <div class="big" id="treasury"></div>
           <i class="vl"></i>
@@ -657,21 +632,21 @@ nav button[data-t=home].on{font-size:12px}
         </div>
         <div class="lbl inc">درآمد روزانه: <span id="income" dir="ltr"></span></div>
         <div class="stats">
-          <div><span class="lbl"><i class="li"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l9 9M4 4v4l9 9M20 4l-9 9M20 4v4l-9 9M6 18l-2 2M18 18l2 2M3 15l3 3M21 15l-3 3"/></svg></i>قدرت نظامی</span><b id="power"></b></div>
-          <div><span class="lbl"><i class="li"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></i>درآمد ساعتی</span><b id="hourly" class="grn"></b></div>
+          <div><span class="lbl">⚔️ قدرت نظامی</span><b id="power"></b></div>
+          <div><span class="lbl">⏱️ درآمد هر ساعت</span><b id="hourly" class="grn"></b></div>
         </div>
       </div>
     </div>
     <div class="tiles">
-      <button class="tile army" onclick="soon()"><b class="tl">ارتش</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></i></button>
-      <button class="tile war" onclick="soon()"><b class="tl">جنگ</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg></i></button>
-      <button class="tile eco" onclick="openEco()"><b class="tl">اقتصاد</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M5 16l4-5 4 3 6-8M15 6h4v4"/></svg></i></button>
-      <button class="tile dip" onclick="soon()"><b class="tl">دیپلماسی</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h11a2 2 0 012 2v2H9M7 3a2 2 0 00-2 2v13a3 3 0 003 3h9a3 3 0 003-3V7M9 11h7M9 15h5"/></svg></i></button>
-      <button class="tile mkt" onclick="soon()"><b class="tl">بازار جهانی</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0M5 12v8h14v-8M10 20v-5h4v5"/></svg></i></button>
-      <button class="tile inf" onclick="openInf()"><b class="tl">زیرساخت</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V9l6-4v16M10 21V3l10 5v13M2 21h20M13 11h4M13 15h4"/></svg></i></button>
-      <button class="tile mini" onclick="soon()"><b class="tl">آمار کشور</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></i></button>
-      <button class="tile mini" onclick="soon()"><b class="tl">وام</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v.1M18 14.5v.1"/></svg></i></button>
-      <button class="tile mini ref" onclick="openRef()"><b class="tl">دعوت دوستان</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8c-2-4-6-3-5 0 .5 1 3 1 5 0zM12 8c2-4 6-3 5 0-.5 1-3 1-5 0z"/></svg></i></button>
+      <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
+      <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
+      <button class="tile eco" onclick="openEco()"><span>📈</span>اقتصاد</button>
+      <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
+      <button class="tile mkt" onclick="soon()"><span>🏪</span>بازار جهانی</button>
+      <button class="tile inf" onclick="openInf()"><span>🏗️</span>زیرساخت</button>
+      <button class="tile mini" onclick="soon()"><span>📊</span>آمار کشور</button>
+      <button class="tile mini" onclick="soon()"><span>💵</span>وام</button>
+      <button class="tile mini ref" onclick="openRef()"><span>🎁</span>دعوت دوستان</button>
     </div>
   </section>
 
@@ -895,11 +870,11 @@ nav button[data-t=home].on{font-size:12px}
 
 <div id="chBar" hidden><input id="chIn" maxlength="300" placeholder="پیام بنویسید…" autocomplete="off"><button id="chSend" onclick="chatSend()">ارسال</button></div>
 <nav id="nav" hidden><div>
-  <button data-t="chat" onclick="openChat()"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.1M12 10.5h.1M15.5 10.5h.1" stroke-width="2.6"/></svg><b class="bdg" id="chBdg" hidden></b></i>ارتباطات</button>
-  <button onclick="soon()"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0M5 12v8h14v-8M10 20v-5h4v5"/></svg></i>بازار جهانی</button>
-  <button data-t="home" class="on" onclick="screen('home')"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9.5V21h5v-6h4v6h5V9.5"/></svg></i>خانه</button>
-  <button data-t="worldmap" onclick="screen('worldmap')"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></i>نقشه جهان</button>
-  <button data-t="shop" onclick="screen('shop')"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h3l2 12h11l2-8H7M10 20h.1M17 20h.1" stroke-width="2.2"/></svg></i>فروشگاه</button>
+  <button data-t="chat" onclick="openChat()"><i>💬<b class="bdg" id="chBdg" hidden></b></i>ارتباطات</button>
+  <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
+  <button data-t="home" class="on" onclick="screen('home')"><i>🏠</i>خانه</button>
+  <button data-t="worldmap" onclick="screen('worldmap')"><i>🌍</i>نقشه جهان</button>
+  <button data-t="shop" onclick="screen('shop')"><i>🛒</i>فروشگاه</button>
 </div></nav>
 <div id="setBack" onclick="closeSettings()"></div>
 <div id="setSheet" role="dialog" aria-label="تنظیمات"><div class="in">
@@ -907,6 +882,7 @@ nav button[data-t=home].on{font-size:12px}
   <h2>تنظیمات</h2>
   <p class="lbl hint">با ترک کشور، فرماندهی را رها می‌کنید و به صفحه انتخاب کشور برمی‌گردید. حساب شما حفظ می‌شود و نیازی به ورود دوباره نیست.</p>
   <button class="danger" id="leaveBtn" onclick="leaveCountry()">🚪 ترک کشور</button>
+  <button class="ghost" onclick="openBordersTool()">🧰 ابزار موقت: ساخت SQL مرزها</button>
   <button class="ghost" onclick="closeSettings()">بستن</button>
 </div></div>
 <div id="chPk" hidden onclick="if(event.target===this)chPkClose()"><div class="pkbox">
@@ -2064,7 +2040,19 @@ const RESB = [
   { id: "steel_ind", fa: "صنایع فولاد", icon: "🏭", isRes: true, res: "steel", price: 1500000, prod: 64800, use: 3.5, mins: 26, maint: 0, desc: "فولاد بیشتری از معدن تولید می‌کند، با مصرف برق بیشتر." },
   { id: "oil_well", fa: "چاه نفت", icon: "🛢️", isRes: true, res: "oil", price: 3000000, prod: 466560, use: 7, mins: 48, maint: 0, desc: "بیشترین تولید نفت؛ برق زیادی مصرف می‌کند. هر سطح نفت بیشتری می‌دهد." }
 ];
-const INF_ALL = PLANTS.concat(FOODS, RESB);
+const MIL = [
+  { id: "tank_factory", grp: "land", fa: "کارخانه تانک", icon: "🏭", price: 1454545, use: 5, mins: 23, maint: 20107, desc: "تانک و لانچر موشک می‌سازد؛ هر دو در پایگاه زرهی مستقر می‌شوند. هر سطح ساخت را سریع‌تر و صف تولید را بلندتر می‌کند." },
+  { id: "armored_base", grp: "land", fa: "پایگاه زرهی", icon: "🪖", isBase: 1, cap: 2000, price: 2181818, use: 5, mins: 46, maint: 30162, desc: "محل استقرار تانک و لانچر موشک. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، این یگان‌ها ساخته نمی‌شوند." },
+  { id: "aircraft_factory", grp: "air", fa: "کارخانه ادوات هوایی", icon: "✈️", price: 1500000, use: 5, mins: 24, maint: 41472, desc: "جنگنده، بمب‌افکن، بالگرد و سوخت‌رسان می‌سازد؛ همه در فرودگاه مستقر می‌شوند. هر سطح ساخت را سریع‌تر و صف تولید را بلندتر می‌کند." },
+  { id: "airport", grp: "air", fa: "فرودگاه", icon: "🛫", isBase: 1, cap: 200, price: 2000000, use: 5, mins: 48, maint: 55296, desc: "محل استقرار جنگنده، بمب‌افکن، بالگرد و سوخت‌رسان. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، هواپیما ساخته نمی‌شود." },
+  { id: "ship_factory", grp: "sea", fa: "کارخانه کشتی", icon: "🚢", price: 3272727, use: 5, mins: 40, maint: 45242, desc: "زیردریایی، ناوشکن، ناو ترابری و ناو هواپیمابر می‌سازد؛ همه در بندر پهلو می‌گیرند. فقط برای کشور ساحلی." },
+  { id: "port", grp: "sea", fa: "بندر", icon: "⚓", isBase: 1, cap: 400, price: 3272727, use: 5, mins: 69, maint: 45242, desc: "محل پهلوگرفتن ناوگان. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، کشتی ساخته نمی‌شود. فقط برای کشور ساحلی." },
+  { id: "missile_base", grp: "missile", fa: "پایگاه موشکی", icon: "🚀", isBase: 1, price: 1800000, use: 5, mins: 10, maint: 49766, desc: "انبار موشک. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، موشک ساخته نمی‌شود. لانچر در پایگاه زرهی مستقر می‌شود." },
+  { id: "missile_factory", grp: "missile", fa: "کارخانه موشک", icon: "🎯", price: 2000000, use: 5, mins: 32, maint: 55296, desc: "موشک و پدافند هوایی می‌سازد. موشک در پایگاه موشکی انبار می‌شود؛ پدافند جا نمی‌گیرد." }
+];
+const MIL_G = { land: "🪖 زمینی", air: "✈️ هوایی", sea: "🚢 دریایی", missile: "🚀 موشکی" };
+const MIL_SLOTS = ["armored_base", "airport", "port", "missile_base"];
+const INF_ALL = PLANTS.concat(FOODS, RESB, MIL);
 const RES_IC = { oil: "🛢️", steel: "⛏️", uranium: "☢️" };
 const rdAt = (p, lv) => Math.round(p.prod * (1 + 0.25 * (lv - 1)));
 const abbr = (n) => { n = Number(n); const a = Math.abs(n); return a >= 1e9 ? +(n / 1e9).toFixed(1) + " میلیارد" : a >= 1e6 ? +(n / 1e6).toFixed(1) + " میلیون" : en(n); };
@@ -2096,6 +2084,7 @@ const en = (n) => Number(n).toLocaleString("en-US");
 const durEn = (ms) => dur(ms).replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
 const btEn = (m) => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + " ساعت" : "") + (h && r ? " " : "") + (r ? r + " دقیقه" : ""); };
 const INF_AC = { wind: "#38bdf8", solar: "#fbbf24", hydro: "#5b9dff", nuclear: "#3ddc97", livestock: "#e6a15a", farm: "#e6c25a" };
+Object.assign(INF_AC, { tank_factory: "#4aa3ff", armored_base: "#4aa3ff", aircraft_factory: "#9fb4d6", airport: "#9fb4d6", ship_factory: "#38bdf8", port: "#38bdf8", missile_base: "#ff6b6b", missile_factory: "#ff6b6b" });
 const RES_AC = { oil: "#e0913a", steel: "#9fb4d6", uranium: "#3ddc97", food: "#e6c25a" };
 const acs = (c) => `--ac:${c};--a2:${c}33;--a3:${c}88`;
 let infLv = {}, infPend = {}, infUp = {}, infUpTo = {}, infEco = {}, infOff = {}, infSeen = false, infSettling = false;
@@ -2138,34 +2127,44 @@ function renderInf() {
     <div class="ix-gs"><div class="ix-s"><small>⚡ تولید</small><b>${en(P)}</b></div><div class="ix-s"><small>🏭 مصرف</small><b>${en(C)}</b></div></div></div>`;
   const tb = (id, ic, fa, list) => `<button class="tab${infTab === id ? " on" : ""}" onclick="setInfTab('${id}')"><span>${ic} ${fa}</span><small>${list.filter((p) => infLv[p.id]).length}/${list.length}</small></button>`;
   $("iTabs").innerHTML = tb("power", "⚡", "برق", PLANTS) + tb("food", "🌾", "غذا", FOODS) + tb("res", "⛏️", "منابع", RESB)
-    + [["👥", "رفاه"], ["🛡️", "نظامی"]].map(([ic, fa]) => `<button class="tab" onclick="soon()"><span>${ic} ${fa}</span><small>به‌زودی</small></button>`).join("");
-  const items = infTab === "food" ? FOODS : infTab === "res" ? RESB : PLANTS, lf = liveFood();
+    + `<button class="tab" onclick="soon()"><span>👥 رفاه</span><small>به‌زودی</small></button>` + tb("mil", "🛡️", "نظامی", MIL);
+  const items = infTab === "food" ? FOODS : infTab === "res" ? RESB : infTab === "mil" ? MIL : PLANTS, lf = liveFood();
   const foodBox = infTab === "food" ? `<div class="ix-box"><div class="lbl">🌾 انبار غذا</div><b class="ix-rn" data-food="1" style="margin-top:10px">${lf == null ? "—" : en(lf)}</b><small style="color:var(--mut);font-size:12px">${fr > 0 ? "▲ +" + en(fr) + " در روز" : "هنوز غذایی تولید نمی‌شود"}</small></div>` : "";
   const t = liveT(), now = Date.now();
-  $("iList").innerHTML = foodBox + (infTab === "res" ? rmCard() : "") + items.map((p) => {
+  $("iList").innerHTML = foodBox + (infTab === "res" ? rmCard() : "") + (infTab === "mil" ? milCard() : "") + items.map((p, ix) => {
+    const gh = infTab === "mil" && (!ix || items[ix - 1].grp !== p.grp) ? `<div class="mil-g">${MIL_G[p.grp]}</div>` : "";
     const lv = infLv[p.id] || 0, rdy = infPend[p.id], ur = infUp[p.id], off = !!infOff[p.id], nx = lv + 1;
     const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
-    const sw = lv ? `<button class="sw${off ? "" : " on"}" role="switch" aria-checked="${!off}" aria-label="فعال یا غیرفعال" onclick="toggleInf('${p.id}',${off})"></button>` : "";
-    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>${RES_IC[p.res]} در روز</small></div>` : lv && !p.isFood ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
+    const sw = lv && !p.isMil ? `<button class="sw${off ? "" : " on"}" role="switch" aria-checked="${!off}" aria-label="فعال یا غیرفعال" onclick="toggleInf('${p.id}',${off})"></button>` : "";
+    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>${RES_IC[p.res]} در روز</small></div>` : lv && p.isBase && p.cap ? `<div class="ix-pw"><b style="font-size:22px">${en(p.cap)}</b><small>ظرفیت</small></div>` : lv && !p.isFood && !p.isMil ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
     const statF = (v) => `<div class="ix-ss f4"><div class="ix-s"><small>🌾 غذا/روز</small><b>${en(fdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
     const statP = (v) => `<div class="ix-ss"><div class="ix-s"><small>⚡ برق</small><b>${en(pwAt(p, v))}</b></div><div class="ix-s"><small>${p.uran ? "☢️ سوخت/روز" : "🔧 نگهداری/روز"}</small><b>${p.uran ? "−" + en(p.uran * v) : "$" + en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
     const statR = (v) => `<div class="ix-ss"><div class="ix-s"><small>${RES_IC[p.res]} تولید/روز</small><b>${en(rdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
-    const stat = p.isFood ? statF : p.isRes ? statR : statP;
+    const statM = (v) => `<div class="ix-ss${p.cap ? " f4" : ""}"><div class="ix-s"><small>⚡ برق</small><b>${en(p.use)}</b></div><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(mtAt(p, v))}</b></div>${p.cap ? `<div class="ix-s"><small>🏠 ظرفیت</small><b>${en(p.cap)}</b></div>` : ""}<div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const stat = p.isMil ? statM : p.isFood ? statF : p.isRes ? statR : statP;
     const cls = `ix-c${lv ? "" : " no"}${off ? " off" : ""}`;
     if (rdy || ur) {
       const end = rdy || ur, to = rdy ? 1 : infUpTo[p.id], st = end - vm(mAt(p, to)) * 60000;
-      return `<div class="${cls}" style="${acs(INF_AC[p.id])}" data-rdy="${end}" data-st="${st}">${head}
+      return gh + `<div class="${cls}" style="${acs(INF_AC[p.id])}" data-rdy="${end}" data-st="${st}">${head}
         <p class="ix-d">${rdy ? "🔨 در حال ساخت" : "⬆ در حال ارتقا به سطح " + to}</p>
         <div class="tmr"><small>⏱️ زمان باقی‌مانده</small><b class="cd" dir="ltr">${durEn(end - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (end - st)) * 100))}%"></u></div>
         ${stat(to)}<button class="buy" onclick="speedInf('${p.id}',${end})">⚡ تکمیل سریع — <span class="spc">${en(spCost(end - now))}</span> 💎</button></div>`;
     }
-    return `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? (p.isFood ? " ⏸ غیرفعال: غذا تولید نمی‌کند و هزینه‌ی نگهداری ندارد." : p.isRes ? " ⏸ غیرفعال: تولید نمی‌کند." : " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد.") : ""}</p>
+    return gh + `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? (p.isFood ? " ⏸ غیرفعال: غذا تولید نمی‌کند و هزینه‌ی نگهداری ندارد." : p.isRes ? " ⏸ غیرفعال: تولید نمی‌کند." : " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد.") : ""}</p>
       ${stat(lv ? Math.min(nx, MAXLV) : 1)}
       ${lv >= MAXLV ? '<button class="up" disabled>✅ حداکثر سطح</button>'
         : lv ? `<button class="buy${t < upCost(p, lv) ? " poor" : ""}" onclick="askInfUp('${p.id}')">⬆ ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
         : `<button class="buy${t < pv(p.price) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}</div>`;
   }).join("");
+}
+function milCard() {
+  const built = MIL.filter((p) => infLv[p.id]).length;
+  const slots = MIL_SLOTS.map((id) => {
+    const p = MIL.find((x) => x.id === id), lv = infLv[id] || 0;
+    return `<div class="mil-s${lv ? "" : " no"}"><div class="mil-h"><i>${p.icon}</i><span>${p.fa}</span></div><b>${lv && p.cap ? en(p.cap) : "—"}</b><small>${lv ? (p.cap ? "ظرفیت" : "ساخته شده") : "ساخته نشده"}</small></div>`;
+  }).join("");
+  return `<div class="ix-box mil"><div class="mil-t"><b>🛡️ جای نگه‌داری ارتش</b><span dir="ltr">${built}/${MIL.length}</span></div><div class="mil-gr">${slots}</div><p class="rm-n">یگان تازه به جای خالی در پایگاه خودش نیاز دارد، فرمانده.</p></div>`;
 }
 function infRows(p, lv, cost, t) {
   const poor = t < cost;
@@ -2174,6 +2173,7 @@ function infRows(p, lv, cost, t) {
     rows: [["💰 هزینه", priceH(pAt(p, lv))], ["⏱️ مدت", btEn(vm(mAt(p, lv)))],
       ...(p.isFood ? [["🌾 غذا در روز", lv > 1 ? en(fdAt(p, lv - 1)) + " ← " + en(fdAt(p, lv)) : en(fdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
         : p.isRes ? [[RES_IC[p.res] + " تولید در روز", lv > 1 ? en(rdAt(p, lv - 1)) + " ← " + en(rdAt(p, lv)) : en(rdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
+        : p.isMil ? [["⚡ مصرف برق", en(p.use)], ...(p.cap ? [["🏠 ظرفیت", en(p.cap), "good"]] : [])]
         : [["⚡ برق", lv > 1 ? en(pwAt(p, lv - 1)) + " ← " + en(pwAt(p, lv)) : en(pwAt(p, 1)), "good"]]),
       ...(p.maint ? [["🔧 نگهداری روزانه", fmt(mtAt(p, lv))]] : []), ...(p.uran ? [["☢️ سوخت روزانه", "−" + en(p.uran * lv)]] : []),
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""]]
@@ -2214,6 +2214,62 @@ setInterval(() => {
   });
   if (!infSettling && Object.values(infPend).concat(Object.values(infUp)).some((x) => x <= now)) { infSettling = true; loadInf().catch(() => {}).then(() => { infSettling = false; }); }
 }, 1000);
+
+/* ابزار موقت: ساخت SQL مرز کشورها برای سرور (بعد از استفاده می‌توانید حذفش کنید) */
+function dpSimplify(pts, tol) {
+  const n = pts.length; if (n < 5) return pts;
+  const keep = new Uint8Array(n); keep[0] = keep[n - 1] = 1;
+  const st = [[0, n - 1]];
+  while (st.length) {
+    const [a, b] = st.pop(); let md = 0, mi = -1;
+    const [x1, y1] = pts[a], [x2, y2] = pts[b], dx = x2 - x1, dy = y2 - y1, L = dx * dx + dy * dy;
+    for (let i = a + 1; i < b; i++) {
+      const [x, y] = pts[i];
+      let t = L ? ((x - x1) * dx + (y - y1) * dy) / L : 0; t = Math.max(0, Math.min(1, t));
+      const ex = x - (x1 + t * dx), ey = y - (y1 + t * dy), d = ex * ex + ey * ey;
+      if (d > md) { md = d; mi = i; }
+    }
+    if (mi > 0 && md > tol * tol) { keep[mi] = 1; st.push([a, mi], [mi, b]); }
+  }
+  return pts.filter((_, i) => keep[i]);
+}
+function simpGeom(g) {
+  const r2 = (p) => [Math.round(p[0] * 100) / 100, Math.round(p[1] * 100) / 100];
+  const ring = (r) => { const s = dpSimplify(r, 0.03).map(r2); return s.length >= 4 ? s : null; };
+  const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates, out = [];
+  for (const poly of polys) {
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    poly[0].forEach((p) => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    if (x1 - x0 < 0.25 && y1 - y0 < 0.25) continue;
+    const o = ring(poly[0]); if (!o) continue;
+    out.push([o, ...poly.slice(1).map(ring).filter(Boolean)]);
+  }
+  return { type: "MultiPolygon", coordinates: out };
+}
+async function openBordersTool() {
+  closeSettings(); flash("در حال ساخت SQL مرزها…", 2000);
+  let g; try { g = await loadGeo(); } catch (_) { return flash("دریافت مرزها ناموفق بود", 3000); }
+  let list = all; if (!list || !list.length) { const r = await sb.rpc("list_countries"); list = r.data || []; }
+  const want = list.map((c) => c.code), rows = {};
+  g.features.forEach((f) => {
+    const c = geoCode(f);
+    if (want.includes(c) && f.geometry) rows[c] = "insert into public.country_borders (code, geom) values ('" + c + "', '" + JSON.stringify(simpGeom(f.geometry)) + "'::jsonb) on conflict (code) do update set geom = excluded.geom;";
+  });
+  const keys = Object.keys(rows), miss = want.filter((c) => !rows[c]), tot = keys.reduce((a, k) => a + rows[k].length, 0);
+  const ov = document.createElement("div");
+  ov.style.cssText = "position:fixed;inset:0;z-index:99;background:#0a111d;padding:16px;display:flex;flex-direction:column;gap:10px;overflow:auto";
+  ov.innerHTML = `<b>SQL مرز کشورها</b><small class="lbl">یک کشور را انتخاب کن، «کپی» بزن و توی SQL Editor سرور اجرا کن. «همه» همه‌ی کشورها را یک‌جا می‌دهد. ${keys.length} کشور، مجموع ${(tot / 1024).toFixed(0)} KB${miss.length ? " · بدون مرز: " + miss.join(", ") : ""}</small><select id="bdSel" style="padding:12px;border-radius:10px;background:#0e1828;color:#eef2f7;border:1px solid #27364b"><option value="*">همه (${keys.length} کشور)</option>${keys.map((k) => `<option value="${k}">${k} — ${(rows[k].length / 1024).toFixed(0)} KB</option>`).join("")}</select><textarea id="bdTx" readonly dir="ltr" style="flex:1;min-height:180px;background:#0e1828;color:#9fb4d0;border:1px solid #27364b;border-radius:10px;padding:8px;font-size:11px"></textarea><button id="bdCp">کپی</button><button class="ghost" id="bdX">بستن</button>`;
+  document.body.append(ov);
+  const tx = ov.querySelector("#bdTx"), sel = ov.querySelector("#bdSel");
+  const show = () => { tx.value = sel.value === "*" ? keys.map((k) => rows[k]).join("\n") : rows[sel.value] || ""; };
+  sel.onchange = show; show();
+  ov.querySelector("#bdCp").onclick = async () => {
+    try { await navigator.clipboard.writeText(tx.value); }
+    catch (_) { tx.select(); document.execCommand("copy"); }
+    flash("کپی شد", 1500);
+  };
+  ov.querySelector("#bdX").onclick = () => ov.remove();
+}
 
 const fmt = (n) => "$" + Number(n).toLocaleString("en-US");
 const TIER_ICON = { normal: "", premium: " 👑", premium_plus: " 💎" };
@@ -2373,7 +2429,7 @@ function render() {
   const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
   $("treasury").textContent = "$" + live.toLocaleString("en-US");
-  $("crystals").innerHTML = '<svg class="gm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z M2 9h20M9 3l-2 6 5 12 5-12-2-6"/></svg>' + Number(country.crystals || 0).toLocaleString("en-US");
+  $("crystals").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
   $("hFlag").textContent = flagOf(country.code);
   $("hName").textContent = country.name;
   $("hT").textContent = "$" + live.toLocaleString("en-US");
