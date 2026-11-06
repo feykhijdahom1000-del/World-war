@@ -349,6 +349,7 @@ nav button i{position:relative}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .chp{font-size:13px;padding:6px 12px;border-radius:16px;background:#ffffff0f;border:1px solid #ffffff2e}
 .chp.g{color:var(--ok);border-color:#3ddc9755}
+.chp.r{color:var(--err);border-color:#ff8a8a66}
 .buy,.up{margin:0;border:1px solid #d4a73a;background:linear-gradient(180deg,#3a2c0a,#241b08);color:var(--gold);border-radius:16px;padding:15px}
 .buy.poor{color:#ff8a8a}.up{color:var(--mut);border-color:#ffffff2e;background:#ffffff0a}
 .pgb{height:8px;border-radius:4px;background:#ffffff1f;overflow:hidden;margin:0 0 12px}.pg{display:block;height:100%;background:linear-gradient(90deg,#c8962b,#f6d779);border-radius:4px;transition:width 1s linear}
@@ -786,6 +787,7 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
       <div class="e2">
         <div class="eb"><span class="lbl">موجودی</span><b id="eBal"></b></div>
         <div class="eb"><span class="lbl">خالص روزانه</span><b id="eNet" class="grn"></b></div>
+        <div class="eb" style="grid-column:1/-1"><span class="lbl">⚡ برق آزاد (برای ساخت و ارتقا)</span><b id="ePw"></b></div>
       </div>
     </div>
     <div class="tabs" id="eTabs"></div>
@@ -1801,6 +1803,7 @@ function setVip(until) {
 const BUILD_MIN = {bank: 5, tourism: 7, insurance: 10, retail: 10, realestate: 15, telecom: 14, transport: 16, media: 18, stock: 20, shipping: 22, auto: 24, fund: 25, airline: 25, tech: 30, pharma: 30};
 BLD.forEach((b) => { b.mins = BUILD_MIN[b.id]; });
 let pending = {}, upg = {}, upgTo = {}, settling = false;
+let pw = null; // وضعیت برق از سرور: {prod, used, free}
 let owned = {}, ecoCat = "all", ecoSort = "income";
 const SORTS = { income: "درآمد", price: "قیمت", level: "سطح", payback: "بازگشت سرمایه" };
 const faNum = (n) => Number(n).toLocaleString("fa-IR");
@@ -1825,7 +1828,8 @@ async function openEco() {
 }
 async function loadEco() {
   await Promise.resolve(sb.rpc("settle_all")).catch(() => {}); // ساختمان‌های تمام‌شده را حساب کن
-  const [cat, own, prf] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited,upgrade_to,upgrade_ready_at"), sb.from("profiles").select("vip_until").maybeSingle()]);
+  const [cat, own, prf, ps] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited,upgrade_to,upgrade_ready_at"), sb.from("profiles").select("vip_until").maybeSingle(), sb.rpc("power_status")]);
+  if (ps && !ps.error && ps.data) pw = ps.data;
   setVip(prf.data && prf.data.vip_until);
   owned = {}; pending = {}; upg = {}; upgTo = {};
   if (cat.error || own.error) {
@@ -1853,6 +1857,7 @@ function renderEco() {
   const cnt = (c) => BLD.filter((b) => (c === "all" || b.cat === c) && owned[b.id]).length;
   const tot = (c) => BLD.filter((b) => c === "all" || b.cat === c).length;
   $("eInv").textContent = fmt(BLD.reduce((a, b) => a + (owned[b.id] ? iAt(b, owned[b.id]) : 0), 0));
+  { const el = $("ePw"); if (el) { el.textContent = pw ? pf1(pw.free) + " / " + pf1(pw.prod) : "—"; el.className = pw && Number(pw.free) < 0 ? "bad" : "grn"; el.style.color = pw && Number(pw.free) < 0 ? "var(--err)" : ""; } }
   $("eTabs").innerHTML = [["all", "📁", "همه"], ...Object.entries(CATS).map(([k, v]) => [k, v.icon, v.fa])]
     .map(([k, ic, fa]) => `<button class="tab${ecoCat === k ? " on" : ""}" onclick="setEcoCat('${k}')"><span>${ic} ${fa}</span><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></button>`).join("");
   $("eSort").innerHTML = Object.entries(SORTS).map(([k, fa]) => `<button class="sc${ecoSort === k ? " on" : ""}" onclick="setEcoSort('${k}')">${fa}</button>`).join("");
@@ -1887,9 +1892,9 @@ function renderEco() {
     }
     return `<div class="bc${has ? "" : " no"}">${head}
         <div class="bi">${has ? `<b>${fmt(iAt(b, lv))}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
-      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(vm(mAt(b, lv + 1)))}</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(vm(b.mins))}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
-      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) ? " poor" : ""}" onclick="askUp('${b.id}')">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${priceH(pAt(b, lv + 1))}</span></button>`)
-            : `<button class="buy${t < pv(b.price) ? " poor" : ""}" onclick="askBuy('${b.id}')">شروع ساخت — <span dir="ltr">${priceH(b.price)}</span></button>`}
+      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(vm(mAt(b, lv + 1)))}</span><span class="chp${pwShort(b, lv + 1) ? " r" : ""}">⚡ ${pf1(pwNeed(b, lv + 1))}+ برق</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(vm(b.mins))}</span><span class="chp${pwShort(b, 1) ? " r" : ""}">⚡ ${pf1(pwNeed(b, 1))} برق</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
+      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) || pwShort(b, lv + 1) ? " poor" : ""}" onclick="askUp('${b.id}')">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${priceH(pAt(b, lv + 1))}</span></button>`)
+            : `<button class="buy${t < pv(b.price) || pwShort(b, 1) ? " poor" : ""}" onclick="askBuy('${b.id}')">شروع ساخت — <span dir="ltr">${priceH(b.price)}</span></button>`}
     </div>`;
   }).join("");
 }
@@ -1926,41 +1931,50 @@ function openCm(o) {
 }
 function closeCm() { $("cm").hidden = true; cmAct = null; }
 function cmConfirm() { const f = cmAct; closeCm(); if (f) f(); }
+// برق مثل پول است: ساخت/ارتقای ساختمان اقتصادی فقط وقتی مجاز است که برق آزاد کافی باشد (سرور هم همین را چک می‌کند)
+const pf1 = (n) => +Number(n).toFixed(1);
+const pwNeed = (b, to) => useAt(b, to) - (to > 1 ? useAt(b, to - 1) : 0);
+const pwShort = (b, to) => !!pw && Number(pw.free) < pwNeed(b, to);
+const PW_WARN = "برق کافی نیست؛ ابتدا از بخش زیرساخت، برق بیشتری تولید کنید";
 function askBuy(id) {
   const b = BLD.find((x) => x.id === id); if (!b) return;
-  const t = liveT(), poor = t < pv(b.price);
+  const t = liveT(), poor = t < pv(b.price), nd = pwNeed(b, 1), short = pwShort(b, 1);
   openCm({
     ic: b.icon, title: "ساخت " + b.fa, sub: "سطح ۱",
     rows: [
       ["💰 هزینه ساخت", priceH(b.price)],
       ["⏱️ مدت ساخت", buildText(vm(b.mins))],
       ["📈 سود روزانه", fmt(b.income), "good"],
+      ["⚡ برق مورد نیاز", pf1(nd), short ? "bad" : ""],
+      ...(pw ? [["⚡ برق آزاد", pf1(pw.free), short ? "bad" : ""]] : []),
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
       ...(poor ? [] : [["🧾 موجودی بعد از ساخت", fmt(t - pv(b.price))]])
     ],
-    warn: poor ? "موجودی کافی نیست" : "",
+    warn: poor ? "موجودی کافی نیست" : short ? PW_WARN : "",
     btn: "تأیید و شروع ساخت",
     ok: () => buyBuilding(id, {})
   });
 }
 function askUp(id) {
   const b = BLD.find((x) => x.id === id), lv = owned[id] || 0; if (!b || !lv || lv >= MAXLV) return;
-  const t = liveT(), cost = upCost(b, lv), poor = t < cost;
+  const t = liveT(), cost = upCost(b, lv), poor = t < cost, nd = pwNeed(b, lv + 1), short = pwShort(b, lv + 1);
   openCm({
     ic: b.icon, title: "ارتقای " + b.fa, sub: "سطح " + faNum(lv) + " ← سطح " + faNum(lv + 1),
     rows: [
       ["💰 هزینه ارتقا", priceH(pAt(b, lv + 1))],
       ["⏱️ زمان ارتقا", buildText(vm(mAt(b, lv + 1)))],
       ["📈 سود روزانه", fmt(iAt(b, lv)) + " → " + fmt(iAt(b, lv + 1)), "good"],
+      ["⚡ برق مورد نیاز (اضافه)", pf1(nd), short ? "bad" : ""],
+      ...(pw ? [["⚡ برق آزاد", pf1(pw.free), short ? "bad" : ""]] : []),
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
       ...(poor ? [] : [["🧾 موجودی بعد از ارتقا", fmt(t - cost)]])
     ],
-    warn: poor ? "موجودی کافی نیست" : "",
+    warn: poor ? "موجودی کافی نیست" : short ? PW_WARN : "",
     btn: "تأیید و شروع ارتقا",
     ok: () => upgradeBuilding(id, {})
   });
 }
-const UP_ERR = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", NOT_OWNED: "این ساختمان را هنوز نساخته‌اید", STILL_BUILDING: "ساختمان هنوز ساخته نشده", ALREADY_UPGRADING: "این ساختمان در حال ارتقا است", MAX_LEVEL: "ساختمان در حداکثر سطح است", NO_FUNDS: "موجودی کافی نیست", NOT_PENDING: "این ارتقا در حال انجام نیست", NO_CRYSTALS: "الماس کافی ندارید", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
+const UP_ERR = { NO_POWER: "برق کافی نیست؛ ابتدا زیرساخت برق را تقویت کنید", NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", NOT_OWNED: "این ساختمان را هنوز نساخته‌اید", STILL_BUILDING: "ساختمان هنوز ساخته نشده", ALREADY_UPGRADING: "این ساختمان در حال ارتقا است", MAX_LEVEL: "ساختمان در حداکثر سطح است", NO_FUNDS: "موجودی کافی نیست", NOT_PENDING: "این ارتقا در حال انجام نیست", NO_CRYSTALS: "الماس کافی ندارید", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
 async function upgradeBuilding(id, btn) {
   btn.disabled = true;
   const { error } = await sb.rpc("upgrade_building", { p_id: id });
@@ -1992,7 +2006,7 @@ async function buyBuilding(id, btn) {
   const { error } = await sb.rpc("buy_building", { p_id: id });
   if (error) {
     btn.disabled = false;
-    const E = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", ALREADY_OWNED: "این ساختمان را قبلاً خریده‌اید", NO_FUNDS: "موجودی کافی نیست", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
+    const E = { NO_POWER: "برق کافی نیست؛ ابتدا زیرساخت برق را تقویت کنید", NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", ALREADY_OWNED: "این ساختمان را قبلاً خریده‌اید", NO_FUNDS: "موجودی کافی نیست", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
     return flash(E[error.message] || error.message, 5000);
   }
   flash("🔨 ساخت شروع شد", 2000);
@@ -2041,18 +2055,24 @@ const RESB = [
   { id: "oil_well", fa: "چاه نفت", icon: "🛢️", isRes: true, res: "oil", price: 3000000, prod: 466560, use: 7, mins: 48, maint: 0, desc: "بیشترین تولید نفت؛ برق زیادی مصرف می‌کند. هر سطح نفت بیشتری می‌دهد." }
 ];
 const MIL = [
-  { id: "tank_factory", grp: "land", fa: "کارخانه تانک", icon: "🏭", price: 1454545, use: 5, mins: 23, maint: 20107, desc: "تانک و لانچر موشک می‌سازد؛ هر دو در پایگاه زرهی مستقر می‌شوند. هر سطح ساخت را سریع‌تر و صف تولید را بلندتر می‌کند." },
-  { id: "armored_base", grp: "land", fa: "پایگاه زرهی", icon: "🪖", isBase: 1, cap: 2000, price: 2181818, use: 5, mins: 46, maint: 30162, desc: "محل استقرار تانک و لانچر موشک. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، این یگان‌ها ساخته نمی‌شوند." },
-  { id: "aircraft_factory", grp: "air", fa: "کارخانه ادوات هوایی", icon: "✈️", price: 1500000, use: 5, mins: 24, maint: 41472, desc: "جنگنده، بمب‌افکن، بالگرد و سوخت‌رسان می‌سازد؛ همه در فرودگاه مستقر می‌شوند. هر سطح ساخت را سریع‌تر و صف تولید را بلندتر می‌کند." },
-  { id: "airport", grp: "air", fa: "فرودگاه", icon: "🛫", isBase: 1, cap: 200, price: 2000000, use: 5, mins: 48, maint: 55296, desc: "محل استقرار جنگنده، بمب‌افکن، بالگرد و سوخت‌رسان. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، هواپیما ساخته نمی‌شود." },
-  { id: "ship_factory", grp: "sea", fa: "کارخانه کشتی", icon: "🚢", price: 3272727, use: 5, mins: 40, maint: 45242, desc: "زیردریایی، ناوشکن، ناو ترابری و ناو هواپیمابر می‌سازد؛ همه در بندر پهلو می‌گیرند. فقط برای کشور ساحلی." },
-  { id: "port", grp: "sea", fa: "بندر", icon: "⚓", isBase: 1, cap: 400, price: 3272727, use: 5, mins: 69, maint: 45242, desc: "محل پهلوگرفتن ناوگان. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، کشتی ساخته نمی‌شود. فقط برای کشور ساحلی." },
-  { id: "missile_base", grp: "missile", fa: "پایگاه موشکی", icon: "🚀", isBase: 1, price: 1800000, use: 5, mins: 10, maint: 49766, desc: "انبار موشک. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، موشک ساخته نمی‌شود. لانچر در پایگاه زرهی مستقر می‌شود." },
-  { id: "missile_factory", grp: "missile", fa: "کارخانه موشک", icon: "🎯", price: 2000000, use: 5, mins: 32, maint: 55296, desc: "موشک و پدافند هوایی می‌سازد. موشک در پایگاه موشکی انبار می‌شود؛ پدافند جا نمی‌گیرد." }
+  { id: "tank_factory", grp: "land", fa: "کارخانه تانک", icon: "🏭", price: 1454545, mins: 23, maint: 20107, desc: "تانک و لانچر موشک می‌سازد؛ هر دو در پایگاه زرهی مستقر می‌شوند. هر سطح ساخت را سریع‌تر و صف تولید را بلندتر می‌کند." },
+  { id: "armored_base", grp: "land", fa: "پایگاه زرهی", icon: "🪖", isBase: 1, cap: 2000, price: 2181818, mins: 46, maint: 30162, desc: "محل استقرار تانک و لانچر موشک. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، این یگان‌ها ساخته نمی‌شوند." },
+  { id: "aircraft_factory", grp: "air", fa: "کارخانه ادوات هوایی", icon: "✈️", price: 1500000, mins: 24, maint: 41472, desc: "جنگنده، بمب‌افکن، بالگرد و سوخت‌رسان می‌سازد؛ همه در فرودگاه مستقر می‌شوند. هر سطح ساخت را سریع‌تر و صف تولید را بلندتر می‌کند." },
+  { id: "airport", grp: "air", fa: "فرودگاه", icon: "🛫", isBase: 1, cap: 200, price: 2000000, mins: 48, maint: 55296, desc: "محل استقرار جنگنده، بمب‌افکن، بالگرد و سوخت‌رسان. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، هواپیما ساخته نمی‌شود." },
+  { id: "ship_factory", grp: "sea", fa: "کارخانه کشتی", icon: "🚢", price: 3272727, mins: 40, maint: 45242, desc: "زیردریایی، ناوشکن، ناو ترابری و ناو هواپیمابر می‌سازد؛ همه در بندر پهلو می‌گیرند. فقط برای کشور ساحلی." },
+  { id: "port", grp: "sea", fa: "بندر", icon: "⚓", isBase: 1, cap: 400, price: 3272727, mins: 69, maint: 45242, desc: "محل پهلوگرفتن ناوگان. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، کشتی ساخته نمی‌شود. فقط برای کشور ساحلی." },
+  { id: "missile_base", grp: "missile", fa: "پایگاه موشکی", icon: "🚀", isBase: 1, cap: 500, price: 1800000, mins: 10, maint: 49766, desc: "انبار موشک. هر سطح ظرفیت را بیشتر می‌کند؛ بدون جای خالی، موشک ساخته نمی‌شود. لانچر در پایگاه زرهی مستقر می‌شود." },
+  { id: "missile_factory", grp: "missile", fa: "کارخانه موشک", icon: "🎯", price: 2000000, mins: 32, maint: 55296, desc: "موشک و پدافند هوایی می‌سازد. موشک در پایگاه موشکی انبار می‌شود؛ پدافند جا نمی‌گیرد." }
 ];
+MIL.forEach((p) => { p.isMil = true; });
+// ظرفیت پایگاه‌ها: هر سطح +۲۵٪ (باید با infra_cap سرور یکی باشد)
+const capAt = (p, lv) => Math.round(p.cap * (1 + 0.25 * (lv - 1)));
 const MIL_G = { land: "🪖 زمینی", air: "✈️ هوایی", sea: "🚢 دریایی", missile: "🚀 موشکی" };
 const MIL_SLOTS = ["armored_base", "airport", "port", "missile_base"];
 const INF_ALL = PLANTS.concat(FOODS, RESB, MIL);
+// برق مورد نیاز زیرساخت‌های مصرف‌کننده (غذا/منابع): خرید = مصرف پایه، ارتقا = ۲۵٪ مصرف پایه (مثل سرور)
+const infNeed = (p, to) => (to > 1 ? p.use * 0.25 : p.use);
+const infShort = (p, to) => !!p.use && !!pw && Number(pw.free) < infNeed(p, to);
 const RES_IC = { oil: "🛢️", steel: "⛏️", uranium: "☢️" };
 const rdAt = (p, lv) => Math.round(p.prod * (1 + 0.25 * (lv - 1)));
 const abbr = (n) => { n = Number(n); const a = Math.abs(n); return a >= 1e9 ? +(n / 1e9).toFixed(1) + " میلیارد" : a >= 1e6 ? +(n / 1e6).toFixed(1) + " میلیون" : en(n); };
@@ -2092,7 +2112,8 @@ let infLv = {}, infPend = {}, infUp = {}, infUpTo = {}, infEco = {}, infOff = {}
 async function openInf() { screen("inf"); renderInf(); await loadInf(); }
 async function loadInf() {
   await Promise.resolve(sb.rpc("settle_all")).catch(() => {});
-  const [r, e] = await Promise.all([sb.from("country_infra").select("infra_id,level,ready_at,upgrade_to,upgrade_ready_at,active"), sb.from("country_buildings").select("building_id,level,ready_at")]);
+  const [r, e, ps] = await Promise.all([sb.from("country_infra").select("infra_id,level,ready_at,upgrade_to,upgrade_ready_at,active"), sb.from("country_buildings").select("building_id,level,ready_at"), sb.rpc("power_status")]);
+  if (ps && !ps.error && ps.data) pw = ps.data;
   const was = infOff;
   infLv = {}; infPend = {}; infUp = {}; infUpTo = {}; infEco = {}; infOff = {};
   if (r.error || e.error) $("iMsg").textContent = "اطلاعات زیرساخت از سرور دریافت نشد؛ مطمئن شوید فایل SQL زیرساخت اجرا شده است.";
@@ -2118,13 +2139,14 @@ function renderInf() {
     const v = k === "food" ? liveFood() : liveRes(k), n = resNet(k);
     return `<div class="ix-r" style="${acs(RES_AC[k])}"><div class="ix-ri">${ic}</div><span class="ix-rl">${fa}</span><b class="ix-rn"${k === "food" ? ' data-food="1"' : ` data-res="${k}"`}>${v == null ? "—" : en(v)}</b><small class="${n < 0 ? "bad" : n > 0 ? "good" : ""}">${n < 0 ? "▼ " + en(-n) + " در روز" + (v ? " · ≈ " + (v / -n).toFixed(1) + " روز" : "") : n > 0 ? "▲ " + en(n) + " در روز" : "&nbsp;"}</small></div>`;
   }).join("");
-  const P = PLANTS.reduce((a, p) => a + (infLv[p.id] && !infOff[p.id] ? pwAt(p, infLv[p.id]) : 0), 0);
-  const C = BLD.reduce((a, b) => a + (infEco[b.id] ? useAt(b, infEco[b.id]) : 0), 0) + FOODS.concat(RESB).reduce((a, f) => a + (infLv[f.id] && !infOff[f.id] ? fuAt(f, infLv[f.id]) : 0), 0);
+  const P0 = PLANTS.reduce((a, p) => a + (infLv[p.id] && !infOff[p.id] ? pwAt(p, infLv[p.id]) : 0), 0);
+  const C0 = BLD.reduce((a, b) => a + (infEco[b.id] ? useAt(b, infEco[b.id]) : 0), 0) + FOODS.concat(RESB).reduce((a, f) => a + (infLv[f.id] && !infOff[f.id] ? fuAt(f, infLv[f.id]) : 0), 0);
+  const P = pw ? Number(pw.prod) : P0, C = pw ? Number(pw.used) : C0;
   const cov = C ? Math.min(100, Math.round((P / C) * 100)) : 100;
   const col = cov >= 100 ? "#3ddc97" : cov >= 60 ? "#f0b43a" : "#ff6b6b", R = 54, L = 2 * Math.PI * R;
   $("iGrid").innerHTML = `<div class="ix-g"><div class="ix-ring"><svg viewBox="0 0 132 132"><circle class="ix-t" cx="66" cy="66" r="${R}"/><circle class="ix-p" cx="66" cy="66" r="${R}" style="color:${col};stroke:${col};stroke-dasharray:${((L * cov) / 100).toFixed(1)} ${L.toFixed(1)}"/></svg>
       <div class="ix-rc"><b style="color:${col}">${cov}<i>%</i></b><small>پوشش برق</small></div></div>
-    <div class="ix-gs"><div class="ix-s"><small>⚡ تولید</small><b>${en(P)}</b></div><div class="ix-s"><small>🏭 مصرف</small><b>${en(C)}</b></div></div></div>`;
+    <div class="ix-gs"><div class="ix-s"><small>⚡ تولید</small><b>${en(pf1(P))}</b></div><div class="ix-s"><small>🏭 مصرف</small><b>${en(pf1(C))}</b></div><div class="ix-s"><small>✨ آزاد</small><b style="color:${P - C < 0 ? "var(--err)" : "var(--ok)"}">${en(pf1(P - C))}</b></div></div></div>`;
   const tb = (id, ic, fa, list) => `<button class="tab${infTab === id ? " on" : ""}" onclick="setInfTab('${id}')"><span>${ic} ${fa}</span><small>${list.filter((p) => infLv[p.id]).length}/${list.length}</small></button>`;
   $("iTabs").innerHTML = tb("power", "⚡", "برق", PLANTS) + tb("food", "🌾", "غذا", FOODS) + tb("res", "⛏️", "منابع", RESB)
     + `<button class="tab" onclick="soon()"><span>👥 رفاه</span><small>به‌زودی</small></button>` + tb("mil", "🛡️", "نظامی", MIL);
@@ -2133,14 +2155,14 @@ function renderInf() {
   const t = liveT(), now = Date.now();
   $("iList").innerHTML = foodBox + (infTab === "res" ? rmCard() : "") + (infTab === "mil" ? milCard() : "") + items.map((p, ix) => {
     const gh = infTab === "mil" && (!ix || items[ix - 1].grp !== p.grp) ? `<div class="mil-g">${MIL_G[p.grp]}</div>` : "";
-    const lv = infLv[p.id] || 0, rdy = infPend[p.id], ur = infUp[p.id], off = !!infOff[p.id], nx = lv + 1;
+    const lv = infLv[p.id] || 0, rdy = infPend[p.id], ur = infUp[p.id], off = !p.isMil && !!infOff[p.id], nx = lv + 1;
     const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
     const sw = lv && !p.isMil ? `<button class="sw${off ? "" : " on"}" role="switch" aria-checked="${!off}" aria-label="فعال یا غیرفعال" onclick="toggleInf('${p.id}',${off})"></button>` : "";
-    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>${RES_IC[p.res]} در روز</small></div>` : lv && p.isBase && p.cap ? `<div class="ix-pw"><b style="font-size:22px">${en(p.cap)}</b><small>ظرفیت</small></div>` : lv && !p.isFood && !p.isMil ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
+    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (p.isMil ? "" : off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>${RES_IC[p.res]} در روز</small></div>` : lv && p.isBase && p.cap ? `<div class="ix-pw"><b style="font-size:22px">${en(capAt(p, lv))}</b><small>ظرفیت</small></div>` : lv && !p.isFood && !p.isMil ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
     const statF = (v) => `<div class="ix-ss f4"><div class="ix-s"><small>🌾 غذا/روز</small><b>${en(fdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
     const statP = (v) => `<div class="ix-ss"><div class="ix-s"><small>⚡ برق</small><b>${en(pwAt(p, v))}</b></div><div class="ix-s"><small>${p.uran ? "☢️ سوخت/روز" : "🔧 نگهداری/روز"}</small><b>${p.uran ? "−" + en(p.uran * v) : "$" + en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
     const statR = (v) => `<div class="ix-ss"><div class="ix-s"><small>${RES_IC[p.res]} تولید/روز</small><b>${en(rdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
-    const statM = (v) => `<div class="ix-ss${p.cap ? " f4" : ""}"><div class="ix-s"><small>⚡ برق</small><b>${en(p.use)}</b></div><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(mtAt(p, v))}</b></div>${p.cap ? `<div class="ix-s"><small>🏠 ظرفیت</small><b>${en(p.cap)}</b></div>` : ""}<div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const statM = (v) => `<div class="ix-ss${p.cap ? "" : " f4"}"><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(mtAt(p, v))}</b></div>${p.cap ? `<div class="ix-s"><small>🏠 ظرفیت</small><b>${en(capAt(p, v))}</b></div>` : ""}<div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
     const stat = p.isMil ? statM : p.isFood ? statF : p.isRes ? statR : statP;
     const cls = `ix-c${lv ? "" : " no"}${off ? " off" : ""}`;
     if (rdy || ur) {
@@ -2154,27 +2176,28 @@ function renderInf() {
     return gh + `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? (p.isFood ? " ⏸ غیرفعال: غذا تولید نمی‌کند و هزینه‌ی نگهداری ندارد." : p.isRes ? " ⏸ غیرفعال: تولید نمی‌کند." : " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد.") : ""}</p>
       ${stat(lv ? Math.min(nx, MAXLV) : 1)}
       ${lv >= MAXLV ? '<button class="up" disabled>✅ حداکثر سطح</button>'
-        : lv ? `<button class="buy${t < upCost(p, lv) ? " poor" : ""}" onclick="askInfUp('${p.id}')">⬆ ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
-        : `<button class="buy${t < pv(p.price) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}</div>`;
+        : lv ? `<button class="buy${t < upCost(p, lv) || infShort(p, nx) ? " poor" : ""}" onclick="askInfUp('${p.id}')">⬆ ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
+        : `<button class="buy${t < pv(p.price) || infShort(p, 1) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}</div>`;
   }).join("");
 }
 function milCard() {
   const built = MIL.filter((p) => infLv[p.id]).length;
   const slots = MIL_SLOTS.map((id) => {
     const p = MIL.find((x) => x.id === id), lv = infLv[id] || 0;
-    return `<div class="mil-s${lv ? "" : " no"}"><div class="mil-h"><i>${p.icon}</i><span>${p.fa}</span></div><b>${lv && p.cap ? en(p.cap) : "—"}</b><small>${lv ? (p.cap ? "ظرفیت" : "ساخته شده") : "ساخته نشده"}</small></div>`;
+    return `<div class="mil-s${lv ? "" : " no"}"><div class="mil-h"><i>${p.icon}</i><span>${p.fa}</span></div><b>${lv && p.cap ? en(capAt(p, lv)) : "—"}</b><small>${lv ? (p.cap ? "ظرفیت" : "ساخته شده") : "ساخته نشده"}</small></div>`;
   }).join("");
   return `<div class="ix-box mil"><div class="mil-t"><b>🛡️ جای نگه‌داری ارتش</b><span dir="ltr">${built}/${MIL.length}</span></div><div class="mil-gr">${slots}</div><p class="rm-n">یگان تازه به جای خالی در پایگاه خودش نیاز دارد، فرمانده.</p></div>`;
 }
 function infRows(p, lv, cost, t) {
   const poor = t < cost;
   return {
-    warn: poor ? "موجودی کافی نیست" : "",
+    warn: poor ? "موجودی کافی نیست" : infShort(p, lv) ? PW_WARN : "",
     rows: [["💰 هزینه", priceH(pAt(p, lv))], ["⏱️ مدت", btEn(vm(mAt(p, lv)))],
       ...(p.isFood ? [["🌾 غذا در روز", lv > 1 ? en(fdAt(p, lv - 1)) + " ← " + en(fdAt(p, lv)) : en(fdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
         : p.isRes ? [[RES_IC[p.res] + " تولید در روز", lv > 1 ? en(rdAt(p, lv - 1)) + " ← " + en(rdAt(p, lv)) : en(rdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
-        : p.isMil ? [["⚡ مصرف برق", en(p.use)], ...(p.cap ? [["🏠 ظرفیت", en(p.cap), "good"]] : [])]
+        : p.isMil ? (p.cap ? [["🏠 ظرفیت", lv > 1 ? en(capAt(p, lv - 1)) + " ← " + en(capAt(p, lv)) : en(capAt(p, 1)), "good"]] : [])
         : [["⚡ برق", lv > 1 ? en(pwAt(p, lv - 1)) + " ← " + en(pwAt(p, lv)) : en(pwAt(p, 1)), "good"]]),
+      ...(p.use ? [["⚡ برق مورد نیاز (اضافه)", pf1(infNeed(p, lv)), infShort(p, lv) ? "bad" : ""], ...(pw ? [["⚡ برق آزاد", pf1(pw.free), infShort(p, lv) ? "bad" : ""]] : [])] : []),
       ...(p.maint ? [["🔧 نگهداری روزانه", fmt(mtAt(p, lv))]] : []), ...(p.uran ? [["☢️ سوخت روزانه", "−" + en(p.uran * lv)]] : []),
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""]]
   };
@@ -2187,7 +2210,7 @@ function askInfUp(id) {
   const p = INF_ALL.find((x) => x.id === id), lv = infLv[id] || 0, t = liveT(); if (!p || !lv || lv >= MAXLV) return;
   openCm({ ic: p.icon, title: "ارتقای " + p.fa, sub: "سطح " + en(lv) + " ← سطح " + en(lv + 1), ...infRows(p, lv + 1, upCost(p, lv), t), btn: "تأیید و شروع ارتقا", ok: () => infDo("upgrade_infra", id, "⬆ ارتقا شروع شد") });
 }
-const INF_ERR = Object.assign({}, UP_ERR, { ALREADY_OWNED: "این ساختمان را قبلاً ساخته‌اید", BAD_INFRA: "ساختمان نامعتبر است", NO_URANIUM: "اورانیوم کافی نیست" });
+const INF_ERR = Object.assign({}, UP_ERR, { ALREADY_OWNED: "این ساختمان را قبلاً ساخته‌اید", BAD_INFRA: "ساختمان نامعتبر است", NO_URANIUM: "اورانیوم کافی نیست", NO_SEA: "کشور شما دریا ندارد؛ بندر و کارخانه کشتی فقط برای کشور ساحلی است", NOT_TOGGLEABLE: "این ساختمان قابل خاموش‌کردن نیست" });
 async function infDo(fn, id, ok) {
   const { error } = await sb.rpc(fn, { p_id: id });
   if (error) return flash(INF_ERR[error.message] || error.message, 5000);
