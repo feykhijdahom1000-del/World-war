@@ -567,6 +567,37 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .mil-gr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mil-s{background:#ffffff0a;border:1px solid #ffffff14;border-radius:16px;padding:12px}.mil-s.no{opacity:.6}
 .mil-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:14px}.mil-h i{font-style:normal;font-size:22px}.mil-s b{display:block;font-size:22px}.mil-s small{color:var(--mut);font-size:12px}
 .mil-g{display:flex;align-items:center;gap:10px;margin:18px 2px 10px;color:var(--mut);font-size:14px}.mil-g::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---- ارتش ---- */
+.ar-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ar-hd .t{font-size:18px;font-weight:700}.ar-hd small{display:block;color:var(--mut);font-size:13px;margin-top:6px}
+.ar-hd b.n{font-size:46px;font-weight:800;line-height:1;direction:ltr;font-variant-numeric:tabular-nums;color:var(--gold)}
+.ar-bs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.ar-b{background:#ffffff0a;border:1px solid #ffffff14;border-radius:16px;padding:12px;cursor:pointer}.ar-b.no{opacity:.6}
+.ar-bh{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px}.ar-bh i{font-style:normal;font-size:22px}
+.ar-b b{display:block;font-size:24px;direction:ltr;text-align:right;font-variant-numeric:tabular-nums}.ar-b small{color:var(--mut);font-size:12px}
+.ar-bar{height:6px;border-radius:3px;background:#ffffff1f;overflow:hidden;margin-top:8px}.ar-bar u{display:block;height:100%;background:var(--ac,var(--gold));border-radius:3px}
+.ar-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ar-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:14px;background:#ffffff10;border:1px solid #ffffff1f;font-size:13px;white-space:nowrap}
+.ar-chip.g{color:var(--gold);border-color:#d4a73a66}
+.ar-lr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14;margin-top:10px}
+.ar-lr b{direction:ltr}
+.ar-qr{padding:12px 0;border-top:1px solid #ffffff14}.ar-qr.f{border-top:0}
+.ar-qh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.ar-qh b{font-size:15px}.ar-qh .cd{direction:ltr;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700}
+.ar-qr .buy{width:100%;padding:11px;font-size:14px;margin-top:2px}
+.ar-qr .pgb{margin:0 0 8px}
+#pm{position:fixed;inset:0;z-index:31;background:#000b;display:flex;align-items:flex-end;justify-content:center}
+.pmbox{max-height:92vh;overflow-y:auto}
+.pmq{display:grid;grid-template-columns:52px 1fr 52px 84px;gap:8px;align-items:center;direction:ltr}
+.pmq input{margin:0;text-align:center;font-size:22px;font-weight:800;padding:10px}
+.pmb{margin:0;padding:12px 0;background:linear-gradient(180deg,#3a2c0a,#241b08);border:1px solid #d4a73a88;color:var(--gold);border-radius:14px;font-size:17px}
+.pmqk{display:flex;gap:8px;margin:8px 0 12px;direction:ltr}.pmqk .pmb{width:64px}
+.pmlim{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pml{background:#ffffff0a;border:1px solid #ffffff1f;border-radius:14px;padding:8px 4px;text-align:center}
+.pml small{display:block;color:var(--mut);font-size:11.5px}.pml b{display:block;margin-top:2px;font-size:18px;direction:ltr}
+.pml.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.pmr span small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -639,7 +670,7 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
       </div>
     </div>
     <div class="tiles">
-      <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
+      <button class="tile army" onclick="openArmy()"><span>🛡️</span>ارتش</button>
       <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
       <button class="tile eco" onclick="openEco()"><span>📈</span>اقتصاد</button>
       <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
@@ -807,6 +838,15 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
     <div class="lbl" id="iMsg" style="text-align:center;line-height:1.9"></div>
   </section>
 
+  <!-- ارتش -->
+  <section id="army" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>ارتش</h2></div>
+    <div id="aTop"></div>
+    <div class="tabs" id="aTabs"></div>
+    <div id="aBody"></div>
+    <div class="lbl" id="aMsg" style="text-align:center;line-height:1.9"></div>
+  </section>
+
   <!-- ارتباطات -->
   <section id="chat" hidden>
     <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>ارتباطات</h2></div>
@@ -898,6 +938,21 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
   <div class="cmwarn" id="cmWarn" hidden></div>
   <button class="buy" id="cmGo" onclick="cmConfirm()">تأیید و شروع</button>
   <button class="ghost" onclick="closeCm()">انصراف</button>
+</div></div>
+<div id="pm" hidden onclick="if(event.target===this)closePm()"><div class="cmbox pmbox">
+  <div class="cmh"><div class="eic" id="pmIc"></div><div><b id="pmTitle"></b><small id="pmSub"></small></div></div>
+  <div class="pmq">
+    <button class="pmb" onclick="pmStep(-1)" aria-label="کمتر">−</button>
+    <input id="pmQty" type="number" inputmode="numeric" min="1" max="1000" value="1" oninput="pmInput()">
+    <button class="pmb" onclick="pmStep(1)" aria-label="بیشتر">+</button>
+    <button class="pmb" onclick="pmMax()">حداکثر</button>
+  </div>
+  <div class="pmqk"><button class="pmb" onclick="pmSet(1)">1</button><button class="pmb" onclick="pmSet(10)">10</button></div>
+  <div class="pmlim" id="pmLim"></div>
+  <div class="cmrows" id="pmRows"></div>
+  <div class="cmwarn" id="pmWarn" hidden></div>
+  <button class="buy" id="pmGo" onclick="pmGo()">تولید</button>
+  <button class="ghost" onclick="closePm()">انصراف</button>
 </div></div>
 <div id="toast"></div>
 <div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2 id="notgT">این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl" id="notgP">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
@@ -1496,9 +1551,9 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "vip", "ref", "cart", "pay", "chat"]) $(s).hidden = s !== n;
-  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay" && n !== "chat";
-  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" ? "home" : n)));
+  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "army", "vip", "ref", "cart", "pay", "chat"]) $(s).hidden = s !== n;
+  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "army" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay" && n !== "chat";
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" || n === "army" ? "home" : n)));
   closeSettings();
   if (n !== "chat") { chatStop(); $("chBar").hidden = true; }
   if (n !== "worldmap") closeMapSheet();
@@ -2076,15 +2131,21 @@ const infShort = (p, to) => !!p.use && !!pw && Number(pw.free) < infNeed(p, to);
 const RES_IC = { oil: "🛢️", steel: "⛏️", uranium: "☢️" };
 const rdAt = (p, lv) => Math.round(p.prod * (1 + 0.25 * (lv - 1)));
 const abbr = (n) => { n = Number(n); const a = Math.abs(n); return a >= 1e9 ? +(n / 1e9).toFixed(1) + " میلیارد" : a >= 1e6 ? +(n / 1e6).toFixed(1) + " میلیون" : en(n); };
-const resNet = (k) => { const c = country || {}; return k === "food" ? Number(c.food_rate) || 0 : (Number(c[k + "_rate"]) || 0) - (k === "uranium" ? Number(c.uranium_burn) || 0 : 0); };
-const liveRes = (k) => { const c = country || {}; if (c[k] == null) return null; const t = c.res_tick ? new Date(c.res_tick).getTime() : Date.now(); return Math.max(0, Math.floor(Number(c[k]) + (resNet(k) * Math.max(0, Date.now() - t)) / 86400000)); };
+// تولید منهای مصرف نیروگاه (بدون یگان‌ها)
+const resProd = (k) => { const c = country || {}; return k === "food" ? Number(c.food_rate) || 0 : (Number(c[k + "_rate"]) || 0) - (k === "uranium" ? Number(c.uranium_burn) || 0 : 0); };
+// مصرف روزانه‌ی یگان‌های ارتش (food / oil / uranium) — از ستون‌های unit_*_use کشور
+const unitUse = (k) => Number((country || {})["unit_" + k + "_use"]) || 0;
+const resNet = (k) => resProd(k) - unitUse(k);
+const msSince = (t) => Math.max(0, Date.now() - (t ? new Date(t).getTime() : Date.now()));
+// موجودی زنده: تولید از res_tick/food_tick ، مصرف یگان‌ها از unit_tick
+const liveRes = (k) => { const c = country || {}; if (c[k] == null) return null; return Math.max(0, Math.floor(Number(c[k]) + (resProd(k) * msSince(c.res_tick) - unitUse(k) * msSince(c.unit_tick)) / 86400000)); };
 function resEntries(k) {
   const on = (p) => infLv[p.id] && !infOff[p.id];
   const inp = RESB.filter((p) => p.res === k && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], rdAt(p, infLv[p.id])]);
-  const out = k === "uranium" ? PLANTS.filter((p) => p.uran && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], p.uran * infLv[p.id]]) : [];
+  const out = (k === "uranium" ? PLANTS.filter((p) => p.uran && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], p.uran * infLv[p.id]]) : []).concat(unitUse(k) > 0 ? [["ارتش · یگان‌ها", unitUse(k)]] : []);
   return [inp, out];
 }
-const RM_NOTE = { steel: "فولاد فعلاً مصرف پیوسته ندارد.", oil: "نفت فعلاً مصرف پیوسته ندارد.", uranium: "نیروگاه هسته‌ای روزانه اورانیوم می‌سوزاند؛ اگر اورانیوم تمام شود غیرفعال می‌شود." };
+const RM_NOTE = { steel: "فولاد برای ساخت یگان‌های ارتش لازم است.", oil: "نفت برای ساخت و سوخت یگان‌های هوایی و دریایی لازم است.", uranium: "نیروگاه هسته‌ای و یگان‌های موشکی اورانیوم مصرف می‌کنند؛ اگر تمام شود نیروگاه‌ها غیرفعال می‌شوند." };
 function rmCard() {
   const ks = [["steel", "فولاد", "⛏️"], ["oil", "نفت", "🛢️"], ["uranium", "اورانیوم", "☢️"]];
   const top = ks.map(([k, fa, ic]) => { const n = resNet(k), v = liveRes(k); return `<div class="rm-l"><span>${ic} ${fa} <b data-res="${k}" data-ab="1">${v == null ? "—" : abbr(v)}</b></span><span class="v ${n < 0 ? "r" : n > 0 ? "g" : ""}">${n > 0 ? "+" : n < 0 ? "−" : ""}${abbr(Math.abs(n))} در روز</span></div>`; }).join("");
@@ -2095,7 +2156,7 @@ function rmCard() {
 const fdAt = (p, lv) => Math.round(p.foodDay * (1 + 0.25 * (lv - 1)));
 const fuAt = (p, lv) => +(p.use * (1 + 0.25 * (lv - 1))).toFixed(1);
 let infTab = "power";
-const liveFood = () => { const c = country || {}; if (c.food == null) return null; const r = Number(c.food_rate) || 0, t = c.food_tick ? new Date(c.food_tick).getTime() : Date.now(); return Math.floor(Number(c.food) + (r * Math.max(0, Date.now() - t)) / 86400000); };
+const liveFood = () => { const c = country || {}; if (c.food == null) return null; return Math.max(0, Math.floor(Number(c.food) + (resProd("food") * msSince(c.food_tick) - unitUse("food") * msSince(c.unit_tick)) / 86400000)); };
 function setInfTab(t) { infTab = t; renderInf(); }
 const pwAt = (p, lv) => Math.round(p.power * (1 + 0.25 * (lv - 1)));
 const mtAt = (p, lv) => Math.round(p.maint * Math.pow(1.1, lv - 1));
@@ -2239,6 +2300,196 @@ setInterval(() => {
 }, 1000);
 
 /* ابزار موقت: ساخت SQL مرز کشورها برای سرور (بعد از استفاده می‌توانید حذفش کنید) */
+
+/* ---------- ارتش: تولید و مدیریت یگان‌ها ---------- */
+// کاتالوگ و قواعد را سرور نگه می‌دارد (unit_catalog / produce_unit / speedup_unit / army_status). اینجا فقط نمایش و محاسبه‌ی پیش‌نمایش است.
+const UNIT_META = {
+  tank: ["تانک", "🛡️"], missile_launcher: ["لانچر موشک", "🚀"],
+  fighter: ["جنگنده", "✈️"], bomber: ["بمب‌افکن", "🛩️"], helicopter: ["بالگرد", "🚁"], tanker: ["سوخت‌رسان", "⛽"],
+  destroyer: ["ناوشکن", "🚢"], submarine: ["زیردریایی", "🌊"], transport: ["ناو ترابری", "🛳️"], carrier: ["ناو هواپیمابر", "⚓"],
+  missile: ["موشک", "🎯"], air_defense: ["پدافند هوایی", "📡"]
+};
+const unitFa = (id) => (UNIT_META[id] || [id])[0], unitIc = (id) => (UNIT_META[id] || [0, "🔹"])[1];
+const GR = {
+  land: { fa: "زمینی", ic: "🪖", ac: "#4aa3ff" }, air: { fa: "هوایی", ic: "✈️", ac: "#9fb4d6" },
+  sea: { fa: "دریایی", ic: "🚢", ac: "#38bdf8" }, missile: { fa: "موشکی", ic: "🚀", ac: "#ff6b6b" }
+};
+const GR_OF_BASE = { armored_base: "land", airport: "air", port: "sea", missile_base: "missile" };
+const UP_IC = { food: "🌾", oil: "🛢️", uranium: "☢️" }, UP_FA = { food: "غذا", oil: "نفت", uranium: "اورانیوم" };
+const ARM_ERR = {
+  NO_COUNTRY: "شما کشوری ندارید", BAD_UNIT: "یگان نامعتبر است", BAD_QTY: "تعداد نامعتبر است",
+  NO_FACTORY: "کارخانه‌ی این یگان را هنوز نساخته‌اید", NO_BASE: "پایگاه این یگان را هنوز نساخته‌اید",
+  NO_SPACE: "جای خالی در پایگاه کافی نیست", QUEUE_FULL_UNITS: "صف کارخانه پر است",
+  NO_FUNDS: "موجودی کافی نیست", NO_STEEL: "فولاد کافی نیست", NO_OIL: "نفت کافی نیست", NO_URANIUM: "اورانیوم کافی نیست",
+  NO_CRYSTALS: "الماس کافی ندارید", NOT_PENDING: "این سفارش دیگر در صف نیست"
+};
+let UC = null, UL = [], UQ = [], AS = null, armTab = "land", armSettling = false;
+const unitTotal = (id) => UL.filter((r) => r.unit_id === id).reduce((a, r) => a + Number(r.qty), 0);
+const armTotal = (st) => Number(st.base_power || 0) + Object.values(st.power || {}).reduce((a, b) => a + Number(b), 0);
+function armPower() {
+  Promise.resolve(sb.rpc("army_status")).then((r) => { if (r && r.data) $("power").textContent = armTotal(r.data); }).catch(() => {});
+}
+async function openArmy() { screen("army"); renderArmy(); await loadArmy(); }
+async function loadArmy() {
+  await Promise.resolve(sb.rpc("settle_all")).catch(() => {});
+  const [cat, us, qs, st] = await Promise.all([
+    UC ? { data: UC } : sb.from("unit_catalog").select("*").eq("enabled", true).order("sort"),
+    sb.from("country_units").select("unit_id,loc,qty"),
+    sb.from("unit_queue").select("id,unit_id,factory_id,qty,start_at,ready_at").eq("done", false).order("ready_at"),
+    sb.rpc("army_status")
+  ]);
+  const bad = cat.error || us.error || qs.error || st.error || !st.data || !cat.data;
+  if (bad) { $("aMsg").textContent = "اطلاعات ارتش از سرور دریافت نشد؛ مطمئن شوید فایل SQL ارتش اجرا شده است."; return; }
+  $("aMsg").textContent = "";
+  UC = cat.data; UL = us.data; UQ = qs.data; AS = st.data;
+  await loadCountry(); render();
+  $("power").textContent = armTotal(AS);
+  renderArmy();
+}
+function setArmTab(t) { armTab = t; renderArmy(); }
+function renderArmy() {
+  if (!UC || !AS) {
+    $("aTop").innerHTML = ""; $("aTabs").innerHTML = "";
+    $("aBody").innerHTML = '<div class="ix-box"><div class="lbl">در حال بارگذاری…</div></div>';
+    return;
+  }
+  const c = country || {}, now = Date.now(), total = armTotal(AS), base = Number(AS.base_power || 0);
+  const slots = MIL_SLOTS.map((id) => {
+    const p = MIL.find((x) => x.id === id), b = (AS.bases || {})[id], g = GR_OF_BASE[id];
+    const pct = b && b.cap ? Math.min(100, (b.used / b.cap) * 100) : 0;
+    return `<div class="ar-b${b ? "" : " no"}" style="${acs(GR[g].ac)}" onclick="setArmTab('${g}')"><div class="ar-bh"><i>${p.icon}</i><span>${p.fa}</span></div><b>${b ? en(b.used) : "—"}</b><small>${b ? "از " + en(b.cap) : "ساخته نشده"}</small>${b ? `<div class="ar-bar"><u style="width:${pct}%"></u></div>` : ""}</div>`;
+  }).join("");
+  const rl = (k, fa, ic) => {
+    const v = k === "food" ? liveFood() : liveRes(k), n = resNet(k);
+    return `<div class="rm-l"><span>${ic} ${fa} <b ${k === "food" ? 'data-food="1"' : `data-res="${k}"`}>${v == null ? "—" : en(v)}</b></span><span class="v ${n < 0 ? "r" : n > 0 ? "g" : ""}">${n > 0 ? "+" : n < 0 ? "−" : ""}${en(Math.abs(n))} در روز</span></div>`;
+  };
+  $("aTop").innerHTML = `<div class="ix-box"><div class="ar-hd"><div><div class="t">🛡️ قدرت ارتش</div><small>${en(base)} پایه + ${en(total - base)} یگان‌ها</small></div><b class="n">${en(total)}</b></div><div class="ar-bs">${slots}</div></div>`
+    + `<div class="ix-box"><div class="rm-top"><b>📦 ذخایر</b><small>مصرف یگان‌ها از موجودی کم می‌شود</small></div>${rl("steel", "فولاد", "⛏️")}${rl("oil", "نفت", "🛢️")}${rl("uranium", "اورانیوم", "☢️")}${rl("food", "غذا", "🌾")}</div>`;
+  $("aTabs").innerHTML = Object.keys(GR).map((g) => {
+    const n = UC.filter((u) => u.grp === g).reduce((a, u) => a + unitTotal(u.id), 0);
+    return `<button class="tab${armTab === g ? " on" : ""}" onclick="setArmTab('${g}')"><span>${GR[g].ic} ${GR[g].fa}</span><small>${en(n)}</small></button>`;
+  }).join("");
+
+  const g = GR[armTab], units = UC.filter((u) => u.grp === armTab), ids = units.map((u) => u.id);
+  const gn = units.reduce((a, u) => a + unitTotal(u.id), 0), gp = units.reduce((a, u) => a + unitTotal(u.id) * u.power, 0);
+  const upk = {};
+  units.forEach((u) => { upk[u.upkeep_res] = (upk[u.upkeep_res] || 0) + unitTotal(u.id) * Number(u.upkeep_day); });
+  const chips = Object.entries(upk).filter(([, v]) => v > 0).map(([r, v]) => `<span class="ar-chip g">${UP_IC[r]} ${en(v)} ${UP_FA[r]} در روز</span>`).join("");
+  let h = `<div class="ix-box"><div class="ar-hd"><div><div class="t">${g.ic} قدرت این شاخه</div><small>${en(gn)} یگان</small></div><b class="n">${en(gp)}</b></div>${chips ? `<div class="ar-chips">${chips}</div>` : ""}</div>`;
+
+  if (gn > 0) {
+    const home = units.reduce((a, u) => a + UL.filter((r) => r.unit_id === u.id && r.loc === "home").reduce((x, r) => x + Number(r.qty), 0), 0);
+    h += `<div class="ix-box"><div class="lbl">🗺️ محل استقرار</div><div class="ar-lr"><span>🏠 خانه · ${c.name || ""}</span><b>${en(home)} یگان</b></div><button class="ghost" style="margin-top:10px" onclick="soon()">اعزام از خانه</button></div>`;
+  }
+
+  const q = UQ.filter((x) => ids.includes(x.unit_id));
+  if (q.length) {
+    h += `<div class="ix-box"><div class="lbl">🏭 صف تولید</div>` + q.map((x, i) => {
+      const st = new Date(x.start_at).getTime(), end = new Date(x.ready_at).getTime();
+      return `<div class="ar-qr${i ? "" : " f"}" data-rdy="${end}" data-st="${st}"><div class="ar-qh"><b>${unitIc(x.unit_id)} ${unitFa(x.unit_id)} × ${en(x.qty)}</b><span class="cd" dir="ltr">${durEn(end - now)}</span></div><div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (end - st)) * 100))}%"></u></div><button class="buy" onclick="speedUnit(${x.id},${end})">⚡ تکمیل سریع — <span class="spc">${en(spCost(end - now))}</span> 💎</button></div>`;
+    }).join("") + `</div>`;
+  }
+
+  h += units.map((u) => {
+    const I = armInfo(u), n = unitTotal(u.id), noF = !I.fac;
+    const fa = (MIL.find((x) => x.id === u.factory_id) || {}).fa || "";
+    const btn = noF
+      ? `<button class="buy poor" onclick="setInfTab('mil');openInf()">🔨 اول «${fa}» را بسازید</button>`
+      : `<button class="buy${I.max < 1 ? " poor" : ""}" onclick="openPm('${u.id}')">⚙️ تولید</button>`;
+    return `<div class="ix-c" style="${acs(g.ac)}"><div class="ix-h"><div class="ix-i">${unitIc(u.id)}</div><div class="ix-t2"><b>${unitFa(u.id)}</b><small>قدرت کل ${en(n * u.power)}</small></div></div>
+      <div class="ar-chips"><span class="ar-chip">${en(n)} واحد</span><span class="ar-chip">⚔️ آسیب ${en(u.attack)}</span><span class="ar-chip">💰 ${fmt(pv(u.price))} ساخت</span></div>
+      <div style="height:12px"></div>${btn}</div>`;
+  }).join("");
+  $("aBody").innerHTML = h;
+}
+
+// محدودیت‌های تولید یک یگان (پیش‌نمایش؛ سرور دوباره چک می‌کند)
+function armInfo(u) {
+  const st = AS || {}, fac = (st.factories || {})[u.factory_id], bs = u.base_id ? (st.bases || {})[u.base_id] : null;
+  const price = pv(u.price), lim = {};
+  lim.money = Math.max(0, Math.floor(liveT() / price));
+  lim.space = u.space > 0 ? (bs ? Math.max(0, Math.floor((bs.cap - bs.used) / u.space)) : 0) : Infinity;
+  lim.queue = fac ? Math.max(0, fac.queue_cap - fac.queued) : 0;
+  const rs = ["steel", "oil", "uranium"].filter((k) => Number(u[k]) > 0).map((k) => Math.floor((liveRes(k) || 0) / Number(u[k])));
+  lim.res = rs.length ? Math.min(...rs) : Infinity;
+  return { price, fac, bs, lim, max: Math.min(lim.money, lim.space, lim.queue, lim.res) };
+}
+
+/* پنجره‌ی تولید */
+let pmU = null, pmN = 1;
+function openPm(id) {
+  pmU = UC.find((x) => x.id === id); if (!pmU) return;
+  pmN = 1; $("pmQty").value = 1;
+  $("pmIc").textContent = unitIc(id); $("pmTitle").textContent = "تولید " + unitFa(id);
+  $("pmSub").innerHTML = "هر واحد " + `<bdi dir="ltr">${fmt(pv(pmU.price))}</bdi>`;
+  $("pm").hidden = false; pmRender();
+}
+function closePm() { $("pm").hidden = true; pmU = null; }
+function pmSet(n) { pmN = Math.max(0, Math.min(1000, n)); $("pmQty").value = pmN; pmRender(); }
+function pmStep(d) { pmSet(Math.max(1, pmN + d)); }
+function pmMax() { if (pmU) pmSet(Math.max(1, armInfo(pmU).max)); }
+function pmInput() { pmN = Math.max(0, Math.min(1000, parseInt($("pmQty").value, 10) || 0)); pmRender(); }
+function pmRender() {
+  const u = pmU; if (!u) return;
+  const I = armInfo(u), n = pmN, t = liveT();
+  const lims = [["💰", "پول", I.lim.money], ["🏠", "جا", I.lim.space], ["🏭", "صف", I.lim.queue], ["⛏️", "منابع", I.lim.res]];
+  $("pmLim").innerHTML = lims.map(([ic, fa, v]) => `<div class="pml${v === I.max ? " on" : ""}"><small>${ic} ${fa}</small><b>${v === Infinity ? "∞" : en(v)}</b></div>`).join("");
+  const row = (k, v, cls, sub) => `<div class="cmr pmr${cls ? " " + cls : ""}"><span>${k}${sub ? `<small>${sub}</small>` : ""}</span><b>${v}</b></div>`;
+  const cost = I.price * n;
+  let rows = row("💰 پول", fmt(cost), n && cost > t ? "bad" : "", `موجودی: <bdi dir="ltr">${fmt(t)}</bdi>`);
+  [["steel", "⛏️ فولاد"], ["oil", "🛢️ نفت"], ["uranium", "☢️ اورانیوم"]].forEach(([k, fa]) => {
+    const need = Number(u[k]) * n; if (!(Number(u[k]) > 0)) return;
+    const have = liveRes(k) || 0;
+    rows += row(fa, en(need), need > have ? "bad" : "", "موجودی: " + en(have));
+  });
+  if (I.fac) rows += row("⏱️ زمان", durEn(Math.max(5, (u.build_minutes * 60 * n * vipMul) / (1 + 0.25 * (I.fac.level - 1))) * 1000));
+  rows += row("🔧 نگهداری روزانه", "+ " + en(n * Number(u.upkeep_day)) + " " + UP_IC[u.upkeep_res], "");
+  $("pmRows").innerHTML = rows;
+  const fa = (MIL.find((x) => x.id === u.factory_id) || {}).fa || "", bf = (MIL.find((x) => x.id === u.base_id) || {}).fa || "";
+  let warn = "";
+  if (!I.fac) warn = "کارخانه‌ی «" + fa + "» ساخته نشده است";
+  else if (u.space > 0 && !I.bs) warn = "«" + bf + "» ساخته نشده است";
+  else if (n < 1) warn = "تعداد را وارد کنید";
+  else if (n > I.lim.queue) warn = "صف کارخانه پر است (جای خالی: " + en(I.lim.queue) + ")";
+  else if (n > I.lim.space) warn = "جای خالی در پایگاه کافی نیست";
+  else if (n > I.lim.money) warn = "موجودی کافی نیست";
+  else if (n > I.lim.res) warn = "منابع کافی نیست";
+  $("pmWarn").hidden = !warn; $("pmWarn").textContent = warn;
+  $("pmGo").disabled = !!warn;
+  $("pmGo").innerHTML = `⚙️ تولید ${en(n)} — <bdi dir="ltr">${fmt(cost)}</bdi>`;
+}
+async function pmGo() {
+  if (!pmU || $("pmGo").disabled) return;
+  const id = pmU.id, n = pmN;
+  $("pmGo").disabled = true;
+  const { error } = await sb.rpc("produce_unit", { p_unit: id, p_qty: n });
+  if (error) { flash(ARM_ERR[error.message] || error.message, 5000); await loadArmy(); if (pmU) pmRender(); return; }
+  closePm(); flash("🔨 تولید شروع شد", 2000); await loadArmy();
+}
+function speedUnit(id, end) {
+  const cost = spCost(end - Date.now());
+  if (!confirm("با " + en(cost) + " الماس همین حالا تمام شود؟")) return;
+  Promise.resolve(sb.rpc("speedup_unit", { p_batch: id })).then(async ({ error }) => {
+    if (error) return flash(ARM_ERR[error.message] || error.message, 5000);
+    flash("⚡ تمام شد", 2000); await loadArmy();
+  });
+}
+setInterval(() => {
+  if ($("army").hidden) return;
+  const now = Date.now(), lf = liveFood();
+  document.querySelectorAll("#army [data-food]").forEach((el) => { if (lf != null) el.textContent = en(lf); });
+  document.querySelectorAll("#army [data-res]").forEach((el) => { const v = liveRes(el.dataset.res); if (v != null) el.textContent = en(v); });
+  document.querySelectorAll("#aBody [data-rdy]").forEach((el) => {
+    const rdy = +el.dataset.rdy, st = +el.dataset.st, cd = el.querySelector(".cd"), pg = el.querySelector(".pg"), sc = el.querySelector(".spc");
+    if (cd) cd.textContent = durEn(rdy - now);
+    if (sc) sc.textContent = en(spCost(rdy - now));
+    if (pg) pg.style.width = Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100)) + "%";
+  });
+  if (!armSettling && UQ.some((q) => new Date(q.ready_at).getTime() <= now)) {
+    armSettling = true; loadArmy().catch(() => {}).then(() => { armSettling = false; });
+  }
+}, 1000);
+
 function dpSimplify(pts, tol) {
   const n = pts.length; if (n < 5) return pts;
   const keep = new Uint8Array(n); keep[0] = keep[n - 1] = 1;
@@ -2490,6 +2741,7 @@ async function doRoute(session) {
     $("name").textContent = country.name;
     $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
     $("power").textContent = country.military_power;
+    armPower();
     render();
     screen("home");
     chatBadge();
