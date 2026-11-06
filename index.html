@@ -185,6 +185,58 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
 .pk ul.ft{text-align:start;min-height:84px}
 .pk button:disabled,.vip button:disabled{background:#2a2410;color:var(--mut);border:1px dashed #6b5a2a;opacity:1}
 
+/* VIP page */
+.vpc{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--gold);border-radius:20px;padding:18px;margin-bottom:12px;background:linear-gradient(160deg,#3a2c0a,#12120f)}
+.vpc h3{margin:0 0 6px;font-size:26px}.vpc p{margin:0 0 8px;color:#e8d9aa;font-size:14px;line-height:1.8}.vpc .pr{color:var(--gold);font-weight:800;font-size:20px}
+.vpc .crown{width:76px;height:76px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:38px;background:radial-gradient(circle at 30% 25%,#e6c25a,#8a6a1c)}
+.vps{border:1px solid #6b5320;border-radius:18px;padding:14px 16px;margin-bottom:12px;background:#0e1422;line-height:1.9;color:var(--mut);font-size:14px}
+.vps b{display:block;color:var(--txt);font-size:15px}.vps.on b::before{content:"✔ ";color:var(--ok)}
+.vpt{border:1px solid #6b5320;border-radius:18px;padding:14px 16px;background:linear-gradient(180deg,#171a22,#0d1220)}
+.vpt h4{margin:0 0 10px;font-size:16px}
+.vph,.vpr{display:grid;grid-template-columns:1fr 64px 84px;gap:8px;align-items:center}
+.vph{color:var(--mut);font-size:13px;padding-bottom:8px}.vph b{color:var(--gold)}
+.vpr{padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.vpr .w{color:var(--mut);text-align:center}
+.vpr .v{background:#2a2410;color:#f0d98a;font-weight:800;border-radius:10px;padding:8px 4px;text-align:center}
+.vpn{color:var(--mut);font-size:13px;line-height:1.9;margin:12px 0}
+/* cart */
+.cartbar{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:0 0 14px;font-weight:700}
+.cbadge{min-width:24px;height:24px;border-radius:12px;background:var(--gold);color:#1b1405;font-size:13px;font-weight:800;display:grid;place-items:center;padding:0 6px}
+.cbox{border:1px solid var(--gold);border-radius:20px;padding:14px;margin-bottom:12px;background:linear-gradient(180deg,#1b1a1a,#0f1420)}
+.chd{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.chd span{color:var(--mut);font-size:14px}
+.ci{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cic{width:54px;height:54px;flex:none;border-radius:14px;border:1px solid #6b5320;background:#2a2410;display:grid;place-items:center;font-size:26px}
+.cin{flex:1;min-width:0}.cin b{display:block;font-size:17px}.cin span{color:#f0d98a;font-weight:700}
+.ci .ic{width:48px;height:48px;flex:none;background:#2a2410;border:1px solid #6b5320;color:var(--gold)}
+.addmore{background:#2a2410;color:#f0d98a;border:1px solid #6b5320;margin:4px 0 0;font-weight:600}
+.cpay{border:1px solid var(--line);border-radius:20px;padding:16px;background:var(--card)}
+.crow{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.crow b{font-size:22px;color:#f0d98a}
+.terms{display:flex;align-items:center;gap:12px;font-size:15px;margin-bottom:10px;cursor:pointer}
+#cartTerms{width:26px;height:26px;margin:0;padding:0;flex:none;accent-color:var(--gold)}
+.terms u{color:#f0d98a}
+#cartGo{margin:6px 0 0}
+#cartGo:disabled{background:#2a2410;color:var(--mut);border:1px solid #6b5a2a;opacity:1}
+/* payment */
+.pbox,.pbox2{border:1px solid #6b5320;border-radius:20px;padding:14px;margin-bottom:14px;background:linear-gradient(180deg,#1b1a1a,#0f1420)}
+.pbox2{border-color:var(--line);background:var(--card)}
+.prow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prow .amt{font-size:20px;color:#f0d98a}
+.pln{display:flex;justify-content:space-between;gap:10px;font-size:16px;padding:3px 0}
+.pln b:last-child{color:#f0d98a}
+.pcd{border:1px solid #6b5320;background:#2a2410;border-radius:14px;padding:14px;text-align:center;margin:12px 0;font-size:17px}
+.pcard{border:1px solid #6b5320;background:#221c10;border-radius:16px;padding:14px;text-align:center;margin-bottom:12px}
+.pcard small{display:block;color:var(--mut);margin:4px 0}
+.pnum{direction:ltr;border:1px dashed #8a6a1c;border-radius:12px;padding:12px 6px;font-size:22px;font-weight:700;letter-spacing:2px;margin:8px 0;word-break:break-all}
+.pbox textarea{display:block;width:100%;min-height:110px;padding:13px;margin:6px 0 10px;border-radius:14px;border:1px solid var(--line);background:#0e1828;color:var(--txt);font:inherit;font-size:16px;resize:vertical}
+.pbox .lbl{line-height:1.9;margin:8px 0}
+.pbox .addmore:disabled{opacity:.45}
+.ord{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.ord:first-child{border-top:0}
+.ord b{display:block;font-size:17px}.ord small{color:var(--mut)}
+.st{border:1px solid #6b5320;color:#f0d98a;border-radius:20px;padding:5px 12px;font-size:13px;white-space:nowrap;background:#2a2410}
+.st.ok{border-color:var(--ok);color:var(--ok);background:transparent}.st.bad{border-color:var(--line);color:var(--mut);background:transparent}
 /* ===== home: glass look ===== */
 body{background:radial-gradient(120% 55% at 50% -8%,#1d3560 0,transparent 62%),radial-gradient(70% 40% at 105% 35%,#3b1f5266,transparent 70%),var(--bg) fixed}
 .wrap{padding-bottom:130px}
@@ -326,13 +378,15 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
   <!-- ۴. فروشگاه -->
   <section id="shop" hidden>
     <h2>فروشگاه</h2>
+    <button class="cartbar" onclick="openCart()"><span>🛒 سبد خرید</span><span class="cbadge" id="cartCnt" hidden></span></button>
+    <button class="cartbar" onclick="openPay()"><span>🧾 سفارش‌های من</span></button>
     <div class="vip">
       <span class="tag">پیشنهاد ستاد</span>
       <h3>اشتراک VIP</h3>
       <p>پیشرفت سریع‌تر و امکانات ویژه، به مدت ۳۱ روز</p>
       <ul class="ft"><li>پیشرفت سریع‌تر</li><li>ساخت‌وساز همزمان</li><li>تعمیر ارزان‌تر و سریع‌تر</li><li>۱۰ کریستال در روز</li></ul>
       <div class="price">380,000 تومان</div>
-      <button disabled>به‌زودی</button>
+      <button onclick="openVip()">مشاهده مزایا و خرید</button>
     </div>
 
     <h3 class="sec">کشورها</h3>
@@ -341,21 +395,21 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
         <b>کشور Premium</b>
         <ul class="ft"><li>۲۵٪ خزانه بیشتر</li></ul>
         <div class="price">200,000 تومان</div>
-        <button disabled>به‌زودی</button>
+        <button onclick="addToCart('prem')">افزودن</button>
       </div>
       <div class="pk plus">
         <b>کشور Premium Plus</b>
         <ul class="ft"><li>۵۰٪ خزانه بیشتر</li><li>تنگه‌ی راهبردی</li></ul>
         <div class="price">280,000 تومان</div>
-        <button disabled>به‌زودی</button>
+        <button onclick="addToCart('plus')">افزودن</button>
       </div>
     </div>
 
     <h3 class="sec">کریستال</h3>
     <div class="grid3">
-      <div class="pk"><div class="big2">💎100</div><small>کریستال</small><div class="price">150,000<small>تومان</small></div><button disabled>به‌زودی</button></div>
-      <div class="pk"><div class="big2">💎300</div><small>کریستال</small><div class="price">300,000<small>تومان</small></div><button disabled>به‌زودی</button></div>
-      <div class="pk"><div class="big2">💎500</div><small>کریستال</small><div class="price">450,000<small>تومان</small></div><button disabled>به‌زودی</button></div>
+      <div class="pk"><div class="big2">💎100</div><small>کریستال</small><div class="price">150,000<small>تومان</small></div><button onclick="addToCart('c100')">افزودن</button></div>
+      <div class="pk"><div class="big2">💎300</div><small>کریستال</small><div class="price">300,000<small>تومان</small></div><button onclick="addToCart('c300')">افزودن</button></div>
+      <div class="pk"><div class="big2">💎500</div><small>کریستال</small><div class="price">450,000<small>تومان</small></div><button onclick="addToCart('c500')">افزودن</button></div>
     </div>
 
     <h3 class="sec">خزانه</h3>
@@ -363,8 +417,71 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
       <div class="big2" dir="ltr">$10,000,000</div>
       <small>به خزانه</small>
       <div class="price">100,000 تومان</div>
-      <button disabled>به‌زودی</button>
+      <button onclick="addToCart('tre')">افزودن</button>
     </div>
+  </section>
+
+  <!-- سبد خرید -->
+  <section id="cart" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('shop')" aria-label="بازگشت">→</button><h2>سبد خرید</h2></div>
+    <div class="cbox">
+      <div class="chd"><b>🛒 کالاهای سبد</b><span id="cartN"></span></div>
+      <div id="cartList"></div>
+      <button class="addmore" onclick="screen('shop')">+ افزودن کالای دیگر</button>
+    </div>
+    <div class="cpay" id="cartPay">
+      <div class="crow"><span>مبلغ قابل پرداخت</span><b id="cartTot"></b></div>
+      <label class="terms"><input type="checkbox" id="cartTerms" onchange="renderCart()"><span><u onclick="event.preventDefault();soon()">قوانین بازی</u> را خوانده‌ام و می‌پذیریم.</span></label>
+      <p class="lbl" id="cartHint" style="line-height:1.9;margin:0 0 6px">برای پرداخت، پذیرش قوانین بازی را تیک بزنید.</p>
+      <button id="cartGo" onclick="cartPay()" disabled></button>
+    </div>
+  </section>
+
+  <!-- پرداخت -->
+  <section id="pay" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('shop')" aria-label="بازگشت">→</button><h2>پرداخت</h2></div>
+    <div class="pbox" id="payBox" hidden>
+      <div class="prow"><b>💰 پرداخت</b><b class="amt" id="payTot"></b></div>
+      <div id="payLines"></div>
+      <div class="pcd" id="payCd"></div>
+      <div class="pcard">
+        <small>شماره کارت</small>
+        <div class="pnum" id="payNum"></div>
+        <small id="payOwner"></small>
+        <button class="addmore" style="width:auto;padding:12px 22px" onclick="copyCard()">📋 کپی شماره کارت</button>
+      </div>
+      <p class="lbl">پس از واریز مبلغ، رسید پرداخت را ثبت کنید؛ به‌صورت متنی یا تصویری.</p>
+      <textarea id="payTxt" placeholder="شماره پیگیری یا متن رسید" oninput="payBtns()"></textarea>
+      <button class="addmore" id="payTxtBtn" onclick="sendReceiptText()" disabled>ثبت رسید متنی</button>
+      <button class="addmore" id="payImgBtn" onclick="$('payImg').click()">🖼 ارسال تصویر رسید</button>
+      <input type="file" id="payImg" accept="image/*" hidden onchange="sendReceiptImage(this)">
+      <p class="lbl">کد هدیه دارید؟ آن را وارد کنید؛ قیمت همان کالایی که کد برایش صادر شده از مبلغ کم می‌شود.</p>
+      <input id="payGift" dir="ltr" autocapitalize="characters" autocomplete="off" placeholder="WW-XXXX-XXXX-XXXX" oninput="payBtns()">
+      <button class="addmore" id="payGiftBtn" onclick="sendGift()" disabled>ثبت کد هدیه</button>
+      <button class="addmore" style="width:auto;padding:12px 22px;margin-top:10px" onclick="cancelOrder()">لغو سفارش</button>
+    </div>
+    <div class="pbox2">
+      <div class="chd"><b>🧾 سفارش‌های شما</b></div>
+      <div id="orderList"></div>
+    </div>
+  </section>
+
+  <!-- اشتراک VIP -->
+  <section id="vip" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('shop')" aria-label="بازگشت">→</button><h2>اشتراک VIP</h2></div>
+    <div class="vpc">
+      <div><h3>اشتراک VIP</h3><p>پیشرفت سریع‌تر و امکانات ویژه، به مدت ۳۱ روز</p><div class="pr">380,000 تومان</div></div>
+      <div class="crown">👑</div>
+    </div>
+    <div class="vps" id="vipSt"></div>
+    <div class="vpt">
+      <h4>👑 با VIP چه عوض می‌شود</h4>
+      <div class="vph"><span></span><span style="text-align:center">بدون VIP</span><b style="text-align:center">با VIP</b></div>
+      <div id="vipTbl"></div>
+    </div>
+    <p class="vpn">۳۱ روز، روی حساب شما و نه کشور؛ با تغییر کشور از میان نمی‌رود.</p>
+    <p class="lbl" id="vipNote" style="text-align:center;line-height:1.9"></p>
+    <button id="vipBuy" onclick="buyVip()">افزودن به سبد — 380,000 تومان</button>
   </section>
 
   <!-- اقتصاد -->
@@ -849,9 +966,9 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap", "eco"]) $(s).hidden = s !== n;
-  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco";
-  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === n));
+  for (const s of ["pick", "home", "shop", "worldmap", "eco", "vip", "cart", "pay"]) $(s).hidden = s !== n;
+  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "vip" && n !== "cart" && n !== "pay";
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n)));
   closeSettings();
   if (n !== "worldmap") closeMapSheet();
   window.scrollTo(0, 0);
@@ -904,6 +1021,205 @@ async function leaveCountry() {
   route(true);
 }
 
+
+
+
+/* ---------- سبد خرید ---------- */
+const SHOP = {
+  vip:  { fa: "اشتراک VIP (۳۱ روز)", ic: "👑", price: 380000 },
+  prem: { fa: "کشور Premium", ic: "🌍", price: 200000 },
+  plus: { fa: "کشور Premium Plus", ic: "💠", price: 280000 },
+  c100: { fa: "۱۰۰ کریستال", ic: "💎", price: 150000 },
+  c300: { fa: "۳۰۰ کریستال", ic: "💎", price: 300000 },
+  c500: { fa: "۵۰۰ کریستال", ic: "💎", price: 450000 },
+  tre:  { fa: "۱۰ میلیون دلار به خزانه", ic: "💵", price: 100000 }
+};
+let cart = {};
+const toman = (n) => Number(n).toLocaleString("en-US") + " تومان";
+function cartCount() { return Object.values(cart).reduce((a, q) => a + q, 0); }
+function updateCartBadge() {
+  const n = cartCount(), el = $("cartCnt");
+  el.hidden = !n; el.textContent = faNum(n);
+}
+function addToCart(id) {
+  if (!SHOP[id]) return;
+  if (id === "vip" && cart.vip) flash("اشتراک VIP قبلاً در سبد است", 1800);
+  else cart[id] = (cart[id] || 0) + 1;
+  openCart();
+}
+function removeFromCart(id) {
+  if (cart[id] > 1) cart[id]--; else delete cart[id];
+  renderCart();
+}
+function openCart() { screen("cart"); renderCart(); }
+function renderCart() {
+  updateCartBadge();
+  const ids = Object.keys(cart), n = cartCount();
+  const total = ids.reduce((a, id) => a + SHOP[id].price * cart[id], 0);
+  $("cartN").textContent = n ? faNum(n) + " کالا" : "";
+  $("cartList").innerHTML = ids.length
+    ? ids.map((id) => `<div class="ci"><div class="cic">${SHOP[id].ic}</div><div class="cin"><b>${SHOP[id].fa}${cart[id] > 1 ? " × " + faNum(cart[id]) : ""}</b><span>${toman(SHOP[id].price * cart[id])}</span></div><button class="ic" onclick="removeFromCart('${id}')" aria-label="حذف">🗑</button></div>`).join("")
+    : '<p class="lbl" style="text-align:center;padding:14px 0">سبد خرید خالی است</p>';
+  $("cartPay").hidden = !ids.length;
+  $("cartTot").textContent = toman(total);
+  const ok = $("cartTerms").checked;
+  $("cartHint").hidden = ok;
+  $("cartGo").disabled = !ok || !ids.length;
+  $("cartGo").textContent = "ثبت سفارش و پرداخت — " + toman(total);
+}
+const PAY_CARD = "0000000000000000";   // ⚠️ شماره کارت خودتان را اینجا بگذارید
+const PAY_OWNER = "نام صاحب کارت";       // ⚠️ نام صاحب کارت
+const ORD_ERR = {
+  NO_AUTH: "ابتدا وارد شوید", HAS_PENDING: "یک سفارش در انتظار پرداخت دارید؛ ابتدا آن را تکمیل یا لغو کنید",
+  BAD_ITEM: "کالای نامعتبر در سبد", BAD_QTY: "تعداد نامعتبر", EMPTY: "سبد خرید خالی است",
+  NOT_PENDING: "این سفارش دیگر در انتظار پرداخت نیست", BAD_RECEIPT: "متن رسید خیلی کوتاه است",
+  BAD_CODE: "کد هدیه نامعتبر است", CODE_USED: "این کد هدیه قبلاً استفاده شده", NOT_FOR_ORDER: "این کد برای کالاهای این سفارش نیست",
+  ALREADY_DISCOUNTED: "برای این سفارش قبلاً کد هدیه ثبت شده"
+};
+let orders = [], ordersAt = 0, payOrder = null;
+const notifTried = new Set(); // هر سفارش در هر بار باز شدن برنامه فقط یک‌بار برای ادمین فرستاده می‌شود
+const orderErr = (m) => ORD_ERR[m] || m;
+const leftMs = (o) => o.secs_left * 1000 - (Date.now() - ordersAt);
+const isActive = (o) => o.status === "pending" && leftMs(o) > 0;
+const orderName = (o) => (o.items || []).map((i) => (SHOP[i.id] ? SHOP[i.id].fa : i.id) + (i.qty > 1 ? " × " + faNum(i.qty) : "")).join("، ");
+
+async function cartPay() {
+  const items = Object.entries(cart).map(([id, qty]) => ({ id, qty }));
+  if (!items.length) return;
+  $("cartGo").disabled = true;
+  const { error } = await sb.rpc("create_order", { p_items: items });
+  if (error && error.message !== "HAS_PENDING") { renderCart(); return flash(orderErr(error.message), 5000); }
+  if (error) flash(orderErr(error.message), 4000);
+  else { cart = {}; $("cartTerms").checked = false; renderCart(); }
+  openPay();
+}
+async function openPay() {
+  screen("pay");
+  $("payTxt").value = ""; $("payGift").value = ""; payBtns();
+  await loadOrders();
+  renderPay();
+}
+async function loadOrders() {
+  const { data, error } = await sb.from("my_orders").select("*").order("created_at", { ascending: false }).limit(20);
+  if (error) { $("orderList").innerHTML = '<p class="lbl" style="text-align:center">دریافت سفارش‌ها ناموفق بود؛ مطمئن شوید فایل SQL سفارش‌ها اجرا شده است.</p>'; orders = []; return; }
+  orders = data; ordersAt = Date.now();
+  // فاکتورِ رسیدهای ثبت‌شده را برای ادمین بفرست (سرور تکراری‌ها را نادیده می‌گیرد؛ اگر قبلاً نرسیده بود دوباره تلاش می‌شود)
+  orders.filter((o) => o.status === "receipt" && !o.notified_at && !notifTried.has(o.id)).forEach((o) => {
+    notifTried.add(o.id);
+    Promise.resolve(sb.functions.invoke("Notify_Order", { body: { order_id: o.id } })).catch(() => {});
+  });
+}
+function renderPay() {
+  payOrder = orders.find(isActive) || null;
+  $("payBox").hidden = !payOrder;
+  if (payOrder) {
+    const o = payOrder, its = o.items || [];
+    $("payTot").textContent = toman(o.amount - o.discount);
+    $("payLines").innerHTML = its.map((i) => `<div class="pln"><span>${SHOP[i.id] ? SHOP[i.id].fa : i.id}${i.qty > 1 ? " × " + faNum(i.qty) : ""}</span><b>${toman((SHOP[i.id] ? SHOP[i.id].price : 0) * i.qty)}</b></div>`).join("")
+      + (o.discount > 0 ? `<div class="pln"><span>🎁 کد هدیه</span><b>-${toman(o.discount)}</b></div>` : "");
+    $("payNum").textContent = PAY_CARD; $("payOwner").textContent = PAY_OWNER;
+    $("payGift").disabled = !!o.gift_code; payBtns();
+    payTick();
+  }
+  const ST = { receipt: ["در انتظار تأیید رسید", ""], paid: ["پرداخت شد", "ok"], cancelled: ["لغو شد", "bad"], expired: ["منقضی شد", "bad"] };
+  $("orderList").innerHTML = orders.length ? orders.map((o) => {
+    const [t, c] = o.status === "pending" ? (isActive(o) ? ["در انتظار پرداخت", ""] : ["منقضی شد", "bad"]) : (ST[o.status] || [o.status, ""]);
+    const dt = new Date(o.created_at).toLocaleDateString("fa-IR-u-ca-persian", { year: "numeric", month: "long", day: "numeric" });
+    return `<div class="ord"><div><b>${orderName(o)}</b><small>${dt} · ${toman(o.amount - o.discount)}</small></div><span class="st ${c}">${t}</span></div>`;
+  }).join("") : '<p class="lbl" style="text-align:center;padding:10px 0">هنوز سفارشی ثبت نکرده‌اید</p>';
+}
+function payTick() {
+  if (!payOrder || $("pay").hidden) return;
+  const ms = leftMs(payOrder);
+  if (ms <= 0) { renderPay(); flash("مهلت پرداخت تمام شد", 2500); return; }
+  const t = Math.ceil(ms / 1000);
+  $("payCd").textContent = faNum(Math.floor(t / 60)) + " دقیقه و " + faNum(t % 60) + " ثانیه تا پایان مهلت پرداخت";
+}
+setInterval(payTick, 1000);
+function payBtns() {
+  $("payTxtBtn").disabled = $("payTxt").value.trim().length < 3;
+  $("payGiftBtn").disabled = !$("payGift").value.trim() || ($("payGift").disabled);
+}
+async function copyCard() {
+  try { await navigator.clipboard.writeText(PAY_CARD); }
+  catch (_) { const t = document.createElement("textarea"); t.value = PAY_CARD; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (_) {} t.remove(); }
+  flash("شماره کارت کپی شد", 1500);
+}
+async function afterReceipt() {
+  await loadOrders(); renderPay();
+  flash("رسید ثبت شد؛ پس از بررسی، سفارش شما تکمیل می‌شود", 4500);
+}
+async function sendReceiptText() {
+  if (!payOrder) return;
+  $("payTxtBtn").disabled = true;
+  const { error } = await sb.rpc("submit_receipt_text", { p_order: payOrder.id, p_text: $("payTxt").value.trim() });
+  if (error) { payBtns(); return flash(orderErr(error.message), 5000); }
+  $("payTxt").value = "";
+  await afterReceipt();
+}
+async function sendReceiptImage(inp) {
+  const f = inp.files && inp.files[0]; inp.value = "";
+  if (!f || !payOrder) return;
+  if (f.size > 8 * 1024 * 1024) return flash("حجم تصویر بیشتر از ۸ مگابایت است", 3500);
+  flash("در حال ارسال تصویر…", 3000);
+  const { data: u } = await sb.auth.getUser();
+  const ext = (f.type.split("/")[1] || "jpg").replace("jpeg", "jpg").replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = u.user.id + "/" + payOrder.id + "-" + Date.now() + "." + ext;
+  const up = await sb.storage.from("receipts").upload(path, f, { contentType: f.type || "image/jpeg" });
+  if (up.error) return flash("ارسال تصویر ناموفق بود: " + up.error.message, 5000);
+  const { error } = await sb.rpc("submit_receipt_image", { p_order: payOrder.id, p_path: path });
+  if (error) return flash(orderErr(error.message), 5000);
+  await afterReceipt();
+}
+async function sendGift() {
+  if (!payOrder) return;
+  $("payGiftBtn").disabled = true;
+  const { error } = await sb.rpc("redeem_gift_code", { p_order: payOrder.id, p_code: $("payGift").value.trim().toUpperCase() });
+  if (error) { payBtns(); return flash(orderErr(error.message), 5000); }
+  $("payGift").value = "";
+  await loadOrders(); renderPay();
+  flash("🎁 کد هدیه اعمال شد", 2500);
+}
+async function cancelOrder() {
+  if (!payOrder || !confirm("سفارش لغو شود؟")) return;
+  const { error } = await sb.rpc("cancel_order", { p_order: payOrder.id });
+  if (error) return flash(orderErr(error.message), 5000);
+  await loadOrders(); renderPay();
+  flash("سفارش لغو شد", 2000);
+}
+
+/* ---------- اشتراک VIP ---------- */
+// مقدارها فعلاً فقط برای نمایش‌اند؛ اعمال واقعی هرکدام باید در سرور پیاده شود
+const VIP_ROWS = [
+  ["⚡", "زمان ساخت و آموزش", "۱۰۰٪", "۸۰٪"],
+  ["🧪", "زمان تحقیقات", "۱۰۰٪", "۸۰٪"],
+  ["🏗️", "صف ساخت", "۱", "۲"],
+  ["🔬", "صف تحقیق", "۱", "۲"],
+  ["💎", "کریستال روزانه", "۰", "۱۰"],
+  ["📈", "مشاور سرمایه‌گذاری", "—", "دارد"],
+  ["🖼️", "بیانیه با تصویر", "—", "دارد"]
+];
+let vipUntil = null;
+async function openVip() {
+  screen("vip");
+  renderVip();
+  const { data } = await sb.from("profiles").select("vip_until").maybeSingle();
+  vipUntil = data && data.vip_until ? new Date(data.vip_until).getTime() : null;
+  renderVip();
+}
+function renderVip() {
+  const now = Date.now(), act = !!vipUntil && vipUntil > now;
+  const days = act ? Math.ceil((vipUntil - now) / 86400000) : 0;
+  $("vipTbl").innerHTML = VIP_ROWS.map(([ic, fa, a, b]) => `<div class="vpr"><span>${ic} ${fa}</span><span class="w">${a}</span><span class="v">${b}</span></div>`).join("");
+  const dt = act ? new Date(vipUntil).toLocaleDateString("fa-IR-u-ca-persian", { year: "numeric", month: "long", day: "numeric" }) : "";
+  $("vipSt").className = "vps" + (act ? " on" : "");
+  $("vipSt").innerHTML = (act ? `<b>اشتراک شما فعال است تا ${dt}</b>` : "<b>اشتراک فعالی ندارید</b>") + "هر خرید ۳۱ روز به اشتراک حساب شما افزوده می‌شود.";
+  const can = !act || days <= 7;
+  $("vipNote").textContent = can ? "" : `اشتراک VIP فعال شما هنوز ${faNum(days)} روز اعتبار دارد — از ۷ روز مانده به پایان امکان تمدید وجود دارد.`;
+  $("vipBuy").disabled = !can;
+  $("vipBuy").textContent = "افزودن به سبد — 380,000 تومان";
+}
+function buyVip() { addToCart("vip"); }
 
 /* ---------- اقتصاد: ساختمان‌ها ---------- */
 // قیمت و درآمد اینجا فقط برای نمایش پیش‌فرض است؛ مقدار اصلی از جدول building_catalog سرور خوانده می‌شود
@@ -1179,9 +1495,10 @@ async function confirmPick() {
   route(true);
 }
 
-async function loadCountry() {
+async function loadCountry(silent) {
   const { data, error } = await sb.from("countries").select("*").maybeSingle();
-  if (error) { msg(error.message); return false; }
+  if (error) { if (!silent) msg(error.message); return false; }
+  if (/Failed to fetch/.test($("msg").textContent)) msg(""); // خطای شبکه‌ی قبلی دیگر معتبر نیست
   country = data;
   return true;
 }
@@ -1291,7 +1608,7 @@ if (!TG) {
     if (!country) return;
     const { error } = await sb.auth.getUser();
     if (error && (error.status === 401 || error.status === 403)) return location.reload();
-    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry());
+    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry(true)); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
   }, 30000);
 }
 </script>
