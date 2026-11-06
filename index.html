@@ -398,7 +398,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
       <span class="tag">پیشنهاد ستاد</span>
       <h3>اشتراک VIP</h3>
       <p>پیشرفت سریع‌تر و امکانات ویژه، به مدت ۳۱ روز</p>
-      <ul class="ft"><li>پیشرفت سریع‌تر</li><li>ساخت‌وساز همزمان</li><li>تعمیر ارزان‌تر و سریع‌تر</li><li>۱۰ کریستال در روز</li></ul>
+      <ul class="ft"><li>پیشرفت سریع‌تر</li><li>ساخت‌وساز همزمان</li><li>۸۰٪ زمان ساخت</li><li>۱۰ کریستال در روز</li></ul>
       <div class="price">380,000 تومان</div>
       <button onclick="openVip()">مشاهده مزایا و خرید</button>
     </div>
@@ -1216,7 +1216,7 @@ async function cancelOrder() {
 }
 
 /* ---------- اشتراک VIP ---------- */
-// مقدارها فعلاً فقط برای نمایش‌اند؛ اعمال واقعی هرکدام باید در سرور پیاده شود
+// فقط نمایش؛ اعمال واقعی در سرور (vip.sql): ساخت‌وساز، صف ساخت و کریستال روزانه
 const VIP_ROWS = [
   ["⚡", "زمان ساخت و آموزش", "۱۰۰٪", "۸۰٪"],
   ["🧪", "زمان تحقیقات", "۱۰۰٪", "۸۰٪"],
@@ -1379,7 +1379,7 @@ async function speedUp(id, btn) {
   const { error } = await sb.rpc("speedup_building", { p_id: id });
   if (error) {
     btn.disabled = false;
-    const E = { NO_COUNTRY: "شما کشوری ندارید", NOT_PENDING: "این ساختمان در حال ساخت نیست", NO_CRYSTALS: "الماس کافی ندارید" };
+    const E = { NO_COUNTRY: "شما کشوری ندارید", NOT_PENDING: "این ساختمان در حال ساخت نیست", NO_CRYSTALS: "الماس کافی ندارید", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
     return flash(E[error.message] || error.message, 5000);
   }
   flash("⚡ ساخت تمام شد", 2000);
@@ -1469,7 +1469,7 @@ async function buyBuilding(id, btn) {
   const { error } = await sb.rpc("buy_building", { p_id: id });
   if (error) {
     btn.disabled = false;
-    const E = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", ALREADY_OWNED: "این ساختمان را قبلاً خریده‌اید", NO_FUNDS: "موجودی کافی نیست" };
+    const E = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", ALREADY_OWNED: "این ساختمان را قبلاً خریده‌اید", NO_FUNDS: "موجودی کافی نیست", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
     return flash(E[error.message] || error.message, 5000);
   }
   flash("🔨 ساخت شروع شد", 2000);
