@@ -305,6 +305,19 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
 .buy,.up{margin:0;border:1px solid #d4a73a;background:linear-gradient(180deg,#3a2c0a,#241b08);color:var(--gold);border-radius:16px;padding:15px}
 .buy.poor{color:#ff8a8a}.up{color:var(--mut);border-color:#ffffff2e;background:#ffffff0a}
 .pgb{height:8px;border-radius:4px;background:#ffffff1f;overflow:hidden;margin:0 0 12px}.pg{display:block;height:100%;background:linear-gradient(90deg,#c8962b,#f6d779);border-radius:4px;transition:width 1s linear}
+
+#cm{position:fixed;inset:0;z-index:30;background:#000b;display:flex;align-items:flex-end;justify-content:center}
+.cmbox{width:100%;max-width:520px;background:#0d1626;border-top:1px solid var(--gold);border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px #000a}
+.cmh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cmh b{font-size:18px;display:block}.cmh small{color:var(--mut)}
+.cmrows{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.cmr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;background:#ffffff0f;border:1px solid #ffffff1f}
+.cmr span{color:var(--mut);font-size:14px}.cmr b{font-size:16px;direction:ltr;text-align:left}
+.cmr.bad b{color:var(--err)}.cmr.good b{color:var(--ok)}
+.cmwarn{color:var(--err);text-align:center;font-size:14px;margin:0 0 6px}
+.tmr{text-align:center;margin:16px 0 8px}.tmr small{color:var(--mut);font-size:13px}
+.tmr b{display:block;margin-top:2px;font-size:36px;letter-spacing:2px;color:var(--gold);font-variant-numeric:tabular-nums}
+.pgb.big{height:14px;border-radius:7px;margin:0 0 6px}.pgb.big .pg{border-radius:7px}
 </style>
 </head>
 <body>
@@ -565,6 +578,13 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
   <p class="lbl hint">با ترک کشور، فرماندهی را رها می‌کنید و به صفحه انتخاب کشور برمی‌گردید. حساب شما حفظ می‌شود و نیازی به ورود دوباره نیست.</p>
   <button class="danger" id="leaveBtn" onclick="leaveCountry()">🚪 ترک کشور</button>
   <button class="ghost" onclick="closeSettings()">بستن</button>
+</div></div>
+<div id="cm" hidden><div class="cmbox">
+  <div class="cmh"><div class="eic" id="cmIc"></div><div><b id="cmTitle"></b><small id="cmSub"></small></div></div>
+  <div class="cmrows" id="cmRows"></div>
+  <div class="cmwarn" id="cmWarn" hidden></div>
+  <button class="buy" id="cmGo" onclick="cmConfirm()">تأیید و شروع</button>
+  <button class="ghost" onclick="closeCm()">انصراف</button>
 </div></div>
 <div id="toast"></div>
 <div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2 id="notgT">این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl" id="notgP">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
@@ -1254,7 +1274,7 @@ const LV_F = [1, 1.4, 2, 3, 4];
 const pAt = (b, lv) => Math.round(b.price * Math.pow(1.1, lv - 1));
 const iAt = (b, lv) => Math.round(b.income * Math.pow(1.1, lv - 1));
 const mAt = (b, lv) => Math.round(b.mins * LV_F[lv - 1]);
-const upCost = (b, lv) => pAt(b, lv + 1) - pAt(b, lv);
+const upCost = (b, lv) => pAt(b, lv + 1);
 // زمان ساخت سطح ۱ (دقیقه)؛ مقدار اصلی از ستون build_minutes سرور خوانده می‌شود
 const BUILD_MIN = {bank: 5, tourism: 7, insurance: 10, retail: 10, realestate: 15, telecom: 14, transport: 16, media: 18, stock: 20, shipping: 22, auto: 24, fund: 25, airline: 25, tech: 30, pharma: 30};
 BLD.forEach((b) => { b.mins = BUILD_MIN[b.id]; });
@@ -1329,22 +1349,24 @@ function renderEco() {
     if (rdy) {
       const st = rdy - b.mins * 60000;
       return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>🔨 در حال ساخت</small></div></div>
-        <div class="chips"><span class="chp">⏱️ تکمیل تا <b class="cd" dir="ltr">${dur(rdy - now)}</b></span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز پس از ساخت</span></div>
-        <div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
+        <div class="tmr"><small>⏱️ زمان باقی‌مانده تا پایان ساخت</small><b class="cd" dir="ltr">${dur(rdy - now)}</b></div>
+        <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
+        <div class="chips"><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز پس از ساخت</span></div>
         <button class="buy" onclick="speedUp('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(rdy - now))}</span> 💎</button></div>`;
     }
     if (upg[b.id]) {
       const ur = upg[b.id], to = upgTo[b.id], ust = ur - mAt(b, to) * 60000;
       return `<div class="bc build" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>⬆ در حال ارتقا به سطح ${faNum(to)}</small></div></div>
-        <div class="chips"><span class="chp">⏱️ تکمیل تا <b class="cd" dir="ltr">${dur(ur - now)}</b></span><span class="chp g">↑ +<span dir="ltr">${fmt(iAt(b, to) - iAt(b, lv))}</span> در روز پس از ارتقا</span></div>
-        <div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - ust) / (ur - ust)) * 100))}%"></u></div>
+        <div class="tmr"><small>⬆ زمان باقی‌مانده تا پایان ارتقا</small><b class="cd" dir="ltr">${dur(ur - now)}</b></div>
+        <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - ust) / (ur - ust)) * 100))}%"></u></div>
+        <div class="chips"><span class="chp g">↑ <span dir="ltr">${fmt(iAt(b, to))}</span> در روز پس از ارتقا</span></div>
         <button class="buy" onclick="speedUpgrade('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(ur - now))}</span> 💎</button></div>`;
     }
     return `<div class="bc${has ? "" : " no"}">${head}
         <div class="bi">${has ? `<b>${fmt(iAt(b, lv))}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
-      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ +<span dir="ltr">${fmt(iAt(b, lv + 1) - iAt(b, lv))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(mAt(b, lv + 1))}</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(b.mins)}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
-      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) ? " poor" : ""}" onclick="upgradeBuilding('${b.id}',this)">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${fmt(upCost(b, lv))}</span></button>`)
-            : `<button class="buy${t < b.price ? " poor" : ""}" onclick="buyBuilding('${b.id}',this)">شروع ساخت — <span dir="ltr">${fmt(b.price)}</span></button>`}
+      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(mAt(b, lv + 1))}</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(b.mins)}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
+      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) ? " poor" : ""}" onclick="askUp('${b.id}')">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${fmt(upCost(b, lv))}</span></button>`)
+            : `<button class="buy${t < b.price ? " poor" : ""}" onclick="askBuy('${b.id}')">شروع ساخت — <span dir="ltr">${fmt(b.price)}</span></button>`}
     </div>`;
   }).join("");
 }
@@ -1364,6 +1386,56 @@ async function speedUp(id, btn) {
   await loadCountry();
   render();
   await loadEco();
+}
+/* ---------- پنجره‌ی تأیید خرید / ارتقا ---------- */
+let cmAct = null;
+function openCm(o) {
+  cmAct = o.ok;
+  $("cmIc").textContent = o.ic;
+  $("cmTitle").textContent = o.title;
+  $("cmSub").textContent = o.sub || "";
+  $("cmRows").innerHTML = o.rows.map(([k, v, c]) => `<div class="cmr${c ? " " + c : ""}"><span>${k}</span><b>${v}</b></div>`).join("");
+  $("cmWarn").hidden = !o.warn;
+  $("cmWarn").textContent = o.warn || "";
+  $("cmGo").disabled = !!o.warn;
+  $("cmGo").textContent = o.btn;
+  $("cm").hidden = false;
+}
+function closeCm() { $("cm").hidden = true; cmAct = null; }
+function cmConfirm() { const f = cmAct; closeCm(); if (f) f(); }
+function askBuy(id) {
+  const b = BLD.find((x) => x.id === id); if (!b) return;
+  const t = liveT(), poor = t < b.price;
+  openCm({
+    ic: b.icon, title: "ساخت " + b.fa, sub: "سطح ۱",
+    rows: [
+      ["💰 هزینه ساخت", fmt(b.price)],
+      ["⏱️ مدت ساخت", buildText(b.mins)],
+      ["📈 سود روزانه", fmt(b.income), "good"],
+      ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
+      ...(poor ? [] : [["🧾 موجودی بعد از ساخت", fmt(t - b.price)]])
+    ],
+    warn: poor ? "موجودی کافی نیست" : "",
+    btn: "تأیید و شروع ساخت",
+    ok: () => buyBuilding(id, {})
+  });
+}
+function askUp(id) {
+  const b = BLD.find((x) => x.id === id), lv = owned[id] || 0; if (!b || !lv || lv >= MAXLV) return;
+  const t = liveT(), cost = upCost(b, lv), poor = t < cost;
+  openCm({
+    ic: b.icon, title: "ارتقای " + b.fa, sub: "سطح " + faNum(lv) + " ← سطح " + faNum(lv + 1),
+    rows: [
+      ["💰 هزینه ارتقا", fmt(cost)],
+      ["⏱️ زمان ارتقا", buildText(mAt(b, lv + 1))],
+      ["📈 سود روزانه", fmt(iAt(b, lv)) + " → " + fmt(iAt(b, lv + 1)), "good"],
+      ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
+      ...(poor ? [] : [["🧾 موجودی بعد از ارتقا", fmt(t - cost)]])
+    ],
+    warn: poor ? "موجودی کافی نیست" : "",
+    btn: "تأیید و شروع ارتقا",
+    ok: () => upgradeBuilding(id, {})
+  });
 }
 const UP_ERR = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", NOT_OWNED: "این ساختمان را هنوز نساخته‌اید", STILL_BUILDING: "ساختمان هنوز ساخته نشده", ALREADY_UPGRADING: "این ساختمان در حال ارتقا است", MAX_LEVEL: "ساختمان در حداکثر سطح است", NO_FUNDS: "موجودی کافی نیست", NOT_PENDING: "این ارتقا در حال انجام نیست", NO_CRYSTALS: "الماس کافی ندارید" };
 async function upgradeBuilding(id, btn) {
