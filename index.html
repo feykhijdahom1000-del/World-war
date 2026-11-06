@@ -1252,21 +1252,21 @@ function buyVip() { addToCart("vip"); }
 // قیمت و درآمد اینجا فقط برای نمایش پیش‌فرض است؛ مقدار اصلی از جدول building_catalog سرور خوانده می‌شود
 const CATS = { fin: { fa: "مالی", icon: "🏛️" }, ind: { fa: "صنعت", icon: "🏭" }, srv: { fa: "خدمات", icon: "🛍️" }, trn: { fa: "حمل‌ونقل", icon: "🚚" } };
 const BLD = [
-  { id: "bank", fa: "بانک", cat: "fin", icon: "🏦", price: 400000, income: 143000 },
-  { id: "insurance", fa: "بیمه", cat: "fin", icon: "🛡️", price: 800000, income: 291000 },
-  { id: "realestate", fa: "املاک", cat: "fin", icon: "🏘️", price: 1600000, income: 593000 },
-  { id: "stock", fa: "بورس", cat: "fin", icon: "📊", price: 3200000, income: 1231000 },
-  { id: "fund", fa: "صندوق سرمایه‌گذاری", cat: "fin", icon: "💼", price: 6000000, income: 2449000 },
-  { id: "auto", fa: "خودروسازی", cat: "ind", icon: "🚗", price: 5200000, income: 2167000 },
-  { id: "tech", fa: "فناوری", cat: "ind", icon: "💻", price: 7200000, income: 3000000 },
-  { id: "pharma", fa: "داروسازی", cat: "ind", icon: "💊", price: 8800000, income: 3700000 },
-  { id: "tourism", fa: "گردشگری", cat: "srv", icon: "🏖️", price: 600000, income: 214000 },
-  { id: "retail", fa: "فروشگاه زنجیره‌ای", cat: "srv", icon: "🛒", price: 1000000, income: 364000 },
-  { id: "telecom", fa: "مخابرات", cat: "srv", icon: "📡", price: 1400000, income: 519000 },
-  { id: "media", fa: "رسانه", cat: "srv", icon: "📺", price: 2400000, income: 923000 },
-  { id: "transport", fa: "حمل‌ونقل", cat: "trn", icon: "🚆", price: 1800000, income: 679000 },
-  { id: "shipping", fa: "کشتیرانی", cat: "trn", icon: "🚢", price: 3600000, income: 1440000 },
-  { id: "airline", fa: "شرکت هواپیمایی", cat: "trn", icon: "✈️", price: 6000000, income: 2500000 }
+  { id: "bank", fa: "بانک", cat: "fin", icon: "🏦", price: 280000, income: 143000 },
+  { id: "insurance", fa: "بیمه", cat: "fin", icon: "🛡️", price: 560000, income: 291000 },
+  { id: "realestate", fa: "املاک", cat: "fin", icon: "🏘️", price: 1120000, income: 593000 },
+  { id: "stock", fa: "بورس", cat: "fin", icon: "📊", price: 2240000, income: 1231000 },
+  { id: "fund", fa: "صندوق سرمایه‌گذاری", cat: "fin", icon: "💼", price: 4200000, income: 2449000 },
+  { id: "auto", fa: "خودروسازی", cat: "ind", icon: "🚗", price: 3640000, income: 2167000 },
+  { id: "tech", fa: "فناوری", cat: "ind", icon: "💻", price: 5040000, income: 3000000 },
+  { id: "pharma", fa: "داروسازی", cat: "ind", icon: "💊", price: 6160000, income: 3700000 },
+  { id: "tourism", fa: "گردشگری", cat: "srv", icon: "🏖️", price: 420000, income: 214000 },
+  { id: "retail", fa: "فروشگاه زنجیره‌ای", cat: "srv", icon: "🛒", price: 700000, income: 364000 },
+  { id: "telecom", fa: "مخابرات", cat: "srv", icon: "📡", price: 980000, income: 519000 },
+  { id: "media", fa: "رسانه", cat: "srv", icon: "📺", price: 1680000, income: 923000 },
+  { id: "transport", fa: "حمل‌ونقل", cat: "trn", icon: "🚆", price: 1260000, income: 679000 },
+  { id: "shipping", fa: "کشتیرانی", cat: "trn", icon: "🚢", price: 2520000, income: 1440000 },
+  { id: "airline", fa: "شرکت هواپیمایی", cat: "trn", icon: "✈️", price: 4200000, income: 2500000 }
 ];
 const MAXLV = 5;
 // فرمول سطح‌ها (سرور مرجع است؛ این‌ها فقط برای نمایش‌اند و باید با bld_price / bld_income / bld_minutes یکی باشند)
