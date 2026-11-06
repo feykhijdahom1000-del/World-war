@@ -538,6 +538,21 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .maplibregl-ctrl-attrib a{color:var(--mut)!important}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.chan{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:12px;border-radius:20px;background:#ffffff0d;border:1px solid #ffffff1f;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.chan .av{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:25px;background:radial-gradient(circle at 30% 22%,#2a4a80,#14264a);border:1px solid #ffffff2e}
+.chan .tx{flex:1;min-width:0}
+.chan .tx b{display:block;font-size:17px}
+.chan .tx small{display:block;color:var(--mut);font-size:12.5px}
+.chan button{flex:none;width:auto;margin:0;padding:8px 14px;font-size:14px}
+.chnew{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 14px}
+.chnew i{font-style:normal;font-size:26px;line-height:1;font-weight:800}
+.chclosed{text-align:center;color:var(--mut);padding:14px 0;font-size:14px}
+#chPk{position:fixed;inset:0;z-index:40;background:#000b;display:flex;align-items:flex-end;justify-content:center}
+.pkbox{width:100%;max-width:460px;max-height:82vh;display:flex;flex-direction:column;background:#0d1626;border-top:1px solid var(--gold);border-radius:22px 22px 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))}
+.pkh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pkh b{font-size:18px}
+.pkh button{width:auto;margin:0;padding:6px 14px}
+#chPkL{overflow-y:auto;overscroll-behavior:contain;flex:1;min-height:120px}
 /* ================= END UPGRADE LAYER ================= */
 </style>
 </head>
@@ -782,7 +797,14 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
   <section id="chat" hidden>
     <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>ارتباطات</h2></div>
     <div class="tabs" id="chTabs"></div>
+    <div class="chan" id="chChan" hidden>
+      <div class="av">🌍</div>
+      <div class="tx"><b>کانال جهانی</b><small id="chCnt">…</small></div>
+      <button class="ghost" onclick="chPick('members')">👥 اعضا</button>
+    </div>
     <div class="phead" id="chHead" hidden><button class="ghost" onclick="chatTab('dm')">→</button><b id="chHeadT"></b></div>
+    <div class="chclosed" id="chGone" hidden>این کشور دیگر بازیکن ندارد و نمی‌توانید به آن پیام بدهید.</div>
+    <div id="chNew" hidden><button class="chnew" onclick="chPick('new')"><i>＋</i> شروع گفتگو</button></div>
     <div id="chList"></div>
   </section>
 
@@ -849,6 +871,11 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
   <p class="lbl hint">با ترک کشور، فرماندهی را رها می‌کنید و به صفحه انتخاب کشور برمی‌گردید. حساب شما حفظ می‌شود و نیازی به ورود دوباره نیست.</p>
   <button class="danger" id="leaveBtn" onclick="leaveCountry()">🚪 ترک کشور</button>
   <button class="ghost" onclick="closeSettings()">بستن</button>
+</div></div>
+<div id="chPk" hidden onclick="if(event.target===this)chPkClose()"><div class="pkbox">
+  <div class="pkh"><b id="chPkT"></b><button class="ghost" onclick="chPkClose()">بستن</button></div>
+  <input id="chPkQ" placeholder="جستجوی کشور…" autocomplete="off" oninput="chPkRender()">
+  <div id="chPkL"></div>
 </div></div>
 <div id="cm" hidden><div class="cmbox">
   <div class="cmh"><div class="eic" id="cmIc"></div><div><b id="cmTitle"></b><small id="cmSub"></small></div></div>
@@ -2314,6 +2341,52 @@ async function doRoute(session) {
 
 /* ---------- ارتباطات: چت جهانی، پیام خصوصی، صندوق اعلان ---------- */
 let chTab = "world", chWith = null, chWN = "", chLast = 0, chTimer = null;
+// فهرست کشورها (taken = بازیکن دارد). عضو کانال جهانی یعنی کشوری که بازیکن دارد؛ آزاد یا ترک‌شده عضو نیست
+let chCs = [], chCsAt = 0, chPkMode = "";
+const chIsMe = (c) => !!(country && c.code === country.code);
+const chMembers = () => chCs.filter((c) => c.taken || chIsMe(c));
+async function chLoadCs(force) {
+  if (!force && chCs.length && Date.now() - chCsAt < 60000) return;
+  const { data, error } = await sb.rpc("list_countries");
+  if (error || !data) return;
+  chCs = data; chCsAt = Date.now();
+  chCount(); chSyncBar(); chPkRender();
+}
+function chCount() { const n = chMembers().length; $("chCnt").textContent = n ? faNum(n) + " عضو" : "…"; }
+function chSyncBar() {
+  const dm = chTab === "dm" && chWith;
+  const c = dm && chCs.find((x) => x.code === chWith);
+  const gone = !!(c && !c.taken); // کشور آزاد شده یا ترک شده
+  $("chBar").hidden = !(chTab === "world" || (dm && !gone));
+  $("chGone").hidden = !(dm && gone);
+}
+function chPick(mode) {
+  chPkMode = mode;
+  $("chPkT").textContent = mode === "members" ? "اعضای کانال جهانی" : "شروع گفتگو با…";
+  $("chPkQ").value = "";
+  $("chPk").hidden = false;
+  chPkRender();
+  chLoadCs(true);
+}
+function chPkClose() { $("chPk").hidden = true; }
+function chPkRender() {
+  if ($("chPk").hidden) return;
+  const q = $("chPkQ").value.trim(), box = $("chPkL");
+  let rows = chMembers();
+  if (chPkMode === "new") rows = rows.filter((c) => !chIsMe(c));
+  if (q) rows = rows.filter((c) => (c.name_fa || "").includes(q));
+  rows.sort((a, b) => Number(chIsMe(b)) - Number(chIsMe(a)) || (a.name_fa || "").localeCompare(b.name_fa || "", "fa"));
+  box.replaceChildren();
+  if (!rows.length) return chEmpty(box, q ? "کشوری پیدا نشد." : "هنوز کشور دیگری بازیکن ندارد.");
+  rows.forEach((c) => {
+    const b = document.createElement("button"); b.className = "chi";
+    const n = document.createElement("b"); n.textContent = flagOf(c.code) + " " + c.name_fa + (chIsMe(c) ? " (شما)" : "");
+    b.append(n);
+    if (chIsMe(c)) b.disabled = true;
+    else b.onclick = () => { chPkClose(); chatTab("dm", c.code, c.name_fa); };
+    box.append(b);
+  });
+}
 const chTime = (t) => new Date(t).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
 function openChat() { screen("chat"); chatTab(chTab === "inbox" ? "inbox" : "world"); }
 function chatStop() { clearInterval(chTimer); chTimer = null; }
@@ -2322,10 +2395,14 @@ async function chatTab(t, w, wn) {
   chTab = t; chWith = w || null; chWN = wn || ""; chLast = 0;
   $("chTabs").innerHTML = [["world", "🌍", "جهانی"], ["dm", "✉️", "خصوصی"], ["inbox", "🔔", "اعلان‌ها"]]
     .map(([k, i, n]) => '<button class="tab' + (k === t ? " on" : "") + '" onclick="chatTab(\'' + k + '\')">' + i + " " + n + "</button>").join("");
-  $("chBar").hidden = !(t === "world" || (t === "dm" && chWith));
+  $("chChan").hidden = t !== "world";
+  $("chNew").hidden = !(t === "dm" && !chWith);
   $("chHead").hidden = !(t === "dm" && chWith);
   if (chWith) $("chHeadT").textContent = flagOf(chWith) + " " + chWN;
+  chCount(); chSyncBar();
   $("chList").replaceChildren();
+  await chLoadCs();
+  if (chTab !== t || chWith !== (w || null)) return;
   await chatLoad(true);
   if (chTab === t && chWith === (w || null)) chTimer = setInterval(() => chatLoad(false), 4000);
 }
@@ -2338,6 +2415,7 @@ async function chatLoad(first) {
   if (chTab === "inbox") return loadInbox();
   if (chTab === "dm" && !chWith) return loadThreads();
   const t = chTab, w = chWith;
+  chLoadCs(); // عضویت کانال را تازه نگه می‌دارد (هر ۶۰ ثانیه)
   const { data, error } = await sb.rpc("list_chat", { p_kind: t, p_with: w });
   if (t !== chTab || w !== chWith || error || !data) { if (error && first) flash(error.message, 2500); return; }
   const mx = data.reduce((a, r) => Math.max(a, r.id), 0);
@@ -2345,10 +2423,13 @@ async function chatLoad(first) {
   chLast = mx;
   const near = innerHeight + scrollY >= document.body.scrollHeight - 140;
   const box = $("chList");
-  if (!data.length) chEmpty(box, t === "world" ? "هنوز پیامی نیست؛ اولین نفر باشید." : "پیامی نیست؛ گفتگو را شروع کنید.");
+  // پیام کشورهایی که دیگر بازیکن ندارند (آزاد یا ترک‌شده) از کانال جهانی دیده نمی‌شود
+  let rows = data;
+  if (t === "world" && chCs.length) { const ok = new Set(chMembers().map((c) => c.code)); rows = data.filter((r) => r.mine || ok.has(r.sender_code)); }
+  if (!rows.length) chEmpty(box, t === "world" ? "هنوز پیامی در کانال نیست؛ اولین نفر باشید." : "پیامی نیست؛ گفتگو را شروع کنید.");
   else {
     box.replaceChildren();
-    data.slice().sort((a, b) => a.id - b.id).forEach((r) => box.append(chRow(r)));
+    rows.slice().sort((a, b) => a.id - b.id).forEach((r) => box.append(chRow(r)));
   }
   if (first || near) window.scrollTo(0, document.body.scrollHeight);
   chatBadge();
@@ -2381,7 +2462,7 @@ async function loadThreads() {
   const { data, error } = await sb.rpc("list_dm_threads");
   if (chTab !== "dm" || chWith || error || !data) return;
   const box = $("chList");
-  if (!data.length) return chEmpty(box, "هنوز گفتگوی خصوصی ندارید. در چت جهانی روی نام یک کشور بزنید.");
+  if (!data.length) return chEmpty(box, "هنوز گفتگویی ندارید. با دکمه‌ی «＋ شروع گفتگو» به یک کشور پیام بدهید.");
   box.replaceChildren();
   data.forEach((x) => {
     const b = document.createElement("button"); b.className = "chi" + (x.unread ? " new" : "");
