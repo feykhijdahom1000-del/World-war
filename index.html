@@ -208,6 +208,13 @@ ul.ft li::before{content:"✔";color:var(--ok);margin-inline-end:8px}
 .vpr{padding:9px 0;border-top:1px solid var(--line);font-size:14px}
 .vpr .w{color:var(--mut);text-align:center}
 .vpr .v{background:#2a2410;color:#f0d98a;font-weight:800;border-radius:10px;padding:8px 4px;text-align:center}
+.tile.ref{grid-column:1/-1;background:linear-gradient(160deg,#5a4318,#1c1710);border-color:var(--gold)}
+.rfc{border:1px dashed var(--gold);border-radius:16px;padding:14px;margin-bottom:12px;text-align:center;background:#0e1422}
+.rfc b{display:block;font-size:30px;letter-spacing:4px;color:var(--gold);direction:ltr;margin:4px 0}
+.rfc small{display:block;color:var(--mut);font-size:12px;direction:ltr;word-break:break-all}
+.rfs{display:flex;justify-content:space-between;gap:8px;margin:14px 0}
+.rfs div{flex:1;text-align:center;background:#ffffff0d;border:1px solid var(--line);border-radius:14px;padding:10px 4px}
+.rfs b{display:block;font-size:22px;margin-top:2px}
 .vpn{color:var(--mut);font-size:13px;line-height:1.9;margin:12px 0}
 /* cart */
 .cartbar{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:0 0 14px;font-weight:700}
@@ -415,6 +422,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
       <button class="tile inf" onclick="soon()"><span>🏗️</span>زیرساخت</button>
       <button class="tile mini" onclick="soon()"><span>📊</span>آمار کشور</button>
       <button class="tile mini" onclick="soon()"><span>💵</span>وام</button>
+      <button class="tile mini ref" onclick="openRef()"><span>🎁</span>دعوت دوستان</button>
     </div>
   </section>
 
@@ -525,6 +533,24 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
     <p class="vpn">۳۱ روز، روی حساب شما و نه کشور؛ با تغییر کشور از میان نمی‌رود.</p>
     <p class="lbl" id="vipNote" style="text-align:center;line-height:1.9"></p>
     <button id="vipBuy" onclick="buyVip()">افزودن به سبد — 380,000 تومان</button>
+  </section>
+
+  <!-- دعوت دوستان -->
+  <section id="ref" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>دعوت دوستان</h2></div>
+    <div class="vpc">
+      <div><h3>🎁 دوستانت را بیاور</h3><p id="refRule">در حال دریافت…</p></div>
+      <div class="crown">🤝</div>
+    </div>
+    <div class="rfc"><span class="lbl">کد دعوت شما</span><b id="refCode">…</b><small id="refLink"></small></div>
+    <button onclick="refShare()">📨 ارسال به دوستان</button>
+    <button class="ghost" onclick="refCopy()">📋 کپی لینک</button>
+    <div class="rfs">
+      <div><span class="lbl">👥 دعوت‌شده</span><b id="refN">—</b></div>
+      <div><span class="lbl">✅ فعال‌شده</span><b id="refQ">—</b></div>
+      <div><span class="lbl">💎 دریافتی</span><b id="refE">—</b></div>
+    </div>
+    <p class="vpn">دوست شما وقتی «فعال» حساب می‌شود که با لینک شما وارد شود و اولین ساختمانش ساخته شود. پاداش خودکار به حساب هر دو واریز می‌شود. هر نفر فقط یک‌بار و فقط در ۳ روز اول ساخت حسابش می‌تواند دعوت‌شده‌ی کسی باشد.</p>
   </section>
 
   <!-- اقتصاد -->
@@ -682,6 +708,55 @@ const SITES = [
   { id: "oi-au", type: "o", fa: "سکوی شمال غربی استرالیا", ll: [114.5, -19.5], rate: 46 },
   { id: "oi-bs", type: "o", fa: "سکوی دریای بارنتس", ll: [57.3, 69.3], rate: 44 }
 ];
+
+/* ---------- دعوت دوستان ---------- */
+// آدرس مینی‌اپ ربات؛ لینک نهایی = REF_BASE + "ref_" + کد.  مثال: "https://t.me/MyBot?startapp=" یا "https://t.me/MyBot/app?startapp="
+const REF_BASE = "https://t.me/Worldwar2026warbot/play?startapp=";
+(function captureRef() {
+  try {
+    const sp = window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param;
+    const m = sp && /^ref_([A-Za-z0-9]{8})$/.exec(sp);
+    if (m) localStorage.setItem("ww_ref", m[1].toUpperCase());
+  } catch (_) {}
+})();
+async function claimRef() {
+  let c = null;
+  try { c = localStorage.getItem("ww_ref"); } catch (_) {}
+  if (!c) return;
+  try {
+    const { error } = await sb.rpc("claim_referral", { p_code: c });
+    if (!error) localStorage.removeItem("ww_ref");
+  } catch (_) {}
+}
+let refInfo = null;
+const refLink = () => (REF_BASE && refInfo ? REF_BASE + "ref_" + refInfo.code : "");
+async function openRef() {
+  screen("ref"); renderRef();
+  const { data, error } = await sb.rpc("ref_info");
+  if (!error && data) { refInfo = data; renderRef(); } else flash("دریافت اطلاعات دعوت ناموفق بود", 2500);
+}
+function renderRef() {
+  const i = refInfo;
+  $("refCode").textContent = i ? i.code : "…";
+  $("refN").textContent = i ? faNum(i.invited) : "—";
+  $("refQ").textContent = i ? faNum(i.qualified) : "—";
+  $("refE").textContent = i ? faNum(i.earned) : "—";
+  $("refLink").textContent = i ? (refLink() || "لینک ربات هنوز تنظیم نشده") : "";
+  $("refRule").innerHTML = i ? `هر دوست فعال: <b>${faNum(i.r_inv)} 💎</b> برای شما و <b>${faNum(i.r_new)} 💎</b> برای او` : "در حال دریافت…";
+}
+async function refCopy() {
+  const l = refLink();
+  if (!l) return flash("لینک ربات هنوز تنظیم نشده", 2500);
+  try { await navigator.clipboard.writeText(l); }
+  catch (_) { const t = document.createElement("textarea"); t.value = l; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (e) {} t.remove(); }
+  flash("لینک کپی شد ✅", 1800);
+}
+function refShare() {
+  const l = refLink();
+  if (!l) return flash("لینک ربات هنوز تنظیم نشده", 2500);
+  const u = "https://t.me/share/url?url=" + encodeURIComponent(l) + "&text=" + encodeURIComponent("بیا با هم World War بازی کنیم 🌍⚔️");
+  if (TG && TG.openTelegramLink) TG.openTelegramLink(u); else window.open(u, "_blank");
+}
 
 /* ---------- دانلود یک‌باره‌ی دیتای نقشه ---------- */
 const DL_KEY = "ww_mapdata_v1", TILE_CACHE = "tiles-v1";
@@ -1163,9 +1238,9 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap", "eco", "vip", "cart", "pay"]) $(s).hidden = s !== n;
-  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "vip" && n !== "cart" && n !== "pay";
-  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n)));
+  for (const s of ["pick", "home", "shop", "worldmap", "eco", "vip", "ref", "cart", "pay"]) $(s).hidden = s !== n;
+  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay";
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" ? "home" : n)));
   closeSettings();
   if (n !== "worldmap") closeMapSheet();
   window.scrollTo(0, 0);
@@ -1874,6 +1949,7 @@ async function doRoute(session) {
     return;
   }
   msg("");
+  await claimRef(); // اگر با لینک دعوت آمده، دعوت‌کننده ثبت شود
   if (country) {
     await dlGate(); // بار اول: دانلود یک‌باره‌ی دیتای نقشه
     const pf = await sb.from("profiles").select("player_no").maybeSingle();
