@@ -42,6 +42,9 @@ details{margin:6px 0 4px;border-top:1px solid var(--line);padding-top:6px}
 summary{cursor:pointer;color:var(--gold);padding:6px 0}
 .sep{height:1px;background:var(--line);margin:10px 0}
 .empty{text-align:center;color:var(--mut);padding:24px 0}
+button.danger{background:#b3372f;color:#fff}
+.dz{border-color:#b3372f;margin-top:28px}
+.dz b{display:block;color:var(--err);margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -82,6 +85,12 @@ summary{cursor:pointer;color:var(--gold);padding:6px 0}
       </select>
     </div>
     <div id="alist"></div>
+
+    <div class="box dz">
+      <b>⚠️ منطقه خطر</b>
+      <p class="lbl">همه‌ی کشورها آزاد می‌شوند و خزانه، الماس، ساختمان‌ها و تمام پیشرفت بازیکنان پاک می‌شود. حساب بازیکنان، بن‌ها، VIP و سفارش‌ها می‌ماند. این کار برگشت‌پذیر نیست.</p>
+      <button class="danger" id="rstBtn" onclick="resetGame()">🔄 ریست کامل بازی</button>
+    </div>
   </section>
 
   <div id="msg"></div>
@@ -118,7 +127,7 @@ async function enter() {
   search();
 }
 
-let free = [], timer = null;
+let free = [], timer = null, lastStats = null;
 async function loadFree() {
   const c = await sb.rpc("list_countries");
   free = c.error ? [] : c.data.filter((x) => !x.taken);
@@ -127,6 +136,7 @@ function searchSoon() { clearTimeout(timer); timer = setTimeout(search, 350); }
 
 async function stats() {
   const { data, error } = await sb.rpc("admin_stats");
+  lastStats = data || null;
   const box = $("astats");
   box.replaceChildren();
   if (error || !data) return;
@@ -264,6 +274,29 @@ function card(u) {
   };
   d.append(bb);
   return d;
+}
+
+async function resetGame() {
+  const st = lastStats || {};
+  const n = (x) => Number(x || 0).toLocaleString("en-US");
+  if (!confirm(
+    "⚠️ ریست کامل بازی\n\n" +
+    "همه‌ی کشورها آزاد می‌شوند و خزانه، الماس، ساختمان‌ها و تمام پیشرفت همه‌ی بازیکنان پاک می‌شود.\n\n" +
+    "الان: " + n(st.countries_taken) + " کشور گرفته‌شده، " + n(st.players) + " بازیکن، " + n(st.total_crystals) + " الماس.\n\n" +
+    "می‌ماند: حساب بازیکنان، بن‌ها، VIP و سفارش‌ها.\n\n" +
+    "این کار برگشت‌پذیر نیست. ادامه می‌دهید؟"
+  )) return;
+  const w = prompt("برای تأیید نهایی، کلمه‌ی «ریست» را تایپ کنید:");
+  if (w === null) return;
+  if (w.trim() !== "ریست") return flash("تأیید نشد؛ ریست انجام نشد", 3000);
+  const b = $("rstBtn"); b.disabled = true;
+  const { data, error } = await sb.rpc("admin_reset_game", { p_confirm: "RESET" });
+  b.disabled = false;
+  if (error) return flash(error.message, 4000);
+  flash("✅ بازی ریست شد · " + n(data && data.countries_freed) + " کشور آزاد شد", 5000);
+  await loadFree();
+  stats();
+  search();
 }
 
 (async () => {

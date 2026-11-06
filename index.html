@@ -1642,7 +1642,7 @@ if (!TG) {
     }
     const { error } = await sb.auth.getUser();
     if (error && (error.status === 401 || error.status === 403)) return location.reload();
-    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry(true)); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
+    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry(true)).then((ok) => { if (ok && !country) { flash("بازی ریست شده؛ دوباره کشور انتخاب کنید", 4000); route(true); } }); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
   }, 30000);
 }
 </script>
