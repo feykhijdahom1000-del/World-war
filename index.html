@@ -956,6 +956,25 @@ function showMk(mk, on) {
   if (on) { if (!mk._on) { mk.addTo(lmap); mk._on = true; } }
   else if (mk._on) { mk.remove(); mk._on = false; }
 }
+function inRing(r, x, y) {
+  let o = false;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const xi = r[i][0], yi = r[i][1], xj = r[j][0], yj = r[j][1];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) o = !o;
+  }
+  return o;
+}
+// جای جایگزین پرچم داخل خاک کشور؛ اگر وسط کشور معدن/تنگه باشد پرچم به این نقطه‌ها می‌رود (نه این‌که پنهان شود)
+function candPoints(bp, ll) {
+  if (!bp || bp.area < 6) return null; // کشورهای کوچک جابه‌جا نمی‌شوند
+  const [[w, s], [e, n]] = bp.box, N = 7, out = [];
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const x = w + ((i + 0.5) / N) * (e - w), y = s + ((j + 0.5) / N) * (n - s);
+    if (inRing(bp.ring, x, y)) out.push([x, y]);
+  }
+  const d = (a) => (a[0] - ll[0]) ** 2 + (a[1] - ll[1]) ** 2;
+  return out.sort((a, b) => d(a) - d(b)).slice(0, 12);
+}
 function buildMarkers() {
   marks.forEach((m) => m.remove());
   marks = []; ents = [];
@@ -972,7 +991,7 @@ function buildMarkers() {
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa;
     const mm = addMarker(m, ll), lm = addMarker(lb, ll, { anchor: "top", offset: [0, 17] });
     const prio = { mine: 1000, taken: 300, free: 100, none: 0 }[st] + (pp ? 200 : pr ? 100 : 0) + Math.min(bp.area, 400) / 10;
-    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h, mm, lm });
+    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h, mm, lm, alts: candPoints(bp, ll) });
   });
   STRAITS.forEach((s) => {
     const { m, h } = hexEl("⚓", "strait");
@@ -1018,16 +1037,23 @@ function declutter() {
     if (on && z < (e.minZ || 0)) on = false;
     if (on && angDist(ctr, e.ll) > 78) on = false;
     if (on) {
-      const p = lmap.project(e.ll);
-      if (p.x < -40 || p.y < -40 || p.x > W + 40 || p.y > H + 40) on = false;
+      const p0 = lmap.project(e.ll);
+      if (p0.x < -40 || p0.y < -40 || p0.x > W + 40 || p0.y > H + 40) on = false;
       else {
         const sm = e.kind === "r";
-        const hr = sm ? { x: p.x - 12, y: p.y - 13, w: 24, h: 26 } : { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
-        const lr = { x: p.x - e.lw / 2, y: p.y + (sm ? 12 : 16), w: e.lw, h: 14 };
         const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 3.5 : 2.2);
-        if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; }
-        else if (!placed.some((q) => hit(q, hr))) placed.push(hr);
-        else on = false;
+        const spots = e.alts ? [e.ll].concat(e.alts) : [e.ll];
+        let at = -1;
+        for (let k = 0; k < spots.length && at < 0; k++) {
+          const p = k ? lmap.project(spots[k]) : p0;
+          if (p.x < -20 || p.y < -20 || p.x > W + 20 || p.y > H + 20) continue;
+          const hr = sm ? { x: p.x - 12, y: p.y - 13, w: 24, h: 26 } : { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
+          const lr = { x: p.x - e.lw / 2, y: p.y + (sm ? 12 : 16), w: e.lw, h: 14 };
+          if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; at = k; }
+          else if (!placed.some((q) => hit(q, hr))) { placed.push(hr); at = k; }
+        }
+        if (at < 0) on = false;
+        else if (e.at !== at) { e.at = at; const ll = spots[at]; e.mm.setLngLat(ll); e.lm.setLngLat(ll); }
       }
     }
     showMk(e.mm, on);
