@@ -403,12 +403,20 @@ nav button i{position:relative}
 .ix-t2{flex:1;min-width:0}.ix-t2 b{font-size:19px;display:block}.ix-t2 small{color:var(--mut);font-size:12px}
 .ix-pw{text-align:center}.ix-pw b{display:block;font-size:30px;font-weight:800;color:var(--ac);direction:ltr;line-height:1}.ix-pw small{font-size:11px;color:var(--mut)}
 .ix-ss{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.ix-ss .ix-s{padding:10px}.ix-ss .ix-s b{font-size:16px}
+.ix-ss.f4{grid-template-columns:repeat(2,1fr)}.ix-r small.good{color:#7ee2b0}
 .ix-c .dots i.on{background:var(--ac)}
 .ix-d{margin:12px 0 0;font-size:13.5px;line-height:1.9;color:#c5d0df}
 .ix-c .buy{width:100%;padding:16px;font-size:16px;font-weight:800;color:#1b1405;background:linear-gradient(180deg,#f6d779,#c8962b);border:0;box-shadow:0 6px 18px #d4a73a55}
 .ix-c .buy.poor{color:#4a1414;background:linear-gradient(180deg,#f3b4a6,#c8695a)}
 .ix-c .up{width:100%}
 .sw{width:54px;height:30px;border-radius:15px}.sw::after{width:22px;height:22px}.sw.on::after{inset-inline-start:27px}
+.rm-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.rm-top b{font-size:18px}.rm-top small{color:var(--mut);font-size:13px}
+.rm-l{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;font-size:15px}.rm-l>b,.rm-l>.v{direction:ltr;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rm-l .g,.rm-l b.g{color:var(--ok)}.rm-l .r,.rm-l b.r{color:var(--err)}.rm-l .v{font-size:14px;font-weight:700}
+.rm-s{border-top:1px solid #ffffff1f;margin-top:10px;padding-top:12px}.rm-s h4{margin:0 0 4px;font-size:16px}
+.rm-d summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;cursor:pointer;list-style:none;font-weight:700}.rm-d summary::-webkit-details-marker{display:none}
+.rm-d summary b{direction:ltr;font-variant-numeric:tabular-nums}.rm-d .rm-l{padding:6px 0 6px 14px;color:var(--mut);font-size:14px}
+.rm-n{margin:6px 0 0;color:var(--mut);font-size:13px;line-height:1.9}
 .pwn{font-size:22px;font-weight:800;direction:ltr}.pwn.g{color:var(--ok)}.pwn.r{color:var(--err)}
 
 /* ================= VISUAL UPGRADE LAYER (CSS only) ================= */
@@ -2016,13 +2024,49 @@ const PLANTS = [
   { id: "hydro", fa: "نیروگاه برق‌آبی", icon: "💧", price: 2900000, power: 72, mins: 40, maint: 40215, desc: "برقی بیشتر از نیروگاه خورشیدی، اما ساختنش طولانی‌تر است. هر سطح برق بیشتری تولید می‌کند." },
   { id: "nuclear", fa: "نیروگاه هسته‌ای", icon: "☢️", price: 2600000, power: 90, mins: 36, maint: 0, uran: 43200, desc: "پربازده‌ترین نیروگاه. هزینه نگهداری ندارد، اما هر سطح روزانه 43,200 اورانیوم می‌سوزاند." }
 ];
+const FOODS = [
+  { id: "livestock", fa: "دامداری", icon: "🌾", isFood: true, price: 2000000, foodDay: 691200, use: 5, mins: 72, maint: 33178, desc: "غذا تولید می‌کند؛ هر سطح غذای بیشتری می‌دهد." },
+  { id: "farm", fa: "کشاورزی", icon: "🌾", isFood: true, price: 7200000, foodDay: 1036800, use: 16.5, mins: 120, maint: 0, desc: "بیشترین تولید غذا؛ برق بیشتری مصرف می‌کند. هر سطح غذای بیشتری می‌دهد." }
+];
+// ساختمان‌های منابع: تولید روزانه‌ی سطح ۱ و مصرف برق؛ هر سطح +۲۵٪ (سرور مرجع است: ستون‌های oil_prod / steel_prod / uranium_prod در infra_catalog)
+const RESB = [
+  { id: "steel_mine", fa: "معدن فولاد", icon: "⛏️", isRes: true, res: "steel", price: 720000, prod: 38880, use: 1.5, mins: 14, maint: 0, desc: "فولاد تولید می‌کند؛ هر سطح فولاد بیشتری می‌دهد." },
+  { id: "uranium_mine", fa: "معدن اورانیوم", icon: "🧪", isRes: true, res: "uranium", price: 1400000, prod: 77760, use: 3, mins: 25, maint: 0, desc: "اورانیوم تولید می‌کند؛ سوخت نیروگاه هسته‌ای را تأمین می‌کند." },
+  { id: "steel_ind", fa: "صنایع فولاد", icon: "🏭", isRes: true, res: "steel", price: 1500000, prod: 64800, use: 3.5, mins: 26, maint: 0, desc: "فولاد بیشتری از معدن تولید می‌کند، با مصرف برق بیشتر." },
+  { id: "oil_well", fa: "چاه نفت", icon: "🛢️", isRes: true, res: "oil", price: 3000000, prod: 466560, use: 7, mins: 48, maint: 0, desc: "بیشترین تولید نفت؛ برق زیادی مصرف می‌کند. هر سطح نفت بیشتری می‌دهد." }
+];
+const INF_ALL = PLANTS.concat(FOODS, RESB);
+const RES_IC = { oil: "🛢️", steel: "⛏️", uranium: "☢️" };
+const rdAt = (p, lv) => Math.round(p.prod * (1 + 0.25 * (lv - 1)));
+const abbr = (n) => { n = Number(n); const a = Math.abs(n); return a >= 1e9 ? +(n / 1e9).toFixed(1) + " میلیارد" : a >= 1e6 ? +(n / 1e6).toFixed(1) + " میلیون" : en(n); };
+const resNet = (k) => { const c = country || {}; return k === "food" ? Number(c.food_rate) || 0 : (Number(c[k + "_rate"]) || 0) - (k === "uranium" ? Number(c.uranium_burn) || 0 : 0); };
+const liveRes = (k) => { const c = country || {}; if (c[k] == null) return null; const t = c.res_tick ? new Date(c.res_tick).getTime() : Date.now(); return Math.max(0, Math.floor(Number(c[k]) + (resNet(k) * Math.max(0, Date.now() - t)) / 86400000)); };
+function resEntries(k) {
+  const on = (p) => infLv[p.id] && !infOff[p.id];
+  const inp = RESB.filter((p) => p.res === k && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], rdAt(p, infLv[p.id])]);
+  const out = k === "uranium" ? PLANTS.filter((p) => p.uran && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], p.uran * infLv[p.id]]) : [];
+  return [inp, out];
+}
+const RM_NOTE = { steel: "فولاد فعلاً مصرف پیوسته ندارد.", oil: "نفت فعلاً مصرف پیوسته ندارد.", uranium: "نیروگاه هسته‌ای روزانه اورانیوم می‌سوزاند؛ اگر اورانیوم تمام شود غیرفعال می‌شود." };
+function rmCard() {
+  const ks = [["steel", "فولاد", "⛏️"], ["oil", "نفت", "🛢️"], ["uranium", "اورانیوم", "☢️"]];
+  const top = ks.map(([k, fa, ic]) => { const n = resNet(k), v = liveRes(k); return `<div class="rm-l"><span>${ic} ${fa} <b data-res="${k}" data-ab="1">${v == null ? "—" : abbr(v)}</b></span><span class="v ${n < 0 ? "r" : n > 0 ? "g" : ""}">${n > 0 ? "+" : n < 0 ? "−" : ""}${abbr(Math.abs(n))} در روز</span></div>`; }).join("");
+  const det = (cls, sg, label, list) => list.length ? `<details class="rm-d" open><summary><span>${label} (${list.length} مورد)</span><b class="${cls}">${sg}${en(list.reduce((a, x) => a + x[1], 0))}</b></summary>${list.map(([n, v]) => `<div class="rm-l"><span>${n}</span><b class="${cls}">${sg}${en(v)}</b></div>`).join("")}</details>` : "";
+  const sec = ks.map(([k, fa, ic]) => { const [inp, out] = resEntries(k); return `<div class="rm-s"><h4>${ic} ${fa}</h4>${det("g", "+", "ورودی", inp)}${det("r", "−", "مصرف", out)}${inp.length || out.length ? "" : '<p class="rm-n">هنوز تولیدی ندارید.</p>'}<p class="rm-n">${RM_NOTE[k]}</p></div>`; }).join("");
+  return `<div class="ix-box"><div class="rm-top"><b>🔧 مواد خام</b><small>برای ارتش و صنعت</small></div>${top}${sec}</div>`;
+}
+const fdAt = (p, lv) => Math.round(p.foodDay * (1 + 0.25 * (lv - 1)));
+const fuAt = (p, lv) => +(p.use * (1 + 0.25 * (lv - 1))).toFixed(1);
+let infTab = "power";
+const liveFood = () => { const c = country || {}; if (c.food == null) return null; const r = Number(c.food_rate) || 0, t = c.food_tick ? new Date(c.food_tick).getTime() : Date.now(); return Math.floor(Number(c.food) + (r * Math.max(0, Date.now() - t)) / 86400000); };
+function setInfTab(t) { infTab = t; renderInf(); }
 const pwAt = (p, lv) => Math.round(p.power * (1 + 0.25 * (lv - 1)));
 const mtAt = (p, lv) => Math.round(p.maint * Math.pow(1.1, lv - 1));
 const useAt = (b, lv) => Math.max(1, Math.round((b.price / 150000) * lv)); // مصرف برق ساختمان‌های اقتصادی: فرمول موقت
 const en = (n) => Number(n).toLocaleString("en-US");
 const durEn = (ms) => dur(ms).replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
 const btEn = (m) => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + " ساعت" : "") + (h && r ? " " : "") + (r ? r + " دقیقه" : ""); };
-const INF_AC = { wind: "#38bdf8", solar: "#fbbf24", hydro: "#5b9dff", nuclear: "#3ddc97" };
+const INF_AC = { wind: "#38bdf8", solar: "#fbbf24", hydro: "#5b9dff", nuclear: "#3ddc97", livestock: "#e6a15a", farm: "#e6c25a" };
 const RES_AC = { oil: "#e0913a", steel: "#9fb4d6", uranium: "#3ddc97", food: "#e6c25a" };
 const acs = (c) => `--ac:${c};--a2:${c}33;--a3:${c}88`;
 let infLv = {}, infPend = {}, infUp = {}, infUpTo = {}, infEco = {}, infOff = {}, infSeen = false, infSettling = false;
@@ -2051,28 +2095,33 @@ async function loadInf() {
 }
 function renderInf() {
   const c = country || {};
-  const burn = PLANTS.reduce((a, p) => a + (p.uran && infLv[p.id] && !infOff[p.id] ? p.uran * infLv[p.id] : 0), 0);
+  const fr = Number(c.food_rate) || 0;
   $("iRes").innerHTML = INF_RES.map(([k, fa, ic]) => {
-    const v = c[k] == null ? null : Number(c[k]), b = k === "uranium" ? burn : 0;
-    return `<div class="ix-r" style="${acs(RES_AC[k])}"><div class="ix-ri">${ic}</div><span class="ix-rl">${fa}</span><b class="ix-rn">${v == null ? "—" : en(v)}</b><small class="${b ? "bad" : ""}">${b ? "▼ " + en(b) + " در روز" + (v ? " · ≈ " + (v / b).toFixed(1) + " روز" : "") : "&nbsp;"}</small></div>`;
+    const v = k === "food" ? liveFood() : liveRes(k), n = resNet(k);
+    return `<div class="ix-r" style="${acs(RES_AC[k])}"><div class="ix-ri">${ic}</div><span class="ix-rl">${fa}</span><b class="ix-rn"${k === "food" ? ' data-food="1"' : ` data-res="${k}"`}>${v == null ? "—" : en(v)}</b><small class="${n < 0 ? "bad" : n > 0 ? "good" : ""}">${n < 0 ? "▼ " + en(-n) + " در روز" + (v ? " · ≈ " + (v / -n).toFixed(1) + " روز" : "") : n > 0 ? "▲ " + en(n) + " در روز" : "&nbsp;"}</small></div>`;
   }).join("");
   const P = PLANTS.reduce((a, p) => a + (infLv[p.id] && !infOff[p.id] ? pwAt(p, infLv[p.id]) : 0), 0);
-  const C = BLD.reduce((a, b) => a + (infEco[b.id] ? useAt(b, infEco[b.id]) : 0), 0);
-  const cov = C ? Math.min(100, Math.round((P / C) * 100)) : 100, bal = P - C;
+  const C = BLD.reduce((a, b) => a + (infEco[b.id] ? useAt(b, infEco[b.id]) : 0), 0) + FOODS.concat(RESB).reduce((a, f) => a + (infLv[f.id] && !infOff[f.id] ? fuAt(f, infLv[f.id]) : 0), 0);
+  const cov = C ? Math.min(100, Math.round((P / C) * 100)) : 100;
   const col = cov >= 100 ? "#3ddc97" : cov >= 60 ? "#f0b43a" : "#ff6b6b", R = 54, L = 2 * Math.PI * R;
   $("iGrid").innerHTML = `<div class="ix-g"><div class="ix-ring"><svg viewBox="0 0 132 132"><circle class="ix-t" cx="66" cy="66" r="${R}"/><circle class="ix-p" cx="66" cy="66" r="${R}" style="color:${col};stroke:${col};stroke-dasharray:${((L * cov) / 100).toFixed(1)} ${L.toFixed(1)}"/></svg>
       <div class="ix-rc"><b style="color:${col}">${cov}<i>%</i></b><small>پوشش برق</small></div></div>
-    <div class="ix-gs"><div class="ix-s"><small>⚡ تولید</small><b>${en(P)}</b></div><div class="ix-s"><small>🏭 مصرف</small><b>${en(C)}</b></div><div class="ix-s"><small>تراز</small><b style="color:${col}">${bal > 0 ? "+" : bal < 0 ? "−" : ""}${en(Math.abs(bal))}</b></div></div></div>`
-    + (bal < 0 ? `<div class="ix-warn">⚠️ برق کم است؛ درآمد ساختمان‌ها حدود ${Math.round((1 - Math.max(0.3, P / C)) * 100)}% کم شده.</div>` : "");
-  $("iTabs").innerHTML = `<button class="tab on"><span>⚡ برق</span><small>${PLANTS.filter((p) => infLv[p.id]).length}/${PLANTS.length}</small></button>`
-    + [["🌾", "غذا"], ["⛏️", "منابع"], ["👥", "رفاه"], ["🛡️", "نظامی"]].map(([ic, fa]) => `<button class="tab" onclick="soon()"><span>${ic} ${fa}</span><small>به‌زودی</small></button>`).join("");
+    <div class="ix-gs"><div class="ix-s"><small>⚡ تولید</small><b>${en(P)}</b></div><div class="ix-s"><small>🏭 مصرف</small><b>${en(C)}</b></div></div></div>`;
+  const tb = (id, ic, fa, list) => `<button class="tab${infTab === id ? " on" : ""}" onclick="setInfTab('${id}')"><span>${ic} ${fa}</span><small>${list.filter((p) => infLv[p.id]).length}/${list.length}</small></button>`;
+  $("iTabs").innerHTML = tb("power", "⚡", "برق", PLANTS) + tb("food", "🌾", "غذا", FOODS) + tb("res", "⛏️", "منابع", RESB)
+    + [["👥", "رفاه"], ["🛡️", "نظامی"]].map(([ic, fa]) => `<button class="tab" onclick="soon()"><span>${ic} ${fa}</span><small>به‌زودی</small></button>`).join("");
+  const items = infTab === "food" ? FOODS : infTab === "res" ? RESB : PLANTS, lf = liveFood();
+  const foodBox = infTab === "food" ? `<div class="ix-box"><div class="lbl">🌾 انبار غذا</div><b class="ix-rn" data-food="1" style="margin-top:10px">${lf == null ? "—" : en(lf)}</b><small style="color:var(--mut);font-size:12px">${fr > 0 ? "▲ +" + en(fr) + " در روز" : "هنوز غذایی تولید نمی‌شود"}</small></div>` : "";
   const t = liveT(), now = Date.now();
-  $("iList").innerHTML = PLANTS.map((p) => {
+  $("iList").innerHTML = foodBox + (infTab === "res" ? rmCard() : "") + items.map((p) => {
     const lv = infLv[p.id] || 0, rdy = infPend[p.id], ur = infUp[p.id], off = !!infOff[p.id], nx = lv + 1;
     const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
     const sw = lv ? `<button class="sw${off ? "" : " on"}" role="switch" aria-checked="${!off}" aria-label="فعال یا غیرفعال" onclick="toggleInf('${p.id}',${off})"></button>` : "";
-    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
-    const stat = (v) => `<div class="ix-ss"><div class="ix-s"><small>⚡ برق</small><b>${en(pwAt(p, v))}</b></div><div class="ix-s"><small>${p.uran ? "☢️ سوخت/روز" : "🔧 نگهداری/روز"}</small><b>${p.uran ? "−" + en(p.uran * v) : "$" + en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>${RES_IC[p.res]} در روز</small></div>` : lv && !p.isFood ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
+    const statF = (v) => `<div class="ix-ss f4"><div class="ix-s"><small>🌾 غذا/روز</small><b>${en(fdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const statP = (v) => `<div class="ix-ss"><div class="ix-s"><small>⚡ برق</small><b>${en(pwAt(p, v))}</b></div><div class="ix-s"><small>${p.uran ? "☢️ سوخت/روز" : "🔧 نگهداری/روز"}</small><b>${p.uran ? "−" + en(p.uran * v) : "$" + en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const statR = (v) => `<div class="ix-ss"><div class="ix-s"><small>${RES_IC[p.res]} تولید/روز</small><b>${en(rdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const stat = p.isFood ? statF : p.isRes ? statR : statP;
     const cls = `ix-c${lv ? "" : " no"}${off ? " off" : ""}`;
     if (rdy || ur) {
       const end = rdy || ur, to = rdy ? 1 : infUpTo[p.id], st = end - vm(mAt(p, to)) * 60000;
@@ -2082,7 +2131,7 @@ function renderInf() {
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (end - st)) * 100))}%"></u></div>
         ${stat(to)}<button class="buy" onclick="speedInf('${p.id}',${end})">⚡ تکمیل سریع — <span class="spc">${en(spCost(end - now))}</span> 💎</button></div>`;
     }
-    return `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد." : ""}</p>
+    return `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? (p.isFood ? " ⏸ غیرفعال: غذا تولید نمی‌کند و هزینه‌ی نگهداری ندارد." : p.isRes ? " ⏸ غیرفعال: تولید نمی‌کند." : " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد.") : ""}</p>
       ${stat(lv ? Math.min(nx, MAXLV) : 1)}
       ${lv >= MAXLV ? '<button class="up" disabled>✅ حداکثر سطح</button>'
         : lv ? `<button class="buy${t < upCost(p, lv) ? " poor" : ""}" onclick="askInfUp('${p.id}')">⬆ ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
@@ -2094,20 +2143,22 @@ function infRows(p, lv, cost, t) {
   return {
     warn: poor ? "موجودی کافی نیست" : "",
     rows: [["💰 هزینه", priceH(pAt(p, lv))], ["⏱️ مدت", btEn(vm(mAt(p, lv)))],
-      ["⚡ برق", lv > 1 ? en(pwAt(p, lv - 1)) + " ← " + en(pwAt(p, lv)) : en(pwAt(p, 1)), "good"],
+      ...(p.isFood ? [["🌾 غذا در روز", lv > 1 ? en(fdAt(p, lv - 1)) + " ← " + en(fdAt(p, lv)) : en(fdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
+        : p.isRes ? [[RES_IC[p.res] + " تولید در روز", lv > 1 ? en(rdAt(p, lv - 1)) + " ← " + en(rdAt(p, lv)) : en(rdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
+        : [["⚡ برق", lv > 1 ? en(pwAt(p, lv - 1)) + " ← " + en(pwAt(p, lv)) : en(pwAt(p, 1)), "good"]]),
       ...(p.maint ? [["🔧 نگهداری روزانه", fmt(mtAt(p, lv))]] : []), ...(p.uran ? [["☢️ سوخت روزانه", "−" + en(p.uran * lv)]] : []),
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""]]
   };
 }
 function askInfBuy(id) {
-  const p = PLANTS.find((x) => x.id === id), t = liveT(); if (!p) return;
+  const p = INF_ALL.find((x) => x.id === id), t = liveT(); if (!p) return;
   openCm({ ic: p.icon, title: "ساخت " + p.fa, sub: "سطح 1", ...infRows(p, 1, pv(p.price), t), btn: "تأیید و شروع ساخت", ok: () => infDo("buy_infra", id, "🔨 ساخت شروع شد") });
 }
 function askInfUp(id) {
-  const p = PLANTS.find((x) => x.id === id), lv = infLv[id] || 0, t = liveT(); if (!p || !lv || lv >= MAXLV) return;
+  const p = INF_ALL.find((x) => x.id === id), lv = infLv[id] || 0, t = liveT(); if (!p || !lv || lv >= MAXLV) return;
   openCm({ ic: p.icon, title: "ارتقای " + p.fa, sub: "سطح " + en(lv) + " ← سطح " + en(lv + 1), ...infRows(p, lv + 1, upCost(p, lv), t), btn: "تأیید و شروع ارتقا", ok: () => infDo("upgrade_infra", id, "⬆ ارتقا شروع شد") });
 }
-const INF_ERR = Object.assign({}, UP_ERR, { ALREADY_OWNED: "این نیروگاه را قبلاً ساخته‌اید", BAD_INFRA: "نیروگاه نامعتبر است", NO_URANIUM: "اورانیوم کافی نیست" });
+const INF_ERR = Object.assign({}, UP_ERR, { ALREADY_OWNED: "این ساختمان را قبلاً ساخته‌اید", BAD_INFRA: "ساختمان نامعتبر است", NO_URANIUM: "اورانیوم کافی نیست" });
 async function infDo(fn, id, ok) {
   const { error } = await sb.rpc(fn, { p_id: id });
   if (error) return flash(INF_ERR[error.message] || error.message, 5000);
@@ -2124,7 +2175,9 @@ function speedInf(id, end) {
 }
 setInterval(() => {
   if ($("inf").hidden) return;
-  const now = Date.now();
+  const now = Date.now(), lf = liveFood();
+  if (lf != null) document.querySelectorAll("[data-food]").forEach((el) => { el.textContent = en(lf); });
+  document.querySelectorAll("[data-res]").forEach((el) => { const v = liveRes(el.dataset.res); if (v != null) el.textContent = el.dataset.ab ? abbr(v) : en(v); });
   document.querySelectorAll("#iList [data-rdy]").forEach((el) => {
     const rdy = +el.dataset.rdy, st = +el.dataset.st, cd = el.querySelector(".cd"), pg = el.querySelector(".pg"), sc = el.nextElementSibling;
     if (cd) cd.textContent = durEn(rdy - now);
