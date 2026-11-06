@@ -314,7 +314,8 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
     <!-- ۲. انتخاب کشور -->
   <section id="pick" hidden>
     <div class="phead"><span>🌐</span><b>انتخاب کشور</b></div>
-    <p class="lbl hint">هر کشور را بزنید تا جزئیاتش را ببینید، فرمانده؛ تا تأیید نکنید چیزی ثبت نمی‌شود. هر کشور فقط یک فرمانده دارد. اگر خواستید، بعداً می‌توانید کشور را ترک کنید و کشور دیگری بگیرید.</p>
+    <p class="lbl hint">هر کشور را بزنید تا جزئیاتش را ببینید، فرمانده؛ تا تأیید نکنید چیزی ثبت نمی‌شود. هر کشور فقط یک فرمانده دارد. اگر خواستید، بعداً می‌توانید کشور را ترک کنید و کشور دیگری بگیرید. کشورهای عادی رایگان‌اند؛ کشورهای Premium و Premium Plus باید خریداری شوند و بعد از تأیید ادمین وارد بازی می‌شوید.</p>
+    <button class="cartbar" id="pickOrders" onclick="openPay()" hidden><span>🧾 وضعیت سفارش کشور من</span></button>
     <div id="tiers"></div>
     <input id="q" type="search" placeholder="جستجوی کشور…" oninput="renderList()" autocomplete="off">
     <div id="list"></div>
@@ -395,13 +396,13 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
         <b>کشور Premium</b>
         <ul class="ft"><li>۲۵٪ خزانه بیشتر</li></ul>
         <div class="price">200,000 تومان</div>
-        <button onclick="addToCart('prem')">افزودن</button>
+        <button onclick="addToCart('prem')">خرید هنگام انتخاب کشور</button>
       </div>
       <div class="pk plus">
         <b>کشور Premium Plus</b>
         <ul class="ft"><li>۵۰٪ خزانه بیشتر</li><li>تنگه‌ی راهبردی</li></ul>
         <div class="price">280,000 تومان</div>
-        <button onclick="addToCart('plus')">افزودن</button>
+        <button onclick="addToCart('plus')">خرید هنگام انتخاب کشور</button>
       </div>
     </div>
 
@@ -439,7 +440,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
 
   <!-- پرداخت -->
   <section id="pay" hidden>
-    <div class="eh"><button class="ic g" onclick="screen('shop')" aria-label="بازگشت">→</button><h2>پرداخت</h2></div>
+    <div class="eh"><button class="ic g" onclick="payBack()" aria-label="بازگشت">→</button><h2>پرداخت</h2></div>
     <div class="pbox" id="payBox" hidden>
       <div class="prow"><b>💰 پرداخت</b><b class="amt" id="payTot"></b></div>
       <div id="payLines"></div>
@@ -967,7 +968,7 @@ function closeMapSheet() {
 function screen(n) {
   $("boot").hidden = true;
   for (const s of ["pick", "home", "shop", "worldmap", "eco", "vip", "cart", "pay"]) $(s).hidden = s !== n;
-  $("nav").hidden = n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "vip" && n !== "cart" && n !== "pay";
+  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "vip" && n !== "cart" && n !== "pay";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n)));
   closeSettings();
   if (n !== "worldmap") closeMapSheet();
@@ -1043,6 +1044,7 @@ function updateCartBadge() {
 }
 function addToCart(id) {
   if (!SHOP[id]) return;
+  if (id === "prem" || id === "plus") return flash("کشورهای ویژه هنگام «انتخاب کشور» خریداری می‌شوند", 3500);
   if (id === "vip" && cart.vip) flash("اشتراک VIP قبلاً در سبد است", 1800);
   else cart[id] = (cart[id] || 0) + 1;
   openCart();
@@ -1074,14 +1076,19 @@ const ORD_ERR = {
   BAD_ITEM: "کالای نامعتبر در سبد", BAD_QTY: "تعداد نامعتبر", EMPTY: "سبد خرید خالی است",
   NOT_PENDING: "این سفارش دیگر در انتظار پرداخت نیست", BAD_RECEIPT: "متن رسید خیلی کوتاه است",
   BAD_CODE: "کد هدیه نامعتبر است", CODE_USED: "این کد هدیه قبلاً استفاده شده", NOT_FOR_ORDER: "این کد برای کالاهای این سفارش نیست",
-  ALREADY_DISCOUNTED: "برای این سفارش قبلاً کد هدیه ثبت شده"
+  ALREADY_DISCOUNTED: "برای این سفارش قبلاً کد هدیه ثبت شده",
+  HAS_COUNTRY: "شما از قبل کشور دارید؛ برای کشور ویژه ابتدا کشور فعلی را ترک کنید",
+  COUNTRY_TAKEN: "این کشور گرفته شده است", COUNTRY_RESERVED: "این کشور در حال خرید توسط فرمانده دیگری است",
+  BAD_COUNTRY: "کشور نامعتبر است", ONE_COUNTRY_ONLY: "در هر سفارش فقط یک کشور می‌توان خرید",
+  HAS_PREMIUM_ORDER: "سفارش کشور شما در انتظار تأیید ادمین است",
+  PREMIUM_REQUIRES_PURCHASE: "این کشور ویژه است و باید خریداری شود"
 };
 let orders = [], ordersAt = 0, payOrder = null;
 const notifTried = new Set(); // هر سفارش در هر بار باز شدن برنامه فقط یک‌بار برای ادمین فرستاده می‌شود
 const orderErr = (m) => ORD_ERR[m] || m;
 const leftMs = (o) => o.secs_left * 1000 - (Date.now() - ordersAt);
 const isActive = (o) => o.status === "pending" && leftMs(o) > 0;
-const orderName = (o) => (o.items || []).map((i) => (SHOP[i.id] ? SHOP[i.id].fa : i.id) + (i.qty > 1 ? " × " + faNum(i.qty) : "")).join("، ");
+const orderName = (o) => (o.items || []).map((i) => (SHOP[i.id] ? SHOP[i.id].fa : i.id) + (i.country ? " — " + cname(i.country) : "") + (i.qty > 1 ? " × " + faNum(i.qty) : "")).join("، ");
 
 async function cartPay() {
   const items = Object.entries(cart).map(([id, qty]) => ({ id, qty }));
@@ -1115,7 +1122,7 @@ function renderPay() {
   if (payOrder) {
     const o = payOrder, its = o.items || [];
     $("payTot").textContent = toman(o.amount - o.discount);
-    $("payLines").innerHTML = its.map((i) => `<div class="pln"><span>${SHOP[i.id] ? SHOP[i.id].fa : i.id}${i.qty > 1 ? " × " + faNum(i.qty) : ""}</span><b>${toman((SHOP[i.id] ? SHOP[i.id].price : 0) * i.qty)}</b></div>`).join("")
+    $("payLines").innerHTML = its.map((i) => `<div class="pln"><span>${SHOP[i.id] ? SHOP[i.id].fa : i.id}${i.country ? " — " + cname(i.country) : ""}${i.qty > 1 ? " × " + faNum(i.qty) : ""}</span><b>${toman((SHOP[i.id] ? SHOP[i.id].price : 0) * i.qty)}</b></div>`).join("")
       + (o.discount > 0 ? `<div class="pln"><span>🎁 کد هدیه</span><b>-${toman(o.discount)}</b></div>` : "");
     $("payNum").textContent = PAY_CARD; $("payOwner").textContent = PAY_OWNER;
     $("payGift").disabled = !!o.gift_code; payBtns();
@@ -1395,6 +1402,7 @@ async function loadPick() {
   hideSheet();
   renderTiers();
   renderList();
+  pickOrdersCheck();
 }
 
 function renderTiers() {
@@ -1431,15 +1439,15 @@ function renderList() {
     const t = tiers[c.tier];
     const b = document.createElement("button");
     b.className = "c " + c.tier + (picked === c.code ? " on" : "");
-    b.disabled = c.taken;
+    b.disabled = c.taken || c.reserved;
     const f = document.createElement("span"); f.className = "fl"; f.textContent = flagOf(c.code);
     const n = document.createElement("span"); n.textContent = c.name_fa;
-    const s = document.createElement("small"); s.textContent = c.taken ? "گرفته شده" : seaText(c);
+    const s = document.createElement("small"); s.textContent = c.taken ? "گرفته شده" : c.reserved ? "در حال خرید توسط فرمانده دیگر" : seaText(c);
     b.append(f, n, s);
-    if (!c.taken && c.tier !== "normal") {
+    if (!c.taken && !c.reserved && c.tier !== "normal") {
       const bd = document.createElement("span"); bd.className = "bd"; bd.textContent = t.label + TIER_ICON[c.tier];
       const d = document.createElement("small");
-      d.textContent = "+" + t.bonus_pct + "٪ پول · " + t.assets + " دارایی از روز نخست";
+      d.textContent = "+" + t.bonus_pct + "٪ پول · " + t.assets + " دارایی از روز نخست · " + toman(SHOP[premId(c.tier)].price);
       b.append(bd, d);
     }
     b.onclick = () => { picked = c.code; openSheet(c); renderList(); };
@@ -1455,8 +1463,8 @@ function openSheet(c) {
   $("st").textContent = fmt(t.start_treasury);
   $("si").textContent = fmt(c.start_income);
   $("sp").textContent = c.start_power;
-  $("sperk").textContent = t.perk_fa;
-  $("go").textContent = "تأیید و شروع بازی";
+  $("sperk").textContent = t.perk_fa + (c.tier !== "normal" ? " — بعد از پرداخت و تأیید ادمین وارد بازی می‌شوید." : "");
+  $("go").textContent = c.tier === "normal" ? "تأیید و شروع بازی" : "خرید این کشور — " + toman(SHOP[premId(c.tier)].price);
   $("sheet").hidden = false;
   document.body.classList.add("has-sheet");
 }
@@ -1467,6 +1475,26 @@ function hideSheet() {
 }
 function closeSheet() { hideSheet(); renderList(); }
 
+const premId = (tier) => (tier === "premium_plus" ? "plus" : "prem");
+const cname = (code) => { const c = all.find((x) => x.code === code); return flagOf(code) + " " + (c ? c.name_fa : code); };
+async function buyCountry(c) {
+  const { error } = await sb.rpc("create_order", { p_items: [{ id: premId(c.tier), qty: 1, country: c.code }] });
+  $("go").disabled = false;
+  if (error && error.message !== "HAS_PENDING") { await loadPick(); return flash(orderErr(error.message), 5000); }
+  if (error) flash(orderErr(error.message), 4000);
+  hideSheet();
+  openPay();
+}
+async function pickOrdersCheck() {
+  const b = $("pickOrders"); b.hidden = true;
+  if (!authed) return;
+  const { data } = await sb.from("my_orders").select("id").in("status", ["pending", "receipt"]).limit(1);
+  b.hidden = !(data && data.length);
+}
+function payBack() {
+  if (country) return screen("shop");
+  loadPick().then(() => screen("pick"));
+}
 async function confirmPick() {
   if (!picked) return;
   const code = picked;
@@ -1476,13 +1504,15 @@ async function confirmPick() {
     const { data: ss } = await sb.auth.getSession();
     if (!ss.session) { $("go").disabled = false; return; }
   }
+  const pc = all.find((x) => x.code === code);
+  if (pc && pc.tier !== "normal") return buyCountry(pc);
   const { error } = await sb.rpc("choose_country", { p_code: code });
   $("go").disabled = false;
   if (error) {
     // شاید کشور از قبل دارید و فقط صفحه اشتباهی بالا آمده؛ در این حالت مستقیم برو خانه
     if ((await loadCountry()) && country) { hideSheet(); msg(""); return route(true); }
     await loadPick();
-    return flash(error.message, 6000);
+    return flash(orderErr(error.message), 6000);
   }
   msg("");
   hideSheet();
@@ -1605,7 +1635,11 @@ if (!TG) {
   boot();
   setInterval(render, 1000);
   setInterval(async () => {
-    if (!country) return;
+    if (!country) {
+      if (!authed) return;
+      if ((await loadCountry(true)) && country) { flash("🎉 کشور شما تأیید شد و وارد بازی شدید!", 4000); route(true); }
+      return;
+    }
     const { error } = await sb.auth.getUser();
     if (error && (error.status === 401 || error.status === 403)) return location.reload();
     Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry(true)); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
