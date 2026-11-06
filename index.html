@@ -562,6 +562,35 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .pkh button{width:auto;margin:0;padding:6px 14px}
 #chPkL{overflow-y:auto;overscroll-behavior:contain;flex:1;min-height:120px}
 /* ================= END UPGRADE LAYER ================= */
+
+/* ===== UK-style home ===== */
+.li{display:inline-grid;place-items:center;width:18px;height:18px;margin-inline-end:6px;vertical-align:-3px;font-style:normal;color:#9fb4d0}
+.li.gold{color:var(--gold)}.li svg{width:100%;height:100%}
+.pill{display:inline-flex;align-items:center}
+.ic.g svg{width:22px;height:22px;color:var(--gold)}
+.ic.g{background:#0d1626b3;border-color:#ffffff26}
+.flag{width:68px;height:68px;font-size:38px;border:3px solid #fff;box-shadow:0 0 0 3px var(--gold),0 10px 24px #000b}
+.main{background:linear-gradient(180deg,#0a111dcc,#0a111dee),linear-gradient(180deg,#183059,#0a111d)}
+.main::after{height:150px;opacity:.55;background:linear-gradient(180deg,#1b3560aa,#070d18)}
+.gp{background:#070d1acc}
+.gp .stats>div{min-width:0}.gp .stats .lbl{white-space:nowrap;font-size:13px}
+.cr{display:flex;align-items:center;gap:6px}.cr .gm{width:26px;height:26px;color:#5fd0ff;flex:none}
+nav button i svg{width:26px;height:26px;display:block;margin:0 auto 2px}
+nav button[data-t=home].on i svg{width:30px;height:30px;margin:0 auto}
+nav button i{font-size:0}nav button.on{color:var(--gold)}
+nav button[data-t=home].on{font-size:12px}
+.bdg{font-size:10px}
+.tile{--t1:#16314f;--t2:#0a111d;height:132px;padding:0;display:block;border-radius:22px;border:1px solid #ffffff26;text-shadow:none;
+ background:radial-gradient(120% 80% at 85% 0,color-mix(in srgb,var(--ta) 35%,transparent),transparent 60%),repeating-linear-gradient(0deg,#ffffff08 0 1px,transparent 1px 14px),linear-gradient(160deg,var(--t1),var(--t2))}
+.tile::before{background:linear-gradient(0deg,#050a14e6 0,#050a1455 55%,transparent)}
+.tile.army{--t1:#17365a}.tile.war{--t1:#5a2227}.tile.eco{--t1:#144a37}.tile.dip{--t1:#3d2d6e}.tile.mkt{--t1:#6a4c14}.tile.inf{--t1:#15505a}
+.tile .tl{position:absolute;left:16px;bottom:14px;font-size:19px;font-weight:800;z-index:1;direction:rtl}
+.tile .tb{position:absolute;right:12px;bottom:12px;width:52px;height:58px;display:grid;place-items:center;z-index:1;font-style:normal;color:var(--ta);
+ background:linear-gradient(160deg,#1a2a46,#0b1426);border:1.5px solid var(--ta);border-radius:14px 14px 26px 26px;box-shadow:0 4px 14px #0009,0 0 14px color-mix(in srgb,var(--ta) 40%,transparent)}
+.tile .tb svg{width:28px;height:28px}
+.tile.mini{height:88px}.tile.mini .tb{width:40px;height:44px;border-radius:12px;bottom:10px}.tile.mini .tb svg{width:22px;height:22px}
+.tile.mini .tl{font-size:16px;bottom:12px}
+.tile.ref{--ta:var(--gold)}.tile.mini:not(.ref){--ta:#7aa7ff}
 </style>
 </head>
 <body>
@@ -608,19 +637,19 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
   <section id="home" hidden>
     <div class="top">
       <div class="flag" id="flag"></div>
-      <button class="ic g" onclick="soon()" aria-label="رتبه‌بندی">🏆</button>
-      <button class="ic g" onclick="soon()" aria-label="اعلان‌ها">🔔</button>
+      <button class="ic g" onclick="soon()" aria-label="رتبه‌بندی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M12 14v4M8 21h8M9.5 18h5"/></svg></button>
+      <button class="ic g" onclick="soon()" aria-label="اعلان‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg></button>
       <div class="sp"></div>
-      <button class="ic g" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
+      <button class="ic g" onclick="openSettings()" aria-label="تنظیمات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8l1.5 2.4 2.8-.6.9 2.7 2.7.9-.6 2.8 2.4 1.5-2.4 1.5.6 2.8-2.7.9-.9 2.7-2.8-.6L12 21.2l-1.5-2.4-2.8.6-.9-2.7-2.7-.9.6-2.8L2.3 12l2.4-1.5-.6-2.8 2.7-.9.9-2.7 2.8.6z"/></svg></button>
     </div>
     <div class="main">
       <div class="mh">
         <div class="name" id="name"></div>
-        <span class="pill">🆔 <span id="pno" dir="ltr"></span></span>
+        <span class="pill"><i class="li"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></i><span id="pno" dir="ltr"></span></span>
       </div>
       <div class="vipbd" id="vipBd" hidden onclick="openVip()"><span class="vbc">👑</span><div><b>VIP</b><small id="vipBdT"></small></div></div>
       <div class="gp">
-        <div class="lbl">🪙 موجودی خزانه</div>
+        <div class="lbl"><i class="li gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.5"/></svg></i>موجودی خزانه</div>
         <div class="trow">
           <div class="big" id="treasury"></div>
           <i class="vl"></i>
@@ -628,21 +657,21 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
         </div>
         <div class="lbl inc">درآمد روزانه: <span id="income" dir="ltr"></span></div>
         <div class="stats">
-          <div><span class="lbl">⚔️ قدرت نظامی</span><b id="power"></b></div>
-          <div><span class="lbl">⏱️ درآمد هر ساعت</span><b id="hourly" class="grn"></b></div>
+          <div><span class="lbl"><i class="li"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l9 9M4 4v4l9 9M20 4l-9 9M20 4v4l-9 9M6 18l-2 2M18 18l2 2M3 15l3 3M21 15l-3 3"/></svg></i>قدرت نظامی</span><b id="power"></b></div>
+          <div><span class="lbl"><i class="li"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></i>درآمد ساعتی</span><b id="hourly" class="grn"></b></div>
         </div>
       </div>
     </div>
     <div class="tiles">
-      <button class="tile army" onclick="soon()"><span>🛡️</span>ارتش</button>
-      <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
-      <button class="tile eco" onclick="openEco()"><span>📈</span>اقتصاد</button>
-      <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
-      <button class="tile mkt" onclick="soon()"><span>🏪</span>بازار جهانی</button>
-      <button class="tile inf" onclick="openInf()"><span>🏗️</span>زیرساخت</button>
-      <button class="tile mini" onclick="soon()"><span>📊</span>آمار کشور</button>
-      <button class="tile mini" onclick="soon()"><span>💵</span>وام</button>
-      <button class="tile mini ref" onclick="openRef()"><span>🎁</span>دعوت دوستان</button>
+      <button class="tile army" onclick="soon()"><b class="tl">ارتش</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></i></button>
+      <button class="tile war" onclick="soon()"><b class="tl">جنگ</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg></i></button>
+      <button class="tile eco" onclick="openEco()"><b class="tl">اقتصاد</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M5 16l4-5 4 3 6-8M15 6h4v4"/></svg></i></button>
+      <button class="tile dip" onclick="soon()"><b class="tl">دیپلماسی</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h11a2 2 0 012 2v2H9M7 3a2 2 0 00-2 2v13a3 3 0 003 3h9a3 3 0 003-3V7M9 11h7M9 15h5"/></svg></i></button>
+      <button class="tile mkt" onclick="soon()"><b class="tl">بازار جهانی</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0M5 12v8h14v-8M10 20v-5h4v5"/></svg></i></button>
+      <button class="tile inf" onclick="openInf()"><b class="tl">زیرساخت</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V9l6-4v16M10 21V3l10 5v13M2 21h20M13 11h4M13 15h4"/></svg></i></button>
+      <button class="tile mini" onclick="soon()"><b class="tl">آمار کشور</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></i></button>
+      <button class="tile mini" onclick="soon()"><b class="tl">وام</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v.1M18 14.5v.1"/></svg></i></button>
+      <button class="tile mini ref" onclick="openRef()"><b class="tl">دعوت دوستان</b><i class="tb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8c-2-4-6-3-5 0 .5 1 3 1 5 0zM12 8c2-4 6-3 5 0-.5 1-3 1-5 0z"/></svg></i></button>
     </div>
   </section>
 
@@ -866,11 +895,11 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 
 <div id="chBar" hidden><input id="chIn" maxlength="300" placeholder="پیام بنویسید…" autocomplete="off"><button id="chSend" onclick="chatSend()">ارسال</button></div>
 <nav id="nav" hidden><div>
-  <button data-t="chat" onclick="openChat()"><i>💬<b class="bdg" id="chBdg" hidden></b></i>ارتباطات</button>
-  <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
-  <button data-t="home" class="on" onclick="screen('home')"><i>🏠</i>خانه</button>
-  <button data-t="worldmap" onclick="screen('worldmap')"><i>🌍</i>نقشه جهان</button>
-  <button data-t="shop" onclick="screen('shop')"><i>🛒</i>فروشگاه</button>
+  <button data-t="chat" onclick="openChat()"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h.1M12 10.5h.1M15.5 10.5h.1" stroke-width="2.6"/></svg><b class="bdg" id="chBdg" hidden></b></i>ارتباطات</button>
+  <button onclick="soon()"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0M5 12v8h14v-8M10 20v-5h4v5"/></svg></i>بازار جهانی</button>
+  <button data-t="home" class="on" onclick="screen('home')"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9.5V21h5v-6h4v6h5V9.5"/></svg></i>خانه</button>
+  <button data-t="worldmap" onclick="screen('worldmap')"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></i>نقشه جهان</button>
+  <button data-t="shop" onclick="screen('shop')"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h3l2 12h11l2-8H7M10 20h.1M17 20h.1" stroke-width="2.2"/></svg></i>فروشگاه</button>
 </div></nav>
 <div id="setBack" onclick="closeSettings()"></div>
 <div id="setSheet" role="dialog" aria-label="تنظیمات"><div class="in">
@@ -2344,7 +2373,7 @@ function render() {
   const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
   $("treasury").textContent = "$" + live.toLocaleString("en-US");
-  $("crystals").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
+  $("crystals").innerHTML = '<svg class="gm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z M2 9h20M9 3l-2 6 5 12 5-12-2-6"/></svg>' + Number(country.crystals || 0).toLocaleString("en-US");
   $("hFlag").textContent = flagOf(country.code);
   $("hName").textContent = country.name;
   $("hT").textContent = "$" + live.toLocaleString("en-US");
