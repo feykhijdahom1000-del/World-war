@@ -249,6 +249,13 @@ body{background:radial-gradient(120% 55% at 50% -8%,#1d3560 0,transparent 62%),r
 .main>*{position:relative;z-index:1}
 .mh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .mh .name{margin:0;font-size:21px;font-weight:800;text-shadow:0 2px 10px #000a}
+.vipbd{display:flex;align-items:center;gap:14px;margin:0 0 14px;padding:16px 18px;border-radius:18px;background:linear-gradient(150deg,#6b5320,#2a2008 75%);border:1px solid var(--gold);color:#ffe9a8;cursor:pointer;box-shadow:0 0 22px #d4af3744}
+.vipbd[hidden]{display:none}
+.vipbd .vbc{font-size:44px;line-height:1;filter:drop-shadow(0 0 8px #d4af37aa)}
+.vipbd b{display:block;font-size:22px;letter-spacing:1px;color:var(--gold)}
+.vipbd small{display:block;margin-top:2px;font-size:13px;color:#e8d9aa}
+s.old{text-decoration:line-through;opacity:.55;font-weight:400;margin-inline-end:6px}
+i.vi{display:inline-block;font-style:normal;font-size:10px;font-weight:800;line-height:1;padding:2px 5px;border-radius:6px;background:var(--gold);color:#2a2008;margin-inline-start:5px;vertical-align:middle;white-space:nowrap}
 .pill{font-size:13px;color:var(--txt);background:#ffffff14;border:1px solid #ffffff33;border-radius:20px;padding:5px 12px;white-space:nowrap}
 .gp{background:#ffffff14;border:1px solid #ffffff2e;border-radius:22px;padding:16px;-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);box-shadow:inset 0 1px 0 #ffffff33,0 8px 24px #0006}
 .trow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 8px}
@@ -363,6 +370,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
         <div class="name" id="name"></div>
         <span class="pill">🆔 <span id="pno" dir="ltr"></span></span>
       </div>
+      <div class="vipbd" id="vipBd" hidden onclick="openVip()"><span class="vbc">👑</span><div><b>VIP</b><small id="vipBdT"></small></div></div>
       <div class="gp">
         <div class="lbl">🪙 موجودی خزانه</div>
         <div class="trow">
@@ -398,7 +406,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
       <span class="tag">پیشنهاد ستاد</span>
       <h3>اشتراک VIP</h3>
       <p>پیشرفت سریع‌تر و امکانات ویژه، به مدت ۳۱ روز</p>
-      <ul class="ft"><li>پیشرفت سریع‌تر</li><li>ساخت‌وساز همزمان</li><li>۸۰٪ زمان ساخت</li><li>۱۰ کریستال در روز</li></ul>
+      <ul class="ft"><li>پیشرفت سریع‌تر</li><li>ساخت‌وساز همزمان</li><li>۸۰٪ زمان ساخت</li><li>۲۰٪ تخفیف قیمت ساختمان‌ها</li><li>۱۰ کریستال در روز</li></ul>
       <div class="price">380,000 تومان</div>
       <button onclick="openVip()">مشاهده مزایا و خرید</button>
     </div>
@@ -1220,6 +1228,7 @@ async function cancelOrder() {
 const VIP_ROWS = [
   ["⚡", "زمان ساخت و آموزش", "۱۰۰٪", "۸۰٪"],
   ["🧪", "زمان تحقیقات", "۱۰۰٪", "۸۰٪"],
+  ["💰", "قیمت ساختمان‌ها", "۱۰۰٪", "۸۰٪"],
   ["🏗️", "صف ساخت", "۱", "۲"],
   ["🔬", "صف تحقیق", "۱", "۲"],
   ["💎", "کریستال روزانه", "۰", "۱۰"],
@@ -1232,6 +1241,7 @@ async function openVip() {
   renderVip();
   const { data } = await sb.from("profiles").select("vip_until").maybeSingle();
   vipUntil = data && data.vip_until ? new Date(data.vip_until).getTime() : null;
+  setVip(data && data.vip_until);
   renderVip();
 }
 function renderVip() {
@@ -1274,7 +1284,19 @@ const LV_F = [1, 1.4, 2, 3, 4];
 const pAt = (b, lv) => Math.round(b.price * Math.pow(1.1, lv - 1));
 const iAt = (b, lv) => Math.round(b.income * Math.pow(1.1, lv - 1));
 const mAt = (b, lv) => Math.round(b.mins * LV_F[lv - 1]);
-const upCost = (b, lv) => pAt(b, lv + 1);
+const upCost = (b, lv) => pv(pAt(b, lv + 1));
+let vipMul = 1; // ۰٫۸ وقتی VIP فعال است (فقط نمایش؛ سرور مرجع است)
+const vm = (m) => Math.round(m * vipMul);
+let vipOn = false, vipPm = 1; // ۰٫۸ = ۲۰٪ تخفیف قیمت ساختمان برای VIP (باید با سرور یکی باشد)
+const pv = (p) => Math.round(p * vipPm);
+const priceH = (p) => vipOn ? `<s class="old">${fmt(p)}</s>${fmt(pv(p))}<i class="vi">👑 VIP</i>` : fmt(p);
+function setVip(until) {
+  const t = until ? new Date(until).getTime() : 0;
+  vipOn = t > Date.now(); vipMul = vipPm = vipOn ? 0.8 : 1;
+  const el = $("vipBd"); if (!el) return;
+  el.hidden = !vipOn;
+  if (vipOn) $("vipBdT").textContent = "فعال تا " + new Date(t).toLocaleDateString("fa-IR-u-ca-persian", { year: "numeric", month: "long", day: "numeric" });
+}
 // زمان ساخت سطح ۱ (دقیقه)؛ مقدار اصلی از ستون build_minutes سرور خوانده می‌شود
 const BUILD_MIN = {bank: 5, tourism: 7, insurance: 10, retail: 10, realestate: 15, telecom: 14, transport: 16, media: 18, stock: 20, shipping: 22, auto: 24, fund: 25, airline: 25, tech: 30, pharma: 30};
 BLD.forEach((b) => { b.mins = BUILD_MIN[b.id]; });
@@ -1292,7 +1314,7 @@ function dur(ms) {
   return (p(Math.floor(t / 3600)) + ":" + p(Math.floor((t % 3600) / 60)) + ":" + p(t % 60)).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 }
 function paybackText(b) {
-  const d = b.price / b.income, days = Math.floor(d), h = Math.round((d - days) * 24);
+  const d = pv(b.price) / b.income, days = Math.floor(d), h = Math.round((d - days) * 24);
   return faNum(days) + " روز و " + faNum(h) + " ساعت";
 }
 
@@ -1303,7 +1325,8 @@ async function openEco() {
 }
 async function loadEco() {
   await Promise.resolve(sb.rpc("settle_all")).catch(() => {}); // ساختمان‌های تمام‌شده را حساب کن
-  const [cat, own] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited,upgrade_to,upgrade_ready_at")]);
+  const [cat, own, prf] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited,upgrade_to,upgrade_ready_at"), sb.from("profiles").select("vip_until").maybeSingle()]);
+  setVip(prf.data && prf.data.vip_until);
   owned = {}; pending = {}; upg = {}; upgTo = {};
   if (cat.error || own.error) {
     $("eMsg").textContent = "اطلاعات اقتصاد از سرور دریافت نشد؛ مطمئن شوید فایل‌های SQL اجرا شده‌اند.";
@@ -1321,7 +1344,7 @@ async function loadEco() {
     });
   }
   renderEco();
-  await loadCountry(); render();
+  await loadCountry(); renderEco(); render();
 }
 function setEcoCat(c) { ecoCat = c; renderEco(); }
 function setEcoSort(k) { ecoSort = k; renderEco(); }
@@ -1347,7 +1370,7 @@ function renderEco() {
     const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
     const head = `<div class="bh"><div class="eic">${b.icon}</div><div class="bt"><b>${b.fa}</b><div class="dots">${dots}</div></div>`;
     if (rdy) {
-      const st = rdy - b.mins * 60000;
+      const st = rdy - vm(b.mins) * 60000;
       return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>🔨 در حال ساخت</small></div></div>
         <div class="tmr"><small>⏱️ زمان باقی‌مانده تا پایان ساخت</small><b class="cd" dir="ltr">${dur(rdy - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
@@ -1355,7 +1378,7 @@ function renderEco() {
         <button class="buy" onclick="speedUp('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(rdy - now))}</span> 💎</button></div>`;
     }
     if (upg[b.id]) {
-      const ur = upg[b.id], to = upgTo[b.id], ust = ur - mAt(b, to) * 60000;
+      const ur = upg[b.id], to = upgTo[b.id], ust = ur - vm(mAt(b, to)) * 60000;
       return `<div class="bc build" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>⬆ در حال ارتقا به سطح ${faNum(to)}</small></div></div>
         <div class="tmr"><small>⬆ زمان باقی‌مانده تا پایان ارتقا</small><b class="cd" dir="ltr">${dur(ur - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - ust) / (ur - ust)) * 100))}%"></u></div>
@@ -1364,9 +1387,9 @@ function renderEco() {
     }
     return `<div class="bc${has ? "" : " no"}">${head}
         <div class="bi">${has ? `<b>${fmt(iAt(b, lv))}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
-      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(mAt(b, lv + 1))}</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(b.mins)}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
-      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) ? " poor" : ""}" onclick="askUp('${b.id}')">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${fmt(upCost(b, lv))}</span></button>`)
-            : `<button class="buy${t < b.price ? " poor" : ""}" onclick="askBuy('${b.id}')">شروع ساخت — <span dir="ltr">${fmt(b.price)}</span></button>`}
+      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(vm(mAt(b, lv + 1)))}</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(vm(b.mins))}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
+      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) ? " poor" : ""}" onclick="askUp('${b.id}')">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${priceH(pAt(b, lv + 1))}</span></button>`)
+            : `<button class="buy${t < pv(b.price) ? " poor" : ""}" onclick="askBuy('${b.id}')">شروع ساخت — <span dir="ltr">${priceH(b.price)}</span></button>`}
     </div>`;
   }).join("");
 }
@@ -1405,15 +1428,15 @@ function closeCm() { $("cm").hidden = true; cmAct = null; }
 function cmConfirm() { const f = cmAct; closeCm(); if (f) f(); }
 function askBuy(id) {
   const b = BLD.find((x) => x.id === id); if (!b) return;
-  const t = liveT(), poor = t < b.price;
+  const t = liveT(), poor = t < pv(b.price);
   openCm({
     ic: b.icon, title: "ساخت " + b.fa, sub: "سطح ۱",
     rows: [
-      ["💰 هزینه ساخت", fmt(b.price)],
-      ["⏱️ مدت ساخت", buildText(b.mins)],
+      ["💰 هزینه ساخت", priceH(b.price)],
+      ["⏱️ مدت ساخت", buildText(vm(b.mins))],
       ["📈 سود روزانه", fmt(b.income), "good"],
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
-      ...(poor ? [] : [["🧾 موجودی بعد از ساخت", fmt(t - b.price)]])
+      ...(poor ? [] : [["🧾 موجودی بعد از ساخت", fmt(t - pv(b.price))]])
     ],
     warn: poor ? "موجودی کافی نیست" : "",
     btn: "تأیید و شروع ساخت",
@@ -1426,8 +1449,8 @@ function askUp(id) {
   openCm({
     ic: b.icon, title: "ارتقای " + b.fa, sub: "سطح " + faNum(lv) + " ← سطح " + faNum(lv + 1),
     rows: [
-      ["💰 هزینه ارتقا", fmt(cost)],
-      ["⏱️ زمان ارتقا", buildText(mAt(b, lv + 1))],
+      ["💰 هزینه ارتقا", priceH(pAt(b, lv + 1))],
+      ["⏱️ زمان ارتقا", buildText(vm(mAt(b, lv + 1)))],
       ["📈 سود روزانه", fmt(iAt(b, lv)) + " → " + fmt(iAt(b, lv + 1)), "good"],
       ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
       ...(poor ? [] : [["🧾 موجودی بعد از ارتقا", fmt(t - cost)]])
@@ -1437,7 +1460,7 @@ function askUp(id) {
     ok: () => upgradeBuilding(id, {})
   });
 }
-const UP_ERR = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", NOT_OWNED: "این ساختمان را هنوز نساخته‌اید", STILL_BUILDING: "ساختمان هنوز ساخته نشده", ALREADY_UPGRADING: "این ساختمان در حال ارتقا است", MAX_LEVEL: "ساختمان در حداکثر سطح است", NO_FUNDS: "موجودی کافی نیست", NOT_PENDING: "این ارتقا در حال انجام نیست", NO_CRYSTALS: "الماس کافی ندارید" };
+const UP_ERR = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", NOT_OWNED: "این ساختمان را هنوز نساخته‌اید", STILL_BUILDING: "ساختمان هنوز ساخته نشده", ALREADY_UPGRADING: "این ساختمان در حال ارتقا است", MAX_LEVEL: "ساختمان در حداکثر سطح است", NO_FUNDS: "موجودی کافی نیست", NOT_PENDING: "این ارتقا در حال انجام نیست", NO_CRYSTALS: "الماس کافی ندارید", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
 async function upgradeBuilding(id, btn) {
   btn.disabled = true;
   const { error } = await sb.rpc("upgrade_building", { p_id: id });
@@ -1646,6 +1669,7 @@ async function loadCountry(silent) {
   if (error) { if (!silent) msg(error.message); return false; }
   if (/Failed to fetch/.test($("msg").textContent)) msg(""); // خطای شبکه‌ی قبلی دیگر معتبر نیست
   country = data;
+  try { const pf = await sb.from("profiles").select("vip_until").maybeSingle(); setVip(pf.data && pf.data.vip_until); } catch (e) {}
   return true;
 }
 function render() {
