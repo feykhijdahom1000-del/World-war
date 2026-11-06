@@ -342,6 +342,15 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
 .tmr{text-align:center;margin:16px 0 8px}.tmr small{color:var(--mut);font-size:13px}
 .tmr b{display:block;margin-top:2px;font-size:36px;letter-spacing:2px;color:var(--gold);font-variant-numeric:tabular-nums}
 .pgb.big{height:14px;border-radius:7px;margin:0 0 6px}.pgb.big .pg{border-radius:7px}
+.res4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.rs span{font-size:14px}.rs small{display:block;color:var(--mut);font-size:12px;min-height:16px;direction:ltr;text-align:right}.rs small.bad{color:var(--err)}
+.pwr .pgb{margin:10px 0 8px;height:12px}.pwr .pgb .pg{transition:none}.pwr .pgb.low .pg{background:linear-gradient(90deg,#d9534f,#ff8a8a)}
+.pw2{display:flex;justify-content:space-between;font-size:14px;color:var(--mut)}.pw2 b{color:var(--txt)}
+.sw{flex:none;position:relative;width:48px;height:28px;padding:0;margin:0 4px;border-radius:14px;background:#ffffff1f;border:1px solid #ffffff2e}
+.sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:20px;height:20px;border-radius:50%;background:#8b9bb0;transition:inset-inline-start .15s}
+.sw.on{background:#3ddc9733;border-color:var(--ok)}.sw.on::after{inset-inline-start:23px;background:var(--ok)}
+.bc.off .eic,.bc.off .bt b{opacity:.5}
+.pwn{font-size:22px;font-weight:800;direction:ltr}.pwn.g{color:var(--ok)}.pwn.r{color:var(--err)}
 </style>
 </head>
 <body>
@@ -419,7 +428,7 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
       <button class="tile eco" onclick="openEco()"><span>📈</span>اقتصاد</button>
       <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
       <button class="tile mkt" onclick="soon()"><span>🏪</span>بازار جهانی</button>
-      <button class="tile inf" onclick="soon()"><span>🏗️</span>زیرساخت</button>
+      <button class="tile inf" onclick="openInf()"><span>🏗️</span>زیرساخت</button>
       <button class="tile mini" onclick="soon()"><span>📊</span>آمار کشور</button>
       <button class="tile mini" onclick="soon()"><span>💵</span>وام</button>
       <button class="tile mini ref" onclick="openRef()"><span>🎁</span>دعوت دوستان</button>
@@ -569,6 +578,16 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
     <div class="syn" id="eSyn"></div>
     <div id="eList"></div>
     <div class="lbl" id="eMsg" style="text-align:center;line-height:1.9"></div>
+  </section>
+
+  <!-- زیرساخت -->
+  <section id="inf" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>زیرساخت</h2></div>
+    <div class="ecard"><div class="lbl">📦 ذخایر کشور</div><div class="res4" id="iRes"></div></div>
+    <div class="ecard" style="margin-top:12px"><div class="lbl">⚡ شبکه‌ی برق</div><div class="pwr" id="iGrid"></div></div>
+    <div class="tabs" id="iTabs"></div>
+    <div id="iList"></div>
+    <div class="lbl" id="iMsg" style="text-align:center;line-height:1.9"></div>
   </section>
 
   <div id="msg"></div>
@@ -1238,9 +1257,9 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap", "eco", "vip", "ref", "cart", "pay"]) $(s).hidden = s !== n;
-  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay";
-  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" ? "home" : n)));
+  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "vip", "ref", "cart", "pay"]) $(s).hidden = s !== n;
+  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay";
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" ? "home" : n)));
   closeSettings();
   if (n !== "worldmap") closeMapSheet();
   window.scrollTo(0, 0);
@@ -1761,6 +1780,123 @@ function ecoTick() {
   }
 }
 setInterval(ecoTick, 1000);
+
+/* ---------- زیرساخت: ذخایر و برق ---------- */
+// کاتالوگ فقط برای نمایش است؛ سرور مرجع است (جدول country_infra و RPCهای buy_infra / upgrade_infra / speedup_infra).
+// قیمت و زمان سطح‌ها با همان pAt و mAt اقتصاد حساب می‌شود. ذخایر اولیه‌ی هر کشور ۱۰۰٬۰۰۰ است (ستون‌های countries).
+const INF_RES = [["oil", "نفت", "🛢️"], ["steel", "فولاد", "⛏️"], ["uranium", "اورانیوم", "☢️"], ["food", "غذا", "🌾"]];
+const PLANTS = [
+  { id: "wind", fa: "نیروگاه بادی", icon: "🌬️", price: 700000, power: 36, mins: 16, maint: 19354, desc: "ارزان‌ترین نیروگاه؛ سوختی نمی‌سوزاند. هر سطح برق بیشتری تولید می‌کند." },
+  { id: "solar", fa: "نیروگاه خورشیدی", icon: "☀️", price: 2000000, power: 54, mins: 29, maint: 27648, desc: "برقی بیشتر از نیروگاه بادی، با قیمتی کمتر از نیروگاه برق‌آبی. هر سطح برق بیشتری تولید می‌کند." },
+  { id: "hydro", fa: "نیروگاه برق‌آبی", icon: "💧", price: 2900000, power: 72, mins: 40, maint: 40215, desc: "برقی بیشتر از نیروگاه خورشیدی، اما ساختنش طولانی‌تر است. هر سطح برق بیشتری تولید می‌کند." },
+  { id: "nuclear", fa: "نیروگاه هسته‌ای", icon: "☢️", price: 2600000, power: 90, mins: 36, maint: 0, uran: 43200, desc: "پربازده‌ترین نیروگاه. هزینه نگهداری ندارد، اما هر سطح روزانه ۴۳٬۲۰۰ اورانیوم می‌سوزاند." }
+];
+const pwAt = (p, lv) => Math.round(p.power * (1 + 0.25 * (lv - 1)));
+const mtAt = (p, lv) => Math.round(p.maint * Math.pow(1.1, lv - 1));
+const useAt = (b, lv) => Math.max(1, Math.round((b.price / 150000) * lv)); // مصرف برق ساختمان‌های اقتصادی: فرمول موقت
+const kfmt = (n) => (n >= 1e6 ? faNum(+(n / 1e6).toFixed(1)) + " میلیون" : faNum(Math.floor(n)));
+let infLv = {}, infPend = {}, infUp = {}, infUpTo = {}, infEco = {}, infOff = {}, infSeen = false, infSettling = false;
+
+async function openInf() { screen("inf"); renderInf(); await loadInf(); }
+async function loadInf() {
+  await Promise.resolve(sb.rpc("settle_all")).catch(() => {});
+  const [r, e] = await Promise.all([sb.from("country_infra").select("infra_id,level,ready_at,upgrade_to,upgrade_ready_at,active"), sb.from("country_buildings").select("building_id,level,ready_at")]);
+  const was = infOff;
+  infLv = {}; infPend = {}; infUp = {}; infUpTo = {}; infEco = {}; infOff = {};
+  if (r.error || e.error) $("iMsg").textContent = "اطلاعات زیرساخت از سرور دریافت نشد؛ مطمئن شوید فایل SQL زیرساخت اجرا شده است.";
+  else {
+    $("iMsg").textContent = "";
+    const now = Date.now();
+    r.data.forEach((x) => {
+      if (x.active === false) infOff[x.infra_id] = 1;
+      const t = new Date(x.ready_at).getTime();
+      if (t > now) infPend[x.infra_id] = t; else infLv[x.infra_id] = Number(x.level);
+      if (x.upgrade_to && x.upgrade_ready_at) { const u = new Date(x.upgrade_ready_at).getTime(); if (u > now) { infUp[x.infra_id] = u; infUpTo[x.infra_id] = Number(x.upgrade_to); } }
+    });
+    if (infSeen && PLANTS.some((p) => p.uran && infOff[p.id] && !was[p.id])) flash("⚠️ اورانیوم تمام شد؛ نیروگاه هسته‌ای غیرفعال شد", 4000);
+    infSeen = true;
+    e.data.forEach((x) => { if (new Date(x.ready_at).getTime() <= now) infEco[x.building_id] = Number(x.level); });
+  }
+  await loadCountry(); render(); renderInf();
+}
+function renderInf() {
+  const c = country || {};
+  const burn = PLANTS.reduce((a, p) => a + (p.uran && infLv[p.id] && !infOff[p.id] ? p.uran * infLv[p.id] : 0), 0);
+  $("iRes").innerHTML = INF_RES.map(([k, fa, ic]) => `<div class="eb rs"><span class="lbl">${ic} ${fa}</span><b>${c[k] == null ? "—" : kfmt(Number(c[k]))}</b><small${k === "uranium" && burn ? ' class="bad"' : ""}>${k === "uranium" && burn ? "▼ " + faNum(burn) + " در روز" : ""}</small></div>`).join("");
+  const P = PLANTS.reduce((a, p) => a + (infLv[p.id] && !infOff[p.id] ? pwAt(p, infLv[p.id]) : 0), 0);
+  const C = BLD.reduce((a, b) => a + (infEco[b.id] ? useAt(b, infEco[b.id]) : 0), 0);
+  const pct = P ? Math.round((C / P) * 100) : C ? 100 : 0, bal = P - C;
+  $("iGrid").innerHTML = `<div class="pwn ${bal >= 0 ? "g" : "r"}">${bal >= 0 ? "+" : "−"}${faNum(Math.abs(bal))}</div>
+    <div class="pgb${bal < 0 ? " low" : ""}"><u class="pg" style="width:${Math.min(100, pct)}%"></u></div>
+    <div class="pw2"><span>مصرف <b>${faNum(C)}</b> · ${faNum(pct)}٪</span><span>تولید <b>${faNum(P)}</b></span></div>${bal < 0 ? `<p class="lbl" style="color:var(--err);margin:8px 0 0;line-height:1.8">⚠️ برق کم است؛ درآمد ساختمان‌ها حدود ${faNum(Math.round((1 - Math.max(0.3, P / C)) * 100))}٪ کم شده.</p>` : ""}`;
+  $("iTabs").innerHTML = `<button class="tab on"><span>⚡ برق</span><small>${faNum(PLANTS.filter((p) => infLv[p.id]).length)}/${faNum(PLANTS.length)}</small></button>`
+    + [["🌾", "غذا"], ["⛏️", "منابع"], ["👥", "رفاه"], ["🛡️", "نظامی"]].map(([ic, fa]) => `<button class="tab" onclick="soon()"><span>${ic} ${fa}</span><small>به‌زودی</small></button>`).join("");
+  const t = liveT(), now = Date.now();
+  const stats = (p, lv) => `<span class="chp g">⚡ ${faNum(pwAt(p, lv))} برق</span>` + (p.maint ? `<span class="chp">🔧 <span dir="ltr">${fmt(mtAt(p, lv))}</span> در روز</span>` : "") + (p.uran ? `<span class="chp">☢️ <span dir="ltr">−${faNum(p.uran * lv)}</span> در روز</span>` : "");
+  $("iList").innerHTML = PLANTS.map((p) => {
+    const lv = infLv[p.id] || 0, rdy = infPend[p.id], ur = infUp[p.id];
+    const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
+    const off = !!infOff[p.id];
+    const head = `<div class="bh"><div class="eic">${p.icon}</div><div class="bt"><b>${p.fa}</b><div class="dots">${dots}</div></div>${lv ? `<button class="sw${off ? "" : " on"}" role="switch" aria-checked="${!off}" aria-label="فعال یا غیرفعال" onclick="toggleInf('${p.id}',${off})"></button>` : ""}${lv ? `<div class="bi"><b>${faNum(pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}</div>`;
+    if (rdy || ur) {
+      const end = rdy || ur, to = rdy ? 1 : infUpTo[p.id], st = end - vm(mAt(p, to)) * 60000;
+      return `<div class="bc build${off ? " off" : ""}" data-rdy="${end}" data-st="${st}">${head}<p class="lbl" style="margin:10px 0 0">${rdy ? "🔨 در حال ساخت" : "⬆ در حال ارتقا به سطح " + faNum(to)}</p>
+        <div class="tmr"><small>⏱️ زمان باقی‌مانده</small><b class="cd" dir="ltr">${dur(end - now)}</b></div>
+        <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (end - st)) * 100))}%"></u></div>
+        <div class="chips">${stats(p, to)}</div>
+        <button class="buy" onclick="speedInf('${p.id}',${end})">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(end - now))}</span> 💎</button></div>`;
+    }
+    const nx = lv + 1;
+    return `<div class="bc${lv ? "" : " no"}${off ? " off" : ""}">${head}<p class="lbl" style="margin:10px 0 0;line-height:1.8">${p.desc}${off ? " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد." : ""}</p>
+      <div class="chips">${stats(p, lv ? nx > MAXLV ? lv : nx : 1)}<span class="chp">⏱️ ${buildText(vm(mAt(p, lv ? Math.min(nx, MAXLV) : 1)))}</span></div>
+      ${lv >= MAXLV ? '<button class="up" disabled>✅ حداکثر سطح</button>'
+        : lv ? `<button class="buy${t < upCost(p, lv) ? " poor" : ""}" onclick="askInfUp('${p.id}')">⬆ ارتقا به سطح ${faNum(nx)} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
+        : `<button class="buy${t < pv(p.price) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}</div>`;
+  }).join("");
+}
+function infRows(p, lv, cost, t) {
+  const poor = t < cost;
+  return {
+    warn: poor ? "موجودی کافی نیست" : "",
+    rows: [["💰 هزینه", priceH(pAt(p, lv))], ["⏱️ مدت", buildText(vm(mAt(p, lv)))],
+      ["⚡ برق", lv > 1 ? faNum(pwAt(p, lv - 1)) + " ← " + faNum(pwAt(p, lv)) : faNum(pwAt(p, 1)), "good"],
+      ...(p.maint ? [["🔧 نگهداری روزانه", fmt(mtAt(p, lv))]] : []), ...(p.uran ? [["☢️ سوخت روزانه", "−" + faNum(p.uran * lv)]] : []),
+      ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""]]
+  };
+}
+function askInfBuy(id) {
+  const p = PLANTS.find((x) => x.id === id), t = liveT(); if (!p) return;
+  openCm({ ic: p.icon, title: "ساخت " + p.fa, sub: "سطح ۱", ...infRows(p, 1, pv(p.price), t), btn: "تأیید و شروع ساخت", ok: () => infDo("buy_infra", id, "🔨 ساخت شروع شد") });
+}
+function askInfUp(id) {
+  const p = PLANTS.find((x) => x.id === id), lv = infLv[id] || 0, t = liveT(); if (!p || !lv || lv >= MAXLV) return;
+  openCm({ ic: p.icon, title: "ارتقای " + p.fa, sub: "سطح " + faNum(lv) + " ← سطح " + faNum(lv + 1), ...infRows(p, lv + 1, upCost(p, lv), t), btn: "تأیید و شروع ارتقا", ok: () => infDo("upgrade_infra", id, "⬆ ارتقا شروع شد") });
+}
+const INF_ERR = Object.assign({}, UP_ERR, { ALREADY_OWNED: "این نیروگاه را قبلاً ساخته‌اید", BAD_INFRA: "نیروگاه نامعتبر است", NO_URANIUM: "اورانیوم کافی نیست" });
+async function infDo(fn, id, ok) {
+  const { error } = await sb.rpc(fn, { p_id: id });
+  if (error) return flash(INF_ERR[error.message] || error.message, 5000);
+  flash(ok, 2000); await loadInf();
+}
+async function toggleInf(id, on) {
+  const { error } = await sb.rpc("toggle_infra", { p_id: id, p_on: on });
+  if (error) return flash(INF_ERR[error.message] || error.message, 4000);
+  flash(on ? "▶ فعال شد" : "⏸ غیرفعال شد", 1500); await loadInf();
+}
+function speedInf(id, end) {
+  const cost = spCost(end - Date.now());
+  if (confirm("با " + faNum(cost) + " الماس همین حالا تمام شود؟")) infDo("speedup_infra", id, "⚡ تمام شد");
+}
+setInterval(() => {
+  if ($("inf").hidden) return;
+  const now = Date.now();
+  document.querySelectorAll("#iList [data-rdy]").forEach((el) => {
+    const rdy = +el.dataset.rdy, st = +el.dataset.st, cd = el.querySelector(".cd"), pg = el.querySelector(".pg"), sc = el.nextElementSibling;
+    if (cd) cd.textContent = dur(rdy - now);
+    if (pg) pg.style.width = Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100)) + "%";
+  });
+  if (!infSettling && Object.values(infPend).concat(Object.values(infUp)).some((x) => x <= now)) { infSettling = true; loadInf().catch(() => {}).then(() => { infSettling = false; }); }
+}, 1000);
 
 const fmt = (n) => "$" + Number(n).toLocaleString("en-US");
 const TIER_ICON = { normal: "", premium: " 👑", premium_plus: " 💎" };
