@@ -894,7 +894,8 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
     <div class="def">🔒 دفاعش ناشناخته است؛ با شناسایی ماهواره‌ای روشن می‌شود</div>
     <button class="gb" onclick="soon()">شناسایی ماهواره‌ای دفاع 🛰️</button>
     <p class="hint2" id="rhint"></p>
-    <button class="gb" onclick="soon()">فرمان روی نقشه 🧭</button>
+    <div class="hint2" id="rmine"></div>
+    <button class="gb" onclick="openDp()">اعزام یگان 🧭</button>
   </div></div>
   <div id="mapSheet" hidden><div class="in">
     <div class="hd">
@@ -953,6 +954,19 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
   <div class="cmwarn" id="pmWarn" hidden></div>
   <button class="buy" id="pmGo" onclick="pmGo()">تولید</button>
   <button class="ghost" onclick="closePm()">انصراف</button>
+</div></div>
+<div id="dp" hidden onclick="if(event.target===this)closeDp()"><div class="cmbox pmbox">
+  <div class="cmh"><div class="eic">🧭</div><div><b id="dpTitle"></b><small id="dpSub"></small></div></div>
+  <div class="pmlim" id="dpUnits"></div>
+  <div class="pmq">
+    <button class="pmb" onclick="dpStep(-1)" aria-label="کمتر">−</button>
+    <input id="dpQty" type="number" inputmode="numeric" min="1" value="1" oninput="dpInput()">
+    <button class="pmb" onclick="dpStep(1)" aria-label="بیشتر">+</button>
+    <button class="pmb" onclick="dpMax()">حداکثر</button>
+  </div>
+  <div class="cmwarn" id="dpWarn" hidden></div>
+  <button class="buy" id="dpGo" onclick="dpGo()">اعزام</button>
+  <button class="ghost" onclick="closeDp()">انصراف</button>
 </div></div>
 <div id="toast"></div>
 <div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2 id="notgT">این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl" id="notgP">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
@@ -1527,6 +1541,7 @@ function openStrait(s) {
   showSheet();
 }
 function openResource(r) {
+  curSite = r; renderSiteMine(); if (!UC) loadArmy().then(renderSiteMine).catch(() => {});
   if (selCode) setSel(null);
   markEnt("r:" + r.id);
   const t = RES[r.type], own = owners[r.id], oc = own && byCode[own];
@@ -1535,7 +1550,7 @@ function openResource(r) {
   $("rcf").hidden = !oc;
   $("rcn").textContent = oc ? oc.name_fa : "بدون مالک";
   $("rout").textContent = (r.rate * 86400).toLocaleString("en-US") + " " + t.unit + " در روز";
-  $("rhint").textContent = "برای تسخیر، " + t.attacker + " را روی نقشه به این‌جا بفرستید و همان‌جا نگه دارید، فرمانده؛ در ساعت جنگ به دست ما می‌افتد.";
+  $("rhint").textContent = "برای تسخیر، " + t.attacker + " (یا یگان هوایی) به این‌جا اعزام کنید؛ بعد از رسیدن، اگر آسیب مجموع یگان‌های شما از مدافع بیشتر باشد معدن به دست ما می‌افتد، فرمانده.";
   $("mapSheet").hidden = true;
   $("resSheet").hidden = false;
   $("worldmap").classList.add("sheet-open");
@@ -2323,7 +2338,7 @@ const ARM_ERR = {
   NO_FUNDS: "موجودی کافی نیست", NO_STEEL: "فولاد کافی نیست", NO_OIL: "نفت کافی نیست", NO_URANIUM: "اورانیوم کافی نیست",
   NO_CRYSTALS: "الماس کافی ندارید", NOT_PENDING: "این سفارش دیگر در صف نیست"
 };
-let UC = null, UL = [], UQ = [], AS = null, armTab = "land", armSettling = false;
+let UC = null, UL = [], UQ = [], UM = [], curSite = null, AS = null, armTab = "land", armSettling = false;
 const unitTotal = (id) => UL.filter((r) => r.unit_id === id).reduce((a, r) => a + Number(r.qty), 0);
 const armTotal = (st) => Number(st.base_power || 0) + Object.values(st.power || {}).reduce((a, b) => a + Number(b), 0);
 function armPower() {
@@ -2332,16 +2347,17 @@ function armPower() {
 async function openArmy() { screen("army"); renderArmy(); await loadArmy(); }
 async function loadArmy() {
   await Promise.resolve(sb.rpc("settle_all")).catch(() => {});
-  const [cat, us, qs, st] = await Promise.all([
+  const [cat, us, qs, st, mv] = await Promise.all([
     UC ? { data: UC } : sb.from("unit_catalog").select("*").eq("enabled", true).order("sort"),
     sb.from("country_units").select("unit_id,loc,qty"),
     sb.from("unit_queue").select("id,unit_id,factory_id,qty,start_at,ready_at").eq("done", false).order("ready_at"),
-    sb.rpc("army_status")
+    sb.rpc("army_status"),
+    sb.from("unit_moves").select("id,unit_id,qty,from_loc,to_loc,arrive_at").eq("done", false).order("arrive_at")
   ]);
   const bad = cat.error || us.error || qs.error || st.error || !st.data || !cat.data;
   if (bad) { $("aMsg").textContent = "اطلاعات ارتش از سرور دریافت نشد؛ مطمئن شوید فایل SQL ارتش اجرا شده است."; return; }
   $("aMsg").textContent = "";
-  UC = cat.data; UL = us.data; UQ = qs.data; AS = st.data;
+  UC = cat.data; UL = us.data; UQ = qs.data; AS = st.data; UM = (mv && mv.data) || [];
   await loadCountry(); render();
   $("power").textContent = armTotal(AS);
   renderArmy();
@@ -2379,7 +2395,7 @@ function renderArmy() {
 
   if (gn > 0) {
     const home = units.reduce((a, u) => a + UL.filter((r) => r.unit_id === u.id && r.loc === "home").reduce((x, r) => x + Number(r.qty), 0), 0);
-    h += `<div class="ix-box"><div class="lbl">🗺️ محل استقرار</div><div class="ar-lr"><span>🏠 خانه · ${c.name || ""}</span><b>${en(home)} یگان</b></div><button class="ghost" style="margin-top:10px" onclick="soon()">اعزام از خانه</button></div>`;
+    h += armDeployBox(units, home);
   }
 
   const q = UQ.filter((x) => ids.includes(x.unit_id));
@@ -2487,6 +2503,99 @@ setInterval(() => {
   });
   if (!armSettling && UQ.some((q) => new Date(q.ready_at).getTime() <= now)) {
     armSettling = true; loadArmy().catch(() => {}).then(() => { armSettling = false; });
+  }
+}, 1000);
+
+
+/* ---------- ارتش: اعزام روی نقشه و تسخیر معدن‌ها ---------- */
+Object.assign(ARM_ERR, { NOT_ALLOWED: "این یگان به این مقصد نمی‌رود", NO_UNITS: "یگان کافی در مبدأ نیست", BAD_LOC: "مقصد نامعتبر است", SAME_LOC: "مبدأ و مقصد یکی است" });
+const SITE_OK = { u: ["land", "air"], s: ["land", "air"], o: ["sea", "air"] };
+const MOVE_MIN = { land: 10, sea: 15, air: 5 };
+const siteName = (loc) => { const s = SITES.find((x) => x.id === loc); return loc === "home" ? "🏠 خانه" : s ? RES[s.type].icon + " " + s.fa : loc; };
+function armDeployBox(units, home) {
+  const ids = units.map((u) => u.id), rows = {};
+  UL.filter((r) => ids.includes(r.unit_id) && r.loc !== "home" && r.loc !== "transit" && Number(r.qty) > 0).forEach((r) => { (rows[r.loc] = rows[r.loc] || []).push(r); });
+  let h = `<div class="ix-box"><div class="lbl">🗺️ محل استقرار</div><div class="ar-lr"><span>🏠 خانه · ${(country || {}).name || ""}</span><b>${en(home)} یگان</b></div>`;
+  Object.entries(rows).forEach(([loc, rs]) => {
+    h += `<div class="ar-lr"><span>${siteName(loc)}</span><b>${rs.map((r) => unitIc(r.unit_id) + " " + en(r.qty)).join(" ")}</b></div><button class="ghost" style="margin-top:6px" onclick="recallFrom('${loc}','${armTab}')">↩️ بازگشت به خانه</button>`;
+  });
+  UM.filter((m) => ids.includes(m.unit_id)).forEach((m) => {
+    const t = new Date(m.arrive_at).getTime();
+    h += `<div class="ar-lr" data-arr="${t}"><span>🚚 ${unitIc(m.unit_id)} ${en(m.qty)} ← ${siteName(m.from_loc)} → ${siteName(m.to_loc)}</span><b class="cd" dir="ltr">${durEn(t - Date.now())}</b></div>`;
+  });
+  return h + `<button class="ghost" style="margin-top:10px" onclick="screen('worldmap')">🧭 اعزام روی نقشه</button></div>`;
+}
+function renderSiteMine() {
+  const el = $("rmine"); if (!el) return;
+  if (!curSite) { el.innerHTML = ""; return; }
+  const rs = UL.filter((r) => r.loc === curSite.id && Number(r.qty) > 0), mv = UM.filter((m) => m.to_loc === curSite.id);
+  let h = "";
+  if (rs.length) h += `🪖 یگان‌های شما این‌جا: ${rs.map((r) => unitIc(r.unit_id) + " " + en(r.qty)).join(" ")} <button class="gb" onclick="recallFrom('${curSite.id}')">↩️ بازگشت همه به خانه</button>`;
+  mv.forEach((m) => { const t = new Date(m.arrive_at).getTime(); h += `<div data-arr="${t}">🚚 ${unitIc(m.unit_id)} ${en(m.qty)} در راه · <span class="cd" dir="ltr">${durEn(t - Date.now())}</span></div>`; });
+  el.innerHTML = h;
+}
+async function recallFrom(loc, grp) {
+  const rs = UL.filter((r) => r.loc === loc && Number(r.qty) > 0 && (!grp || (UC.find((u) => u.id === r.unit_id) || {}).grp === grp));
+  for (const r of rs) {
+    const { error } = await sb.rpc("dispatch_units", { p_unit: r.unit_id, p_qty: Number(r.qty), p_from: loc, p_to: "home" });
+    if (error) { flash(ARM_ERR[error.message] || error.message, 5000); break; }
+  }
+  if (rs.length) flash("↩️ یگان‌ها به‌سوی خانه حرکت کردند", 2500);
+  await loadArmy(); renderSiteMine();
+}
+let dpU = null, dpN = 1;
+const dpHome = (id) => UL.filter((r) => r.unit_id === id && r.loc === "home").reduce((a, r) => a + Number(r.qty), 0);
+async function openDp() {
+  if (!curSite) return;
+  if (!UC) await loadArmy();
+  if (!UC) return flash("اطلاعات ارتش دریافت نشد", 3000);
+  const el = UC.filter((u) => SITE_OK[curSite.type].includes(u.grp));
+  dpU = (el.find((u) => dpHome(u.id) > 0) || el[0] || {}).id || null; dpN = 1; $("dpQty").value = 1;
+  $("dpTitle").textContent = "اعزام به " + curSite.fa;
+  $("dp").hidden = false; dpRender();
+}
+function closeDp() { $("dp").hidden = true; }
+const dpMaxN = () => (dpU ? dpHome(dpU) : 0);
+function dpPick(id) { dpU = id; dpSet(1); }
+function dpSet(n) { dpN = Math.max(0, Math.min(dpMaxN(), n)); $("dpQty").value = dpN; dpRender(); }
+function dpStep(d) { dpSet(Math.max(1, dpN + d)); }
+function dpMax() { dpSet(dpMaxN()); }
+function dpInput() { dpN = Math.max(0, Math.min(dpMaxN(), parseInt($("dpQty").value, 10) || 0)); dpRender(); }
+function dpRender() {
+  const el = UC.filter((u) => SITE_OK[curSite.type].includes(u.grp));
+  $("dpUnits").innerHTML = el.map((u) => `<div class="pml${u.id === dpU ? " on" : ""}" onclick="dpPick('${u.id}')"><small>${unitIc(u.id)} ${unitFa(u.id)}</small><b>${en(dpHome(u.id))}</b></div>`).join("");
+  const u = UC.find((x) => x.id === dpU), mx = dpMaxN();
+  $("dpSub").textContent = u ? "آسیب هر واحد " + en(u.attack) + " · رسیدن: " + MOVE_MIN[u.grp] + " دقیقه" : "";
+  const warn = !u ? "یگان مناسبی ندارید" : mx < 1 ? "از این یگان در خانه چیزی ندارید" : dpN < 1 ? "تعداد را وارد کنید" : u.attack <= 0 ? "این یگان آسیب ندارد و فقط همراه نیرو می‌رود" : "";
+  $("dpWarn").hidden = !warn; $("dpWarn").textContent = warn;
+  $("dpGo").disabled = !u || mx < 1 || dpN < 1;
+  $("dpGo").textContent = "🧭 اعزام " + en(dpN);
+}
+async function dpGo() {
+  if (!dpU || $("dpGo").disabled || !curSite) return;
+  $("dpGo").disabled = true;
+  const { error } = await sb.rpc("dispatch_units", { p_unit: dpU, p_qty: dpN, p_from: "home", p_to: curSite.id });
+  if (error) { flash(ARM_ERR[error.message] || error.message, 5000); await loadArmy(); dpRender(); return; }
+  closeDp(); flash("🧭 یگان‌ها در راه‌اند", 2500); await loadArmy(); renderSiteMine();
+}
+async function refreshOwners() {
+  const rs = await sb.rpc("list_resource_sites"); if (rs.error || !rs.data) return;
+  owners = Object.fromEntries(rs.data.map((x) => [x.id, x.owner_code]));
+  SITES.forEach((r) => {
+    const e = ents.find((x) => x.key === "r:" + r.id); if (!e) return;
+    const own = owners[r.id]; e.h.classList.toggle("nown", !own);
+    const old = e.h.querySelector("em.fb"); if (old) old.remove();
+    if (own && byCode[own]) { const b = document.createElement("em"); b.className = "fb"; b.textContent = flagOf(own); e.h.append(b); }
+  });
+  if (!$("resSheet").hidden && curSite) openResource(curSite);
+}
+let opsBusy = false, opsLast = 0;
+setInterval(() => {
+  const now = Date.now();
+  document.querySelectorAll("[data-arr]").forEach((el) => { const c = el.querySelector(".cd"); if (c) c.textContent = durEn(+el.dataset.arr - now); });
+  if (!opsBusy && now - opsLast > 5000 && UM.some((m) => new Date(m.arrive_at).getTime() <= now)) {
+    opsBusy = true; opsLast = now;
+    loadArmy().then(refreshOwners).then(renderSiteMine).catch(() => {}).then(() => { opsBusy = false; });
   }
 }, 1000);
 
