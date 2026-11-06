@@ -1249,10 +1249,16 @@ const BLD = [
   { id: "airline", fa: "شرکت هواپیمایی", cat: "trn", icon: "✈️", price: 6000000, income: 2500000 }
 ];
 const MAXLV = 5;
+// فرمول سطح‌ها (سرور مرجع است؛ این‌ها فقط برای نمایش‌اند و باید با bld_price / bld_income / bld_minutes یکی باشند)
+const LV_F = [1, 1.4, 2, 3, 4];
+const pAt = (b, lv) => Math.round(b.price * Math.pow(1.1, lv - 1));
+const iAt = (b, lv) => Math.round(b.income * Math.pow(1.1, lv - 1));
+const mAt = (b, lv) => Math.round(b.mins * LV_F[lv - 1]);
+const upCost = (b, lv) => pAt(b, lv + 1) - pAt(b, lv);
 // زمان ساخت سطح ۱ (دقیقه)؛ مقدار اصلی از ستون build_minutes سرور خوانده می‌شود
 const BUILD_MIN = {bank: 5, tourism: 7, insurance: 10, retail: 10, realestate: 15, telecom: 14, transport: 16, media: 18, stock: 20, shipping: 22, auto: 24, fund: 25, airline: 25, tech: 30, pharma: 30};
 BLD.forEach((b) => { b.mins = BUILD_MIN[b.id]; });
-let pending = {}, settling = false;
+let pending = {}, upg = {}, upgTo = {}, settling = false;
 let owned = {}, ecoCat = "all", ecoSort = "income";
 const SORTS = { income: "درآمد", price: "قیمت", level: "سطح", payback: "بازگشت سرمایه" };
 const faNum = (n) => Number(n).toLocaleString("fa-IR");
@@ -1276,9 +1282,9 @@ async function openEco() {
   await loadEco();
 }
 async function loadEco() {
-  await Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}); // ساختمان‌های تمام‌شده را حساب کن
-  const [cat, own] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited")]);
-  owned = {}; pending = {};
+  await Promise.resolve(sb.rpc("settle_all")).catch(() => {}); // ساختمان‌های تمام‌شده را حساب کن
+  const [cat, own] = await Promise.all([sb.from("building_catalog").select("*"), sb.from("country_buildings").select("building_id,level,ready_at,credited,upgrade_to,upgrade_ready_at")]);
+  owned = {}; pending = {}; upg = {}; upgTo = {};
   if (cat.error || own.error) {
     $("eMsg").textContent = "اطلاعات اقتصاد از سرور دریافت نشد؛ مطمئن شوید فایل‌های SQL اجرا شده‌اند.";
   } else {
@@ -1288,6 +1294,10 @@ async function loadEco() {
     own.data.forEach((r) => {
       const t = new Date(r.ready_at).getTime();
       if (t > now) pending[r.building_id] = t; else owned[r.building_id] = Number(r.level);
+      if (r.upgrade_to && r.upgrade_ready_at) {
+        const u = new Date(r.upgrade_ready_at).getTime();
+        if (u > now) { upg[r.building_id] = u; upgTo[r.building_id] = Number(r.upgrade_to); }
+      }
     });
   }
   renderEco();
@@ -1299,14 +1309,14 @@ function setEcoSort(k) { ecoSort = k; renderEco(); }
 function renderEco() {
   const cnt = (c) => BLD.filter((b) => (c === "all" || b.cat === c) && owned[b.id]).length;
   const tot = (c) => BLD.filter((b) => c === "all" || b.cat === c).length;
-  $("eInv").textContent = fmt(BLD.reduce((a, b) => a + (owned[b.id] ? b.income : 0), 0));
+  $("eInv").textContent = fmt(BLD.reduce((a, b) => a + (owned[b.id] ? iAt(b, owned[b.id]) : 0), 0));
   $("eTabs").innerHTML = [["all", "📁", "همه"], ...Object.entries(CATS).map(([k, v]) => [k, v.icon, v.fa])]
     .map(([k, ic, fa]) => `<button class="tab${ecoCat === k ? " on" : ""}" onclick="setEcoCat('${k}')"><span>${ic} ${fa}</span><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></button>`).join("");
   $("eSort").innerHTML = Object.entries(SORTS).map(([k, fa]) => `<button class="sc${ecoSort === k ? " on" : ""}" onclick="setEcoSort('${k}')">${fa}</button>`).join("");
   $("eSyn").innerHTML = "<h3>🔗 هم‌افزایی بخش‌ها</h3>" + Object.entries(CATS)
     .map(([k, v]) => `<div class="sr"><span>${v.icon} ${v.fa}</span><i><u style="width:${(cnt(k) / tot(k)) * 100}%"></u></i><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></div>`).join("");
   const sorters = {
-    income: (a, b) => b.income - a.income,
+    income: (a, b) => (owned[b.id] ? iAt(b, owned[b.id]) : b.income) - (owned[a.id] ? iAt(a, owned[a.id]) : a.income),
     price: (a, b) => a.price - b.price,
     level: (a, b) => (owned[b.id] || 0) - (owned[a.id] || 0) || b.income - a.income,
     payback: (a, b) => a.price / a.income - b.price / b.income
@@ -1323,10 +1333,17 @@ function renderEco() {
         <div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
         <button class="buy" onclick="speedUp('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(rdy - now))}</span> 💎</button></div>`;
     }
+    if (upg[b.id]) {
+      const ur = upg[b.id], to = upgTo[b.id], ust = ur - mAt(b, to) * 60000;
+      return `<div class="bc build" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>⬆ در حال ارتقا به سطح ${faNum(to)}</small></div></div>
+        <div class="chips"><span class="chp">⏱️ تکمیل تا <b class="cd" dir="ltr">${dur(ur - now)}</b></span><span class="chp g">↑ +<span dir="ltr">${fmt(iAt(b, to) - iAt(b, lv))}</span> در روز پس از ارتقا</span></div>
+        <div class="pgb"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - ust) / (ur - ust)) * 100))}%"></u></div>
+        <button class="buy" onclick="speedUpgrade('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(ur - now))}</span> 💎</button></div>`;
+    }
     return `<div class="bc${has ? "" : " no"}">${head}
-        <div class="bi">${has ? `<b>${fmt(b.income)}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
-      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? "" : `<span class="chp">🔨 ساخت: ${buildText(b.mins)}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
-      ${has ? `<button class="up" disabled>⬆ ارتقا به سطح ${faNum(lv + 1)} — به‌زودی</button>`
+        <div class="bi">${has ? `<b>${fmt(iAt(b, lv))}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
+      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ +<span dir="ltr">${fmt(iAt(b, lv + 1) - iAt(b, lv))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(mAt(b, lv + 1))}</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(b.mins)}</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
+      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) ? " poor" : ""}" onclick="upgradeBuilding('${b.id}',this)">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${fmt(upCost(b, lv))}</span></button>`)
             : `<button class="buy${t < b.price ? " poor" : ""}" onclick="buyBuilding('${b.id}',this)">شروع ساخت — <span dir="ltr">${fmt(b.price)}</span></button>`}
     </div>`;
   }).join("");
@@ -1348,6 +1365,33 @@ async function speedUp(id, btn) {
   render();
   await loadEco();
 }
+const UP_ERR = { NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", NOT_OWNED: "این ساختمان را هنوز نساخته‌اید", STILL_BUILDING: "ساختمان هنوز ساخته نشده", ALREADY_UPGRADING: "این ساختمان در حال ارتقا است", MAX_LEVEL: "ساختمان در حداکثر سطح است", NO_FUNDS: "موجودی کافی نیست", NOT_PENDING: "این ارتقا در حال انجام نیست", NO_CRYSTALS: "الماس کافی ندارید" };
+async function upgradeBuilding(id, btn) {
+  btn.disabled = true;
+  const { error } = await sb.rpc("upgrade_building", { p_id: id });
+  if (error) {
+    btn.disabled = false;
+    return flash(UP_ERR[error.message] || error.message, 5000);
+  }
+  flash("⬆ ارتقا شروع شد", 2000);
+  await loadCountry();
+  render();
+  await loadEco();
+}
+async function speedUpgrade(id, btn) {
+  const cost = spCost((upg[id] || 0) - Date.now());
+  if (!confirm("ارتقا با " + faNum(cost) + " الماس همین حالا تمام شود؟")) return;
+  btn.disabled = true;
+  const { error } = await sb.rpc("speedup_upgrade", { p_id: id });
+  if (error) {
+    btn.disabled = false;
+    return flash(UP_ERR[error.message] || error.message, 5000);
+  }
+  flash("⚡ ارتقا تمام شد", 2000);
+  await loadCountry();
+  render();
+  await loadEco();
+}
 async function buyBuilding(id, btn) {
   btn.disabled = true;
   const { error } = await sb.rpc("buy_building", { p_id: id });
@@ -1362,7 +1406,7 @@ async function buyBuilding(id, btn) {
   await loadEco();
 }
 function ecoTick() {
-  const ids = Object.keys(pending);
+  const ids = Object.keys(pending).concat(Object.keys(upg));
   if (!ids.length) return;
   const now = Date.now();
   document.querySelectorAll("#eList [data-rdy]").forEach((el) => {
@@ -1373,9 +1417,9 @@ function ecoTick() {
     if (sc) sc.textContent = faNum(spCost(rdy - now));
     if (pg) pg.style.width = Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100)) + "%";
   });
-  if (!settling && ids.some((id) => pending[id] <= now)) {
+  if (!settling && ids.some((id) => (pending[id] || upg[id]) <= now)) {
     settling = true;
-    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadEco()).catch(() => {}).then(() => { settling = false; });
+    Promise.resolve(sb.rpc("settle_all")).catch(() => {}).then(() => loadEco()).catch(() => {}).then(() => { settling = false; });
   }
 }
 setInterval(ecoTick, 1000);
@@ -1642,7 +1686,7 @@ if (!TG) {
     }
     const { error } = await sb.auth.getUser();
     if (error && (error.status === 401 || error.status === 403)) return location.reload();
-    Promise.resolve(sb.rpc("settle_buildings")).catch(() => {}).then(() => loadCountry(true)).then((ok) => { if (ok && !country) { flash("بازی ریست شده؛ دوباره کشور انتخاب کنید", 4000); route(true); } }); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
+    Promise.resolve(sb.rpc("settle_all")).catch(() => {}).then(() => loadCountry(true)).then((ok) => { if (ok && !country) { flash("بازی ریست شده؛ دوباره کشور انتخاب کنید", 4000); route(true); } }); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
   }, 30000);
 }
 </script>
