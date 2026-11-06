@@ -130,6 +130,16 @@ nav{z-index:10}
 #worldmap.sheet-open .mctl,#worldmap.sheet-open #fPanel{display:none}
 .mk{cursor:pointer}
 .mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:10.5px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
+#dlOv{position:fixed;inset:0;z-index:3000;background:#060d1a;display:flex;align-items:center;justify-content:center;padding:24px}
+#dlOv[hidden]{display:none}
+#dlOv .dlb{width:100%;max-width:380px;text-align:center}
+#dlOv .dlic{font-size:56px;margin-bottom:6px}
+#dlOv h3{margin:0 0 8px;font-size:22px}
+#dlOv p{margin:0 0 18px;color:var(--mut);font-size:14px;line-height:1.9;min-height:3.6em}
+#dlOv .dlbar{height:12px;border-radius:8px;background:#ffffff1a;overflow:hidden}
+#dlOv .dlbar u{display:block;height:100%;width:0;background:linear-gradient(90deg,#b8902c,#f0cf6a);transition:width .25s}
+#dlOv .dlst{display:flex;justify-content:space-between;margin:8px 2px 20px;font-size:13px;color:var(--mut)}
+#dlOv button{margin-top:8px}
 .hx{position:relative;width:27px;height:30px;display:grid;place-items:center;transition:transform .15s;--rc:#8b9bb0}
 .hx i,.hx b{position:absolute;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
 .hx i{inset:0;background:var(--rc)}
@@ -329,6 +339,17 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
 </head>
 <body>
 <div class="wrap">
+  <div id="dlOv" hidden>
+    <div class="dlb">
+      <div class="dlic">🛰️</div>
+      <h3>دانلود اطلاعات نقشه</h3>
+      <p id="dlT"></p>
+      <div class="dlbar"><u id="dlU"></u></div>
+      <div class="dlst"><span id="dlP">۰٪</span><span id="dlM"></span></div>
+      <button id="dlRetry" hidden onclick="dlStart()">تلاش دوباره</button>
+      <button id="dlSkip" class="ghost" onclick="dlSkip()">بعداً</button>
+    </div>
+  </div>
   <div id="boot" style="text-align:center;padding:90px 0"><div style="font-size:44px">🌍</div><p class="lbl" id="bootT">در حال ورود…</p><button id="bootBtn" class="ghost" hidden onclick="boot()">تلاش دوباره</button></div>
 
     <!-- ۲. انتخاب کشور -->
@@ -662,6 +683,100 @@ const SITES = [
   { id: "oi-bs", type: "o", fa: "سکوی دریای بارنتس", ll: [57.3, 69.3], rate: 44 }
 ];
 
+/* ---------- دانلود یک‌باره‌ی دیتای نقشه ---------- */
+const DL_KEY = "ww_mapdata_v1", TILE_CACHE = "tiles-v1";
+const TILE_TPL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/";
+async function tileGet(url, signal) {
+  let c = null;
+  try { c = "caches" in window ? await caches.open(TILE_CACHE) : null; } catch (_) {}
+  if (c) { try { const h = await c.match(url, { ignoreVary: true }); if (h) return await h.arrayBuffer(); } catch (_) {} }
+  const r = await fetch(url, { signal });
+  if (!r.ok) throw new Error(r.status);
+  if (c) { try { c.put(url, r.clone()); } catch (_) {} }
+  return await r.arrayBuffer();
+}
+// نقشه تایل‌ها را از طریق این پروتکل می‌گیرد: اول کش، بعد اینترنت (و در کش ذخیره می‌کند)
+maplibregl.addProtocol("esri", async (rq, ac) => {
+  const [z, y, x] = rq.url.replace("esri://", "").split("/");
+  return { data: await tileGet(TILE_TPL + z + "/" + y + "/" + x, ac && ac.signal) };
+});
+const lon2x = (lon, z) => Math.floor(((lon + 180) / 360) * 2 ** z);
+const lat2y = (lat, z) => { const r = (lat * Math.PI) / 180; return Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * 2 ** z); };
+async function dlList() {
+  const list = [];
+  for (let z = 0; z <= 5; z++) { const n = 2 ** z; for (let x = 0; x < n; x++) for (let y = 0; y < n; y++) list.push([z, y, x]); }
+  // اطراف کشور بازیکن با جزئیات بیشتر (زوم ۶ تا ۸)
+  try {
+    const g = await loadGeo(), f = g.features.find((q) => geoCode(q) === country.code), bp = f && bigPoly(f);
+    if (bp) {
+      const [[w, s], [e, n]] = bp.box;
+      for (let z = 6; z <= 8; z++) {
+        const x0 = lon2x(Math.max(-179.9, w - 1), z), x1 = lon2x(Math.min(179.9, e + 1), z);
+        const y0 = lat2y(Math.min(84, n + 1), z), y1 = lat2y(Math.max(-84, s - 1), z);
+        if ((x1 - x0 + 1) * (y1 - y0 + 1) > 400) break; // کشور خیلی بزرگ (روسیه، کانادا…)
+        for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) list.push([z, y, x]);
+      }
+    }
+  } catch (_) {}
+  return list;
+}
+let dlRes = null, dlP = null, dlAbort = false, dlSkipped = false, dlBytes = 0;
+function setDl(f) {
+  $("dlU").style.width = Math.round(f * 100) + "%";
+  $("dlP").textContent = faNum(Math.round(f * 100)) + "٪";
+  $("dlM").textContent = faNum((dlBytes / 1048576).toFixed(1)) + " مگابایت";
+}
+async function dlRun() {
+  dlAbort = false; dlBytes = 0; setDl(0);
+  $("dlT").textContent = "در حال دریافت مرزها…";
+  await loadGeo();
+  const list = await dlList(), total = list.length;
+  $("dlT").textContent = "در حال دریافت نقشه‌ی ماهواره‌ای؛ لطفاً صفحه را نبندید. این کار فقط یک‌بار انجام می‌شود.";
+  let i = 0, done = 0, fail = 0;
+  const worker = async () => {
+    while (i < total && !dlAbort) {
+      const [z, y, x] = list[i++];
+      try {
+        let b;
+        try { b = await tileGet(TILE_TPL + z + "/" + y + "/" + x); } catch (_) { b = await tileGet(TILE_TPL + z + "/" + y + "/" + x); }
+        dlBytes += b.byteLength;
+      } catch (_) { fail++; }
+      done++;
+      if (done % 6 === 0 || done === total) setDl(done / total);
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, worker));
+  return { fail, total };
+}
+async function dlStart() {
+  $("dlRetry").hidden = true;
+  try {
+    const r = await dlRun();
+    if (dlAbort) return;
+    if (r.fail > r.total * 0.03) throw new Error("incomplete");
+    try { localStorage.setItem(DL_KEY, "1"); } catch (_) {}
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (_) {}
+    setDl(1);
+    $("dlT").textContent = "✅ دانلود کامل شد";
+    setTimeout(dlFinish, 700);
+  } catch (e) {
+    $("dlT").textContent = "دانلود کامل نشد؛ اینترنت/VPN را بررسی کنید.";
+    $("dlRetry").hidden = false;
+  }
+}
+function dlFinish() {
+  $("dlOv").hidden = true; dlP = null;
+  const r = dlRes; dlRes = null; if (r) r();
+}
+function dlSkip() { dlAbort = true; dlSkipped = true; dlFinish(); }
+function dlGate() {
+  let done = true;
+  try { done = !!localStorage.getItem(DL_KEY); } catch (_) {} // اگر ذخیره‌سازی ممکن نیست مزاحم نشو
+  if (done || dlSkipped || !("caches" in window)) return Promise.resolve();
+  if (!dlP) dlP = new Promise((res) => { dlRes = res; $("dlOv").hidden = false; dlStart(); });
+  return dlP;
+}
+
 function showMap() {
   if (!lmap) {
     lmap = new maplibregl.Map({
@@ -672,14 +787,15 @@ function showMap() {
         sky: { "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] },
         sources: {
           sat: {
-            type: "raster", tileSize: 256, maxzoom: 12,
-            tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+            type: "raster", tileSize: 256, maxzoom: 10,
+            tiles: ["esri://{z}/{y}/{x}"], // از کش دانلودشده خوانده می‌شود؛ اگر نبود از اینترنت (dlGate)
             attribution: "Imagery © Esri, Maxar, Earthstar Geographics"
           }
         },
-        layers: [{ id: "sat", type: "raster", source: "sat", paint: { "raster-brightness-max": 0.85, "raster-saturation": -0.2, "raster-contrast": 0.1 } }]
+        layers: [{ id: "sat", type: "raster", source: "sat", paint: { "raster-brightness-max": 0.85, "raster-saturation": -0.2, "raster-contrast": 0.1, "raster-fade-duration": 0, "raster-resampling": "linear" } }]
       },
       center: [35, 30], zoom: 1.4, minZoom: 0.6, maxZoom: 8,
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2), fadeDuration: 0, refreshExpiredTiles: false,
       dragRotate: false, pitchWithRotate: false, attributionControl: { compact: true }
     });
     lmap.touchZoomRotate.disableRotation();
@@ -718,8 +834,24 @@ let geoP = null, geoData = null, geoBase = null, byCode = {}, selCode = null, fl
 let ents = [], marks = [];
 
 function loadGeo() {
-  if (!geoP) geoP = fetch(GEO_URL).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { geoP = null; throw e; });
+  if (!geoP) geoP = geoFetch().catch((e) => { geoP = null; throw e; });
   return geoP;
+}
+// مرزها چند مگابایت‌اند: بعد از بار اول از کش مرورگر خوانده می‌شوند و دانلود ناموفق تا ۳ بار تکرار می‌شود
+async function geoFetch() {
+  let cache = null;
+  try { cache = "caches" in window ? await caches.open("geo-v1") : null; } catch (_) {}
+  if (cache) { try { const hit = await cache.match(GEO_URL, { ignoreVary: true }); if (hit) return await hit.json(); } catch (_) {} }
+  let last;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch(GEO_URL);
+      if (!r.ok) throw new Error(r.status);
+      if (cache) { try { cache.put(GEO_URL, r.clone()); } catch (_) {} }
+      return await r.json();
+    } catch (e) { last = e; await new Promise((ok) => setTimeout(ok, 800 * (i + 1))); }
+  }
+  throw last;
 }
 // Natural Earth برای فرانسه و نروژ و… در ISO_A2 مقدار -99 دارد؛ ISO_A2_EH درستش است
 function geoCode(f) {
@@ -772,7 +904,7 @@ async function drawGeo() {
   const src = lmap.getSource("countries");
   if (src) src.setData(geoData);
   else {
-    lmap.addSource("countries", { type: "geojson", data: geoData, promoteId: "code" });
+    lmap.addSource("countries", { type: "geojson", data: geoData, promoteId: "code", maxzoom: 8 });
     const sel = ["boolean", ["feature-state", "sel"], false];
     const stCol = ["match", ["get", "st"], "mine", "#d4a73a", "taken", "#6f7cf2", "#8b9bb0"];
     lmap.addLayer({
@@ -790,7 +922,10 @@ async function drawGeo() {
           ["==", ["get", "tier"], "premium_plus"], "#d4a73a",
           ["==", ["get", "st"], "mine"], "#d4a73a",
           ["==", ["get", "tier"], "premium"], "#c3a24a", "#a9bde0"],
-        "line-width": ["case", sel, 2.5, ["any", ["!=", ["get", "tier"], "normal"], ["==", ["get", "st"], "mine"]], 1.6, 0.7],
+        // با نزدیک‌شدن، مرزها ضخیم‌تر می‌شوند تا داخل یک کشور بزرگ (مثل ایران) هم مرز خوانا بماند
+        "line-width": ["interpolate", ["linear"], ["zoom"],
+          1, ["case", sel, 2, ["any", ["!=", ["get", "tier"], "normal"], ["==", ["get", "st"], "mine"]], 1.2, 0.5],
+          6, ["case", sel, 3.5, ["any", ["!=", ["get", "tier"], "normal"], ["==", ["get", "st"], "mine"]], 2.4, 1.5]],
         "line-opacity": 0.9
       }
     });
@@ -811,7 +946,15 @@ function hexEl(icon, cls) {
   return { m, h };
 }
 function addMarker(el, ll, opts) {
-  marks.push(new maplibregl.Marker(Object.assign({ element: el }, opts || {})).setLngLat(ll).addTo(lmap));
+  // نشانگر فقط وقتی دیده می‌شود به نقشه وصل است؛ نشانگرهای پنهان در هر فریم حرکت هزینه نمی‌گذارند
+  const mk = new maplibregl.Marker(Object.assign({ element: el }, opts || {})).setLngLat(ll);
+  mk._on = false;
+  marks.push(mk);
+  return mk;
+}
+function showMk(mk, on) {
+  if (on) { if (!mk._on) { mk.addTo(lmap); mk._on = true; } }
+  else if (mk._on) { mk.remove(); mk._on = false; }
 }
 function buildMarkers() {
   marks.forEach((m) => m.remove());
@@ -827,16 +970,16 @@ function buildMarkers() {
     if (pp) { const e = document.createElement("em"); e.textContent = "👑"; h.append(e); }
     m.addEventListener("click", (ev) => { ev.stopPropagation(); pickOnMap(code); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa;
-    addMarker(m, ll); addMarker(lb, ll, { anchor: "top", offset: [0, 17] });
+    const mm = addMarker(m, ll), lm = addMarker(lb, ll, { anchor: "top", offset: [0, 17] });
     const prio = { mine: 1000, taken: 300, free: 100, none: 0 }[st] + (pp ? 200 : pr ? 100 : 0) + Math.min(bp.area, 400) / 10;
-    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h });
+    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h, mm, lm });
   });
   STRAITS.forEach((s) => {
     const { m, h } = hexEl("⚓", "strait");
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openStrait(s); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = s.fa;
-    addMarker(m, s.ll); addMarker(lb, s.ll, { anchor: "top", offset: [0, 17] });
-    ents.push({ kind: "s", key: "s:" + s.id, code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 6.5 + 10, h });
+    const mm = addMarker(m, s.ll), lm = addMarker(lb, s.ll, { anchor: "top", offset: [0, 17] });
+    ents.push({ kind: "s", key: "s:" + s.id, code: s.id, ll: s.ll, prio: 450, m, lb, lw: s.fa.length * 6.5 + 10, h, mm, lm });
   });
   SITES.forEach((r) => {
     const t = RES[r.type], own = owners[r.id], oc = own && byCode[own];
@@ -844,11 +987,10 @@ function buildMarkers() {
     if (oc) { const b = document.createElement("em"); b.className = "fb"; b.textContent = flagOf(own); h.append(b); }
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openResource(r); });
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = r.fa;
-    addMarker(m, r.ll); addMarker(lb, r.ll, { anchor: "top", offset: [0, 13] });
-    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 350, minZ: 0, m, lb, lw: r.fa.length * 6.5 + 10, h });
+    const mm = addMarker(m, r.ll), lm = addMarker(lb, r.ll, { anchor: "top", offset: [0, 13] });
+    ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 350, minZ: 0, m, lb, lw: r.fa.length * 6.5 + 10, h, mm, lm });
   });
   ents.sort((a, b) => b.prio - a.prio);
-  ents.forEach((e) => { e.m.style.display = "none"; e.lb.style.display = "none"; });
   declutter();
 }
 
@@ -888,8 +1030,8 @@ function declutter() {
         else on = false;
       }
     }
-    e.m.style.display = on ? "" : "none";
-    e.lb.style.display = on && lbl ? "" : "none";
+    showMk(e.mm, on);
+    showMk(e.lm, on && lbl);
     if (on) shown++;
   }
   $("fCnt").textContent = shown;
@@ -1707,6 +1849,7 @@ async function doRoute(session) {
   }
   msg("");
   if (country) {
+    await dlGate(); // بار اول: دانلود یک‌باره‌ی دیتای نقشه
     const pf = await sb.from("profiles").select("player_no").maybeSingle();
     $("pno").textContent = pf.data ? pf.data.player_no : "—";
     $("flag").textContent = flagOf(country.code);
