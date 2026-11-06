@@ -297,6 +297,28 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
 #worldmap{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 #toast{bottom:104px}
 
+
+/* ===== ارتباطات ===== */
+nav button i{position:relative}
+.bdg{position:absolute;top:-4px;left:50%;margin-left:6px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#ff5a5a;color:#fff;font:700 10px/16px system-ui}
+.tab.on{background:var(--gold);color:#1b1405}
+#chat{padding-bottom:70px}
+.chm{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:10px}
+.chm.me{align-items:flex-end}
+.chn{width:auto;margin:0 0 3px;padding:0;background:none;color:var(--gold);font-size:13px;font-weight:700}
+.chn:disabled{color:var(--mut)}
+.chb{max-width:82%;padding:9px 13px;border-radius:16px;background:var(--card);border:1px solid var(--line);line-height:1.8;word-break:break-word;white-space:pre-wrap}
+.chm.me .chb{background:#1d2b44;border-color:#2c4468}
+.cht{color:var(--mut);font-size:11px;margin-top:2px}
+.chi{display:block;width:100%;text-align:start;margin:0 0 10px;padding:12px 14px;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:14px;font-weight:400;line-height:1.7}
+.chi b{display:block}
+.chi small{display:block;color:var(--mut)}
+.chi.new{border-color:var(--gold)}
+.chi em{font-style:normal;background:#ff5a5a;color:#fff;border-radius:10px;padding:0 7px;font-size:12px;margin-inline-start:6px}
+#chBar{position:fixed;inset-inline:0;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:6;max-width:460px;margin:auto;display:flex;gap:8px;padding:8px 16px;background:linear-gradient(180deg,#0a111d00,var(--bg) 35%)}
+#chBar input{margin:0;flex:1}
+#chBar button{width:auto;margin:0;padding:0 20px}
+
 /* ===== economy ===== */
 .eh{display:flex;align-items:center;gap:12px;margin-bottom:14px}.eh h2{margin:0}
 .ecard{border-radius:24px;padding:16px;border:1px solid #d4a73a88;background:linear-gradient(180deg,#1b2233,#0e1422);box-shadow:0 12px 32px #000a,inset 0 1px 0 #ffffff26}
@@ -626,6 +648,14 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
     <div class="lbl" id="iMsg" style="text-align:center;line-height:1.9"></div>
   </section>
 
+  <!-- ارتباطات -->
+  <section id="chat" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>ارتباطات</h2></div>
+    <div class="tabs" id="chTabs"></div>
+    <div class="phead" id="chHead" hidden><button class="ghost" onclick="chatTab('dm')">→</button><b id="chHeadT"></b></div>
+    <div id="chList"></div>
+  </section>
+
   <div id="msg"></div>
 </div>
 
@@ -674,8 +704,9 @@ nav button[data-t=home].on{flex:none;width:72px;height:72px;margin:-30px 6px 0;p
   </div></div>
 </section>
 
+<div id="chBar" hidden><input id="chIn" maxlength="300" placeholder="پیام بنویسید…" autocomplete="off"><button id="chSend" onclick="chatSend()">ارسال</button></div>
 <nav id="nav" hidden><div>
-  <button onclick="soon()"><i>💬</i>ارتباطات</button>
+  <button data-t="chat" onclick="openChat()"><i>💬<b class="bdg" id="chBdg" hidden></b></i>ارتباطات</button>
   <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
   <button data-t="home" class="on" onclick="screen('home')"><i>🏠</i>خانه</button>
   <button data-t="worldmap" onclick="screen('worldmap')"><i>🌍</i>نقشه جهان</button>
@@ -1293,10 +1324,11 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "vip", "ref", "cart", "pay"]) $(s).hidden = s !== n;
-  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay";
+  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "vip", "ref", "cart", "pay", "chat"]) $(s).hidden = s !== n;
+  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay" && n !== "chat";
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" ? "home" : n)));
   closeSettings();
+  if (n !== "chat") { chatStop(); $("chBar").hidden = true; }
   if (n !== "worldmap") closeMapSheet();
   window.scrollTo(0, 0);
   if (n === "worldmap") showMap();
@@ -2142,11 +2174,120 @@ async function doRoute(session) {
     $("power").textContent = country.military_power;
     render();
     screen("home");
+    chatBadge();
   } else {
     await loadPick();
     screen("pick");
   }
 }
+
+
+/* ---------- ارتباطات: چت جهانی، پیام خصوصی، صندوق اعلان ---------- */
+let chTab = "world", chWith = null, chWN = "", chLast = 0, chTimer = null;
+const chTime = (t) => new Date(t).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+function openChat() { screen("chat"); chatTab(chTab === "inbox" ? "inbox" : "world"); }
+function chatStop() { clearInterval(chTimer); chTimer = null; }
+async function chatTab(t, w, wn) {
+  chatStop();
+  chTab = t; chWith = w || null; chWN = wn || ""; chLast = 0;
+  $("chTabs").innerHTML = [["world", "🌍", "جهانی"], ["dm", "✉️", "خصوصی"], ["inbox", "🔔", "اعلان‌ها"]]
+    .map(([k, i, n]) => '<button class="tab' + (k === t ? " on" : "") + '" onclick="chatTab(\'' + k + '\')">' + i + " " + n + "</button>").join("");
+  $("chBar").hidden = !(t === "world" || (t === "dm" && chWith));
+  $("chHead").hidden = !(t === "dm" && chWith);
+  if (chWith) $("chHeadT").textContent = flagOf(chWith) + " " + chWN;
+  $("chList").replaceChildren();
+  await chatLoad(true);
+  if (chTab === t && chWith === (w || null)) chTimer = setInterval(() => chatLoad(false), 4000);
+}
+function chEmpty(box, txt) {
+  box.replaceChildren();
+  const e = document.createElement("div"); e.className = "empty"; e.textContent = txt;
+  box.append(e);
+}
+async function chatLoad(first) {
+  if (chTab === "inbox") return loadInbox();
+  if (chTab === "dm" && !chWith) return loadThreads();
+  const t = chTab, w = chWith;
+  const { data, error } = await sb.rpc("list_chat", { p_kind: t, p_with: w });
+  if (t !== chTab || w !== chWith || error || !data) { if (error && first) flash(error.message, 2500); return; }
+  const mx = data.reduce((a, r) => Math.max(a, r.id), 0);
+  if (!first && mx === chLast) return;
+  chLast = mx;
+  const near = innerHeight + scrollY >= document.body.scrollHeight - 140;
+  const box = $("chList");
+  if (!data.length) chEmpty(box, t === "world" ? "هنوز پیامی نیست؛ اولین نفر باشید." : "پیامی نیست؛ گفتگو را شروع کنید.");
+  else {
+    box.replaceChildren();
+    data.slice().sort((a, b) => a.id - b.id).forEach((r) => box.append(chRow(r)));
+  }
+  if (first || near) window.scrollTo(0, document.body.scrollHeight);
+  chatBadge();
+}
+function chRow(r) {
+  const d = document.createElement("div"); d.className = "chm" + (r.mine ? " me" : "");
+  if (chTab === "world") {
+    const h = document.createElement("button"); h.className = "chn";
+    h.textContent = flagOf(r.sender_code) + " " + r.sender_name;
+    if (r.mine) h.disabled = true; else h.onclick = () => chatTab("dm", r.sender_code, r.sender_name);
+    d.append(h);
+  }
+  const b = document.createElement("div"); b.className = "chb"; b.textContent = r.body;
+  const t = document.createElement("div"); t.className = "cht"; t.textContent = chTime(r.created_at);
+  d.append(b, t);
+  return d;
+}
+async function chatSend() {
+  const i = $("chIn"), b = i.value.trim();
+  if (!b) return;
+  $("chSend").disabled = true;
+  const { error } = await sb.rpc("send_chat", { p_kind: chTab, p_to: chWith, p_body: b });
+  $("chSend").disabled = false;
+  if (error) return flash(error.message, 2500);
+  i.value = "";
+  chatLoad(true);
+}
+$("chIn").addEventListener("keydown", (e) => { if (e.key === "Enter") chatSend(); });
+async function loadThreads() {
+  const { data, error } = await sb.rpc("list_dm_threads");
+  if (chTab !== "dm" || chWith || error || !data) return;
+  const box = $("chList");
+  if (!data.length) return chEmpty(box, "هنوز گفتگوی خصوصی ندارید. در چت جهانی روی نام یک کشور بزنید.");
+  box.replaceChildren();
+  data.forEach((x) => {
+    const b = document.createElement("button"); b.className = "chi" + (x.unread ? " new" : "");
+    const n = document.createElement("b"); n.textContent = flagOf(x.code) + " " + x.name;
+    if (x.unread) { const u = document.createElement("em"); u.textContent = x.unread; n.append(u); }
+    const s = document.createElement("small"); s.textContent = x.body;
+    b.append(n, s);
+    b.onclick = () => chatTab("dm", x.code, x.name);
+    box.append(b);
+  });
+}
+async function loadInbox() {
+  const { data, error } = await sb.rpc("list_inbox");
+  if (chTab !== "inbox" || error || !data) return;
+  const box = $("chList");
+  if (!data.length) return chEmpty(box, "اعلانی ندارید.");
+  box.replaceChildren();
+  data.forEach((x) => {
+    const b = document.createElement("button"); b.className = "chi" + (x.read_at ? "" : " new");
+    const n = document.createElement("b"); n.textContent = (x.kind === "dm" ? "✉️ " : "🌍 ") + x.title;
+    const s = document.createElement("small"); s.textContent = (x.body || "") + " · " + chTime(x.created_at);
+    b.append(n, s);
+    b.onclick = () => (x.kind === "dm" && x.ref_code ? chatTab("dm", x.ref_code, x.ref_name || x.ref_code) : chatTab("world"));
+    box.append(b);
+  });
+  sb.rpc("mark_inbox_read").then(chatBadge);
+}
+async function chatBadge() {
+  if (!country) return;
+  const { data } = await sb.rpc("chat_badge");
+  const r = data && data[0];
+  if (!r) return;
+  const n = Number(r.world) + Number(r.inbox), e = $("chBdg");
+  e.hidden = !n; e.textContent = n > 99 ? "99+" : n;
+}
+setInterval(() => { if (authed && country && !document.hidden) chatBadge(); }, 30000);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let booting = false;
