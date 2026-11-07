@@ -641,6 +641,12 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 </style>
 </head>
 <body>
+<script>
+(function(){var g=function(i){return document.getElementById(i)},show=function(t){var b=g("boot"),x=g("bootT");if(b&&!b.hidden&&x){x.textContent=t;x.style.direction="ltr";var k=g("bootBtn");if(k)k.hidden=false}};
+addEventListener("error",function(e){var t=e.target;show(t&&t.src?"LOAD FAIL: "+t.src:"JS ERROR: "+(e.message||"")+" @"+(e.lineno||""))},true);
+addEventListener("unhandledrejection",function(e){show("PROMISE: "+((e.reason&&e.reason.message)||e.reason))});
+setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s): check VPN/network or Supabase")},20000)})();
+</script>
 <div class="wrap">
   <div id="dlOv" hidden>
     <div class="dlb">
