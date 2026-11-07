@@ -1027,7 +1027,25 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
 <div id="toast"></div>
 <div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2 id="notgT">این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl" id="notgP">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* شیم تلگرام: initData را بدون انتظار برای telegram.org از hash/sessionStorage برمی‌دارد */
+(function(){
+  var d="";
+  try{d=new URLSearchParams(location.hash.slice(1)).get("tgWebAppData")||"";}catch(_){}
+  if(!d){try{var ip=JSON.parse(sessionStorage.getItem("__telegram__initParams")||"{}");d=ip.tgWebAppData||"";}catch(_){}}
+  if(d){
+    var px=function(e,o){var m=JSON.stringify(o||{});try{if(window.TelegramWebviewProxy)TelegramWebviewProxy.postEvent(e,m);else if(window.external&&external.notify)external.notify(JSON.stringify({eventType:e,eventData:o||{}}));else parent.postMessage(JSON.stringify({eventType:e,eventData:o||{}}),"https://web.telegram.org");}catch(_){}};
+    var u={};try{new URLSearchParams(d).forEach(function(v,k){u[k]=v;});}catch(_){}
+    window.Telegram=window.Telegram||{};
+    window.Telegram.WebApp={initData:d,initDataUnsafe:{start_param:u.start_param},
+      ready:function(){px("web_app_ready");},expand:function(){px("web_app_expand");},
+      setHeaderColor:function(c){px("web_app_set_header_color",{color:c});},
+      setBackgroundColor:function(c){px("web_app_set_background_color",{color:c});},
+      openTelegramLink:function(l){px("web_app_open_tg_link",{path_full:String(l).replace(/^https?:\/\/t\.me/,"")});}};
+    var a=document.createElement("script");a.async=true;a.src="https://telegram.org/js/telegram-web-app.js";document.head.appendChild(a);
+  }else{document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');}
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
