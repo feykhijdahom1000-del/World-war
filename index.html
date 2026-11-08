@@ -2624,11 +2624,20 @@ function renderSiteMine() {
   el.innerHTML = h;
 }
 async function dispatchRpc(a) {
-  let r = await sb.rpc("dispatch_units", a);
+  const base = { p_unit: a.p_unit, p_qty: a.p_qty, p_from: a.p_from, p_to: a.p_to };
+  let used = a, r = await sb.rpc("dispatch_units", used);
   if (r.error && /function|schema cache|PGRST202|p_src|p_dst/i.test(String(r.error.message || "") + String(r.error.code || ""))) {
-    r = await sb.rpc("dispatch_units", { p_unit: a.p_unit, p_qty: a.p_qty, p_from: a.p_from, p_to: a.p_to });
+    used = base; r = await sb.rpc("dispatch_units", used);
   }
-  if (r.error) console.error("dispatch_units", r.error);
+  if (r.error && r.error.message === "BAD_GROUP") {
+    // گروه نامعتبر: اول با همان گروه مبدأ ، بعد بدون گروه (۰) دوباره تلاش می‌کنیم؛ اعزام ناموفق چیزی را تغییر نمی‌دهد
+    for (const t of [{ p_src: a.p_src, p_dst: a.p_src }, { p_src: 0, p_dst: 0 }]) {
+      if (t.p_src === a.p_src && t.p_dst === a.p_dst) continue;
+      used = Object.assign({}, base, t); r = await sb.rpc("dispatch_units", used);
+      if (!r.error) break;
+    }
+  }
+  if (r.error) { console.error("dispatch_units", used, r.error); r.error.details = (r.error.details ? r.error.details + " " : "") + JSON.stringify(used); }
   return r;
 }
 async function recallFrom(loc, grp) {
@@ -2861,7 +2870,7 @@ async function newGid(kind) { const { data, error } = await sb.rpc("new_group", 
 function dstGroup(sel) {
   const full = mvSel.grp > 0 && dpList().every((u) => dpsEff(u) === dpQ(u.id));
   if (full) return Promise.resolve(mvSel.grp);
-  const ks = new Set(sel.map((u) => u.grp)); return newGid(ks.size === 1 ? [...ks][0] : "mix").catch((e) => { console.warn("new_group", e); return 0; });
+  return Promise.resolve(-1); // -1 = سرور خودش گروه جدید می‌سازد
 }
 async function mvGo() {
   if (!mvSel || !mvTo || $("dpsGo").disabled) return;
@@ -2872,13 +2881,17 @@ async function mvGo() {
       const dst = await newGid("land");
       for (const u of sel) { const q = dpsEff(u), { error } = await sb.rpc("unload_units", { p_group: mvSel.grp, p_unit: u.id, p_qty: q, p_to: mvTo, p_dst: dst }); if (error) { err = error; break; } n += q; }
     } else {
-      const dst = await dstGroup(sel);
+      let dst = await dstGroup(sel); const ks = new Set(sel.map((u) => u.grp)), kind = ks.size === 1 ? [...ks][0] : "mix";
       outer: for (const u of sel) {
         let left = dpsEff(u);
         for (const r of dpRows(u.id)) {
           if (left < 1) break; const q = Math.min(left, +r.qty);
-          const { error } = await dispatchRpc({ p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst });
-          if (error) { err = error; break outer; } left -= q; n += q;
+          const a = { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst };
+          if (dst < 0) a.p_kind = kind;
+          const { data, error } = await dispatchRpc(a);
+          if (error) { err = error; break outer; }
+          if (dst < 0 && Number(data) > 0) dst = Number(data);
+          left -= q; n += q;
         }
       }
     }
