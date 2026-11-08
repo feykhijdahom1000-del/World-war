@@ -1016,6 +1016,7 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
       <div class="dpsg"><div><b id="dpsE">—</b><small>تا رسیدن</small></div><div><b id="dpsK">—</b><small>مسیر زمینی/هوایی</small></div></div>
       <div id="dpsR"></div>
       <button class="buy" id="dpsGo" onclick="mvGo()" style="width:100%;margin-top:10px"></button>
+      <div id="dpsErr" hidden style="margin-top:8px;padding:8px 10px;border-radius:12px;background:#ff6b6b22;border:1px solid #ff6b6b66;color:#ffb3b3;font-size:12px;direction:ltr;text-align:left;word-break:break-word"></div>
     </div>
   </div>
 </div>
@@ -2864,7 +2865,7 @@ function dstGroup(sel) {
 }
 async function mvGo() {
   if (!mvSel || !mvTo || $("dpsGo").disabled) return;
-  $("dpsGo").disabled = true; let err = null, n = 0;
+  $("dpsGo").disabled = true; let err = null, n = 0; $("dpsErr").hidden = true;
   const sel = dpList().filter((u) => dpsEff(u) > 0);
   try {
     if (mvSel.cargo) {
@@ -2882,7 +2883,7 @@ async function mvGo() {
       }
     }
   } catch (e) { err = { message: String((e && e.message) || e) }; }
-  if (err) flash(ARM_ERR[err.message] || err.message, 5000); else flash(mvSel.cargo ? "نیروها در حال پیاده شدن‌اند" : "یگان‌ها اعزام شدند", 2500);
+  if (err) { flash(ARM_ERR[err.message] || err.message, 5000); const eb = $("dpsErr"); if (eb) { eb.hidden = false; eb.textContent = "خطا: " + [err.message, err.code, err.details, err.hint].filter(Boolean).join(" | "); } } else flash(mvSel.cargo ? "نیروها در حال پیاده شدن‌اند" : "یگان‌ها اعزام شدند", 2500);
   if (!err || n) mvCancel(); else $("dpsGo").disabled = false;
   await loadArmy(); renderSiteMine(); if (mvSel) dpsRender();
 }
