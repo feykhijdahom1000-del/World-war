@@ -623,6 +623,29 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .mvt u{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:#f6c343;box-shadow:0 0 0 3px #0008}
 .mvt i{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border:2px solid #f6c343;border-radius:8px}
 .mvt span{position:absolute;left:0;top:30px;transform:translateX(-50%);white-space:nowrap;background:#f6c343;color:#201603;font-weight:800;font-size:13px;padding:5px 12px;border-radius:16px}
+/* پنل اعزام: سربرگ ثابت ، وسط اسکرول‌خور ، دکمه‌ی اعزام پایین ثابت */
+#dps{display:flex;flex-direction:column;padding:0;max-height:62vh;overflow:hidden}
+#dps .dpsh{flex:none;margin:0;padding:10px 12px;gap:10px;cursor:default;border-bottom:1px solid #ffffff14}
+#dps .dpsh .eic{width:40px;height:40px;font-size:20px;border-width:1.5px}
+#dps .dpsht{flex:1;min-width:0;cursor:pointer}
+#dps .dpsh b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dps .dpsh small{font-size:12.5px}
+#dps .dpsx,#dps .dpsm{position:static;flex:none;width:34px;height:34px;padding:0;border-radius:50%;background:#ffffff10;color:#fff;border:1px solid #ffffff33;box-shadow:none;font-size:15px}
+#dps .dpsb{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 14px 6px}
+#dps .dpsf{flex:none;padding:10px 14px 12px;border-top:1px solid #ffffff14}
+#dps.min .dpsb,#dps.min .dpsf{display:none}
+#dps .dpsp{padding:10px;font-size:14px}
+#dps .dpst b{font-size:17px}#dps .dpst small{font-size:12.5px}
+#dps .dpsg{margin:8px 0}
+#dps .dpsg>div{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 10px}
+#dps .dpsg b{font-size:15px;order:2}#dps .dpsg small{font-size:12px}
+#dps .dpsrow{gap:8px;padding:7px 0}
+#dps .dpsi{flex:none;width:30px;text-align:center;font-size:22px}
+#dps .dpsrow>.dpsst{flex:none;display:flex;align-items:center;gap:4px}
+#dps .dpsrow .pmb{width:34px;height:34px}
+#dps .dpsrow .dpsz{width:auto;min-width:46px;padding:0 10px;font-size:13px}
+#dps .dpsrow b{font-size:15px}
+.hx.res em.fb{top:-9px;bottom:auto;right:-13px;width:21px;height:21px;display:grid;place-items:center;font-size:14px;background:#0b1424;border:1px solid #ffffff3d;border-radius:50%;line-height:1}
 #frc{max-height:70vh}
 #frc h3{margin:2px 0 12px;font-size:24px}
 .frmg{position:absolute;top:12px;inset-inline-end:62px;padding:8px 14px;border-radius:18px;font-size:14px;background:#d4a73a22;color:#f6d779;border:1px solid #d4a73a99;box-shadow:none}
@@ -942,7 +965,8 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
     <button class="gb" onclick="soon()">شناسایی ماهواره‌ای دفاع 🛰️</button>
     <p class="hint2" id="rhint"></p>
     <div class="hint2" id="rmine"></div>
-    <button class="gb" onclick="openDp(null,curSite&&curSite.id)">اعزام یگان 🧭</button>
+    <button class="gb" id="rfrom" onclick="dispatchFromSite()" hidden style="margin-bottom:8px">↗️ اعزام از این موضع</button>
+    <button class="gb" onclick="openDp(null,curSite&&curSite.id)">🧭 اعزام یگان به این معدن</button>
   </div></div>
   <div id="mapSheet" hidden><div class="in">
     <div class="hd">
@@ -1004,20 +1028,26 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
   <button class="ghost" onclick="closePm()">انصراف</button>
 </div></div>
 <div id="dps" hidden>
-  <button class="dpsx" onclick="mvCancel()" aria-label="بستن">✕</button>
-  <div class="dpsh" onclick="$('dps').classList.toggle('min')"><div class="eic">🪖</div><div><b id="dpsT"></b><small id="dpsS"></small></div></div>
+  <div class="dpsh">
+    <div class="eic">🪖</div>
+    <div class="dpsht" onclick="$('dps').classList.toggle('min')"><b id="dpsT"></b><small id="dpsS"></small></div>
+    <button class="dpsm" onclick="$('dps').classList.toggle('min')" aria-label="کوچک/بزرگ">⌄</button>
+    <button class="dpsx" onclick="mvCancel()" aria-label="بستن">✕</button>
+  </div>
   <div class="dpsb">
     <div class="dpsc" id="dpsC"></div>
     <div class="dpsp" id="dpsP">🎯 مقصد یا هدف را روی نقشه بزنید</div>
     <div id="dpsA"><button class="ghost" id="dpsBd" onclick="dpsBoard()">⚓ سوار شوید</button><button class="ghost" onclick="openFrc()">🛡 نیروی دیگر</button></div>
     <div id="dpsB" hidden></div>
     <div id="dpsD" hidden>
-      <div class="dpst"><b id="dpsN"></b><small>مقصد دیگر؟ جای دیگری از نقشه را بزنید</small></div>
-      <div class="dpsg"><div><b id="dpsE">—</b><small>تا رسیدن</small></div><div><b id="dpsK">—</b><small>مسیر زمینی/هوایی</small></div></div>
+      <div class="dpst"><b id="dpsN"></b><small>برای تغییر مقصد، جای دیگری از نقشه را بزنید</small></div>
+      <div class="dpsg"><div><small>⏱ تا رسیدن</small><b id="dpsE">—</b></div><div><small>📏 مسافت</small><b id="dpsK">—</b></div></div>
       <div id="dpsR"></div>
-      <button class="buy" id="dpsGo" onclick="mvGo()" style="width:100%;margin-top:10px"></button>
-      <div id="dpsErr" hidden style="margin-top:8px;padding:8px 10px;border-radius:12px;background:#ff6b6b22;border:1px solid #ff6b6b66;color:#ffb3b3;font-size:12px;direction:ltr;text-align:left;word-break:break-word"></div>
     </div>
+  </div>
+  <div class="dpsf" id="dpsF" hidden>
+    <button class="buy" id="dpsGo" onclick="mvGo()" style="width:100%"></button>
+    <div id="dpsErr" hidden style="margin-top:8px;padding:8px 10px;border-radius:12px;background:#ff6b6b22;border:1px solid #ff6b6b66;color:#ffb3b3;font-size:12px;direction:ltr;text-align:left;word-break:break-word"></div>
   </div>
 </div>
 <div id="frc" hidden>
@@ -1076,7 +1106,7 @@ const RES = {
   s: { label: "معدن فولاد", unit: "فولاد", icon: "⛏️", attacker: "تانک" },
   o: { label: "سکوی نفتی", unit: "نفت", icon: "🛢️", attacker: "ناو جنگی" }
 };
-let owners = {};
+let owners = {}, MINES = [];
 const SITES = [
   { id: "ur-ba", type: "u", fa: "معدن اورانیوم بوسنی", ll: [17.8, 44.0], rate: 17 },
   { id: "ur-kz", type: "u", fa: "معدن اورانیوم کازاخستان جنوبی", ll: [66.5, 44.5], rate: 19 },
@@ -2228,15 +2258,28 @@ const abbr = (n) => { n = Number(n); const a = Math.abs(n); return a >= 1e9 ? +(
 const resProd = (k) => { const c = country || {}; return k === "food" ? Number(c.food_rate) || 0 : (Number(c[k + "_rate"]) || 0) - (k === "uranium" ? Number(c.uranium_burn) || 0 : 0); };
 // مصرف روزانه‌ی یگان‌های ارتش (food / oil / uranium) — از ستون‌های unit_*_use کشور
 const unitUse = (k) => Number((country || {})["unit_" + k + "_use"]) || 0;
-const resNet = (k) => resProd(k) - unitUse(k);
+/* معدن‌های تسخیرشده: تولید هر ثانیه «rate» ؛ سرور فقط موقع تسویه واریز می‌کند، کلاینت از tick هر معدن به‌صورت زنده حساب می‌کند */
+const MINE_RES = { u: "uranium", s: "steel", o: "oil" };
+const mineDay = (k) => MINES.filter((m) => MINE_RES[m.kind] === k).reduce((a, m) => a + m.rate * 86400, 0);
+const mineLive = (k) => { const now = Date.now(); return MINES.filter((m) => MINE_RES[m.kind] === k).reduce((a, m) => a + (m.rate * Math.max(0, now - m.t)) / 1000, 0); };
+async function loadMines() {
+  try {
+    const r = await sb.rpc("list_my_mines");
+    if (r.error) { console.warn("list_my_mines", r.error); MINES = []; }
+    else MINES = (r.data || []).map((x) => ({ id: x.id, kind: x.kind, rate: Number(x.rate) || 0, t: new Date(x.tick).getTime() }));
+  } catch (e) { MINES = []; }
+  try { if (!$("inf").hidden) renderInf(); } catch (_) {}
+}
+const resNet = (k) => resProd(k) - unitUse(k) + mineDay(k);
 const msSince = (t) => Math.max(0, Date.now() - (t ? new Date(t).getTime() : Date.now()));
 // موجودی زنده: تولید از res_tick/food_tick ، مصرف یگان‌ها از unit_tick
-const liveRes = (k) => { const c = country || {}; if (c[k] == null) return null; return Math.max(0, Math.floor(Number(c[k]) + (resProd(k) * msSince(c.res_tick) - unitUse(k) * msSince(c.unit_tick)) / 86400000)); };
+const liveRes = (k) => { const c = country || {}; if (c[k] == null) return null; return Math.max(0, Math.floor(Number(c[k]) + (resProd(k) * msSince(c.res_tick) - unitUse(k) * msSince(c.unit_tick)) / 86400000 + mineLive(k))); };
 function resEntries(k) {
   const on = (p) => infLv[p.id] && !infOff[p.id];
   const inp = RESB.filter((p) => p.res === k && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], rdAt(p, infLv[p.id])]);
   const out = (k === "uranium" ? PLANTS.filter((p) => p.uran && on(p)).map((p) => [p.fa + " · سطح " + infLv[p.id], p.uran * infLv[p.id]]) : []).concat(unitUse(k) > 0 ? [["ارتش · یگان‌ها", unitUse(k)]] : []);
-  return [inp, out];
+  const mi = MINES.filter((m) => MINE_RES[m.kind] === k).map((m) => { const st = SITES.find((x) => x.id === m.id); return [(st ? RES[st.type].icon + " " + st.fa : m.id) + " · معدن", m.rate * 86400]; });
+  return [inp.concat(mi), out];
 }
 const RM_NOTE = { steel: "فولاد برای ساخت یگان‌های ارتش لازم است.", oil: "نفت برای ساخت و سوخت یگان‌های هوایی و دریایی لازم است.", uranium: "نیروگاه هسته‌ای و یگان‌های موشکی اورانیوم مصرف می‌کنند؛ اگر تمام شود نیروگاه‌ها غیرفعال می‌شوند." };
 function rmCard() {
@@ -2610,7 +2653,7 @@ function armDeployBox(units, home) {
   });
   UM.filter((m) => ids.includes(m.unit_id)).forEach((m) => {
     const t = new Date(m.arrive_at).getTime();
-    h += `<div class="ar-lr" data-arr="${t}"><span>🚚 ${unitIc(m.unit_id)} ${en(m.qty)} ← ${siteName(m.from_loc)} → ${siteName(m.to_loc)}</span><b class="cd" dir="ltr">${durEn(t - Date.now())}</b></div>`;
+    h += `<div class="ar-lr" data-arr="${t}"><span>🚚 ${unitIc(m.unit_id)} ${en(m.qty)} ← ${siteName(m.from_loc)} → ${siteName(m.to_loc)}</span><b class="cd" dir="ltr">${durEn(t - Date.now())}</b><button class="ghost" style="padding:4px 10px" onclick="cancelMoves([${m.id}])">لغو</button></div>`;
   });
   return h + `<button class="ghost" style="margin-top:10px" onclick="screen('worldmap')">🧭 اعزام روی نقشه</button></div>`;
 }
@@ -2618,11 +2661,32 @@ function renderSiteMine() {
   const el = $("rmine"); if (!el) return;
   if (!curSite) { el.innerHTML = ""; return; }
   const rs = UL.filter((r) => r.loc === curSite.id && Number(r.qty) > 0), mv = UM.filter((m) => m.to_loc === curSite.id);
+  { const bf = $("rfrom"); if (bf) bf.hidden = !rs.length; }
   let h = "";
   if (rs.length) h += `🪖 یگان‌های شما این‌جا: ${rs.map((r) => unitIc(r.unit_id) + " " + en(r.qty)).join(" ")} <button class="gb" onclick="recallFrom('${curSite.id}')">↩️ بازگشت همه به خانه</button>`;
-  mv.forEach((m) => { const t = new Date(m.arrive_at).getTime(); h += `<div data-arr="${t}">🚚 ${unitIc(m.unit_id)} ${en(m.qty)} در راه · <span class="cd" dir="ltr">${durEn(t - Date.now())}</span></div>`; });
+  mv.forEach((m) => { const t = new Date(m.arrive_at).getTime(); h += `<div data-arr="${t}">🚚 ${unitIc(m.unit_id)} ${en(m.qty)} در راه · <span class="cd" dir="ltr">${durEn(t - Date.now())}</span> <button class="gb" style="padding:4px 12px;margin:0 6px" onclick="cancelMoves([${m.id}])">لغو</button></div>`; });
   el.innerHTML = h;
 }
+function askConfirm(title, msg, ok) {
+  return new Promise((res) => {
+    const ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;z-index:99;background:#000b;display:grid;place-items:center;padding:20px";
+    ov.innerHTML = `<div class="cmbox" style="border-radius:22px;max-width:360px"><b>${frEsc(title)}</b><p class="lbl" style="margin:10px 0 14px;line-height:1.9">${frEsc(msg)}</p><button class="buy" id="acok" style="width:100%">${frEsc(ok || "تأیید")}</button><button class="ghost" id="acno" style="width:100%;margin-top:8px">انصراف</button></div>`;
+    document.body.append(ov);
+    ov.querySelector("#acok").onclick = () => { ov.remove(); res(true); };
+    ov.querySelector("#acno").onclick = () => { ov.remove(); res(false); };
+  });
+}
+const moveIds = (mv) => (+mv.group_id > 0 ? UM.filter((x) => +x.group_id === +mv.group_id) : [mv]).map((x) => x.id);
+/* لغو حرکت: یگان‌ها از نقطه‌ی فعلی‌شان به مبدأ برمی‌گردند (زمان برگشت = زمانی که تا الان رفته‌اند) */
+async function cancelMoves(ids, info) {
+  if (!ids || !ids.length) return;
+  if (!(await askConfirm("لغو حرکت؟", (info ? info + " — " : "") + "یگان‌ها از همین نقطه به مبدأ برمی‌گردند.", "لغو و بازگشت"))) return;
+  const { error } = await sb.rpc("cancel_moves", { p_ids: ids });
+  if (error) flash(ARM_ERR[error.message] || error.message, 5000); else flash("↩️ یگان‌ها در حال بازگشت‌اند", 2500);
+  await loadArmy(); renderSiteMine();
+}
+function dispatchFromSite() { if (!curSite) return; const id = curSite.id; closeMapSheet(); openDp(id); }
+Object.assign(ARM_ERR, { NOT_MOVING: "این حرکت دیگر قابل لغو نیست" });
 async function dispatchRpc(a) {
   const base = { p_unit: a.p_unit, p_qty: a.p_qty, p_from: a.p_from, p_to: a.p_to };
   let used = a, r = await sb.rpc("dispatch_units", used);
@@ -2778,7 +2842,7 @@ function dpsRender() {
   $("dpsT").textContent = mvSel.cargo ? "پیاده کردن · " + gName(mvSel.grp) : mvSel.grp > 0 ? gName(mvSel.grp) : mvSel.from === "home" ? "ارتش پایتخت" : siteName(mvSel.from);
   $("dpsS").textContent = en(l.reduce((a, u) => a + dpQ(u.id), 0)) + " یگان آماده فرمان";
   $("dpsC").innerHTML = l.map((u) => `<span class="dpsch">${unitIc(u.id)} <b>${en(dpQ(u.id))}</b> ${unitFa(u.id)}</span>`).join("");
-  $("dpsC").hidden = $("dpsP").hidden = $("dpsA").hidden = !!mvTo; $("dpsD").hidden = !mvTo; if (mvTo) $("dpsB").hidden = true;
+  $("dpsC").hidden = $("dpsP").hidden = $("dpsA").hidden = !!mvTo; $("dpsD").hidden = !mvTo; $("dpsF").hidden = !mvTo; if (mvTo) $("dpsB").hidden = true;
   $("dpsP").textContent = mvSel.cargo ? "🏖 ساحل نزدیک ناو را روی نقشه بزنید (حداکثر ۵۰ km)" : "🎯 مقصد یا هدف را روی نقشه بزنید";
   $("dpsBd").hidden = mvSel.cargo || mvSel.from !== "home"; $("dpsA").style.display = mvSel.cargo ? "none" : "";
   if (!mvTo) return;
@@ -2788,7 +2852,7 @@ function dpsRender() {
   $("dpsE").textContent = ref.length ? durEn(sec * 1000) : "—";
   $("dpsK").textContent = a && b ? en(Math.round(kmBetween(a, b))) + " km" : "—";
   $("dpsR").innerHTML = l.map((u) => { const e = mvErr(u, mvTo), q = dpsEff(u), mx = dpQ(u.id);
-    return `<div class="dpsrow${e ? " off" : ""}"><span style="font-size:24px">${unitIc(u.id)}</span><div><b>${unitFa(u.id)}</b><small>${e || en(mx) + " در " + here}</small></div><button class="pmb" onclick="dpsAdj('${u.id}',-1)" ${e || q < 1 ? "disabled" : ""}>−</button><b class="dpsq">${en(q)}</b><button class="pmb" onclick="dpsAdj('${u.id}',1)" ${e || q >= mx ? "disabled" : ""}>+</button><button class="pmb dpsz" onclick="dpsAdj('${u.id}',-9999)" ${e || q < 1 ? "disabled" : ""}>هیچ</button></div>`; }).join("");
+    return `<div class="dpsrow${e ? " off" : ""}"><span class="dpsi">${unitIc(u.id)}</span><div><b>${unitFa(u.id)}</b><small>${e || en(mx) + " در " + here}</small></div><div class="dpsst"><button class="pmb" onclick="dpsAdj('${u.id}',-1)" ${e || q < 1 ? "disabled" : ""}>−</button><b class="dpsq">${en(q)}</b><button class="pmb" onclick="dpsAdj('${u.id}',1)" ${e || q >= mx ? "disabled" : ""}>+</button></div><button class="pmb dpsz" onclick="dpsAdj('${u.id}',${q >= mx ? -9999 : 9999})" ${e ? "disabled" : ""}>${q >= mx ? "هیچ" : "همه"}</button></div>`; }).join("");
   $("dpsGo").textContent = (mvSel.cargo ? "پیاده کنید · " : "اعزام کنید · ") + en(tot) + " یگان"; $("dpsGo").disabled = tot < 1;
   if (mvMk) mvMk.getElement().querySelector("span").textContent = ref.length ? durEn(sec * 1000) : "";
 }
@@ -2824,7 +2888,7 @@ function renderUnitMarkers() {
     const dx0 = dl * Math.cos(((a[1] + b[1]) / 2) * rad), dy0 = b[1] - a[1], ang = Math.round((Math.atan2(dx0, dy0) * 180) / Math.PI);
     const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : dx0 < 0 ? "scaleX(-1)" : ""), "move g-" + g), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em);
     const t1 = new Date(mv.arrive_at).getTime();
-    m.addEventListener("click", (ev) => { ev.stopPropagation(); flash("🚚 " + unitFa(mv.unit_id) + " ← " + durEn(t1 - Date.now()) + " تا رسیدن", 3000); });
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); cancelMoves(moveIds(mv), "🚚 " + unitFa(mv.unit_id) + " · " + durEn(t1 - Date.now()) + " تا رسیدن"); });
     addUnitEnt(m, h, a, "u:m" + mv.id, [0, 0], "", { mv: 1, a, b, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
   });
   routeSet("umoves", UM.map((mv) => { const a = locLL(mv.from_loc), b = locLL(mv.to_loc); return a && b ? lineF(a, b) : null; }).filter(Boolean));
@@ -2954,7 +3018,7 @@ function frCards() {
   UL.forEach((r) => { if (Number(r.qty) <= 0 || r.loc === "transit" || r.loc === "cargo") return; const g = +r.grp_id || 0, k = g + "|" + r.loc; (by[k] = by[k] || { gid: g, loc: r.loc, rows: [] }).rows.push(r); });
   Object.values(by).forEach((c) => cards.push({ gid: c.gid, loc: c.loc, mv: false, rows: c.rows, name: c.gid ? gName(c.gid) : c.loc === "home" ? "ارتش پایتخت" : c.loc === "airfield" ? "فرودگاه" : c.loc === "port" ? "بندر" : frLoc(c.loc) }));
   const mg = {}; UM.forEach((m) => { const k = +m.group_id || "m" + m.id; (mg[k] = mg[k] || []).push(m); });
-  Object.entries(mg).forEach(([k, ms]) => cards.push({ gid: +ms[0].group_id || 0, mv: true, rows: ms.map((m) => ({ unit_id: m.unit_id, qty: m.qty })), name: +ms[0].group_id ? gName(+ms[0].group_id) : "یگان‌های در راه", from: ms[0].from_loc, to: ms[0].to_loc, t0: Math.min(...ms.map((m) => new Date(m.depart_at || m.arrive_at).getTime())), t1: Math.max(...ms.map((m) => new Date(m.arrive_at).getTime())) }));
+  Object.entries(mg).forEach(([k, ms]) => cards.push({ gid: +ms[0].group_id || 0, mv: true, ids: ms.map((m) => m.id), rows: ms.map((m) => ({ unit_id: m.unit_id, qty: m.qty })), name: +ms[0].group_id ? gName(+ms[0].group_id) : "یگان‌های در راه", from: ms[0].from_loc, to: ms[0].to_loc, t0: Math.min(...ms.map((m) => new Date(m.depart_at || m.arrive_at).getTime())), t1: Math.max(...ms.map((m) => new Date(m.arrive_at).getTime())) }));
   cards.forEach((c) => { c.cargo = c.gid ? UL.filter((r) => +r.grp_id === c.gid && r.loc === "cargo" && Number(r.qty) > 0) : []; });
   return cards;
 }
@@ -2975,7 +3039,7 @@ function frCard(c) {
   const ul = c.cargo.length && !c.mv ? `<button class="ghost" style="padding:6px 12px" onclick="event.stopPropagation();openUnload(${c.gid})">🏖 پیاده کردن</button>` : "";
   const nm = c.gid ? `<b onclick="event.stopPropagation();frRename(${c.gid})">${frEsc(c.name)} ✎</b>` : `<b>${frEsc(c.name)}</b>`;
   const mid = c.mv ? `<small>از ${frEsc(frLoc(c.from))} به ${frEsc(frLoc(c.to))}</small><div class="pgb"><span class="pg" data-t0="${c.t0}" data-t1="${c.t1}" style="width:0"></span></div><small class="frcd-eta" data-t1="${c.t1}"></small>` : `<small>${frEsc(frLoc(c.loc))}</small>`;
-  return `<div class="frcd${frMg && frMg.includes(c.gid) && c.gid ? " sel" : ""}" onclick="frPick(${i})"><div class="fh">${nm}<span class="frs${c.mv ? " mv" : ""}">${c.mv ? "در حرکت" : "در موضع"}</span></div>${mid}<div>${chips}${cg}</div>${ul}</div>`;
+  return `<div class="frcd${frMg && frMg.includes(c.gid) && c.gid ? " sel" : ""}" onclick="frPick(${i})"><div class="fh">${nm}<span class="frs${c.mv ? " mv" : ""}">${c.mv ? "در حرکت" : "در موضع"}</span></div>${mid}<div>${chips}${cg}</div>${ul}${c.mv && c.ids ? `<button class="ghost" style="padding:6px 12px;margin-top:6px" onclick="event.stopPropagation();cancelMoves(${JSON.stringify(c.ids)})">↩️ لغو حرکت و بازگشت</button>` : ""}</div>`;
 }
 function frTick() {
   const now = Date.now();
@@ -3011,6 +3075,11 @@ async function frRename(gid) {
   if (error) flash(ARM_ERR[error.message] || error.message, 4000); await loadArmy();
 }
 
+/* هماهنگ‌سازی دوره‌ای: معدن‌ها را در سرور واریز می‌کند (settle_ops) و موجودی/نرخ را دوباره می‌خواند؛ اگر معدنی از دست رفت یا گرفته شد، نرخ‌ها درست می‌شوند */
+setInterval(async () => {
+  if (document.hidden || !country || !MINES.length) return;
+  try { await sb.rpc("settle_ops"); await loadCountry(true); } catch (_) {}
+}, 45000);
 async function refreshOwners() {
   const rs = await sb.rpc("list_resource_sites"); if (rs.error || !rs.data) return;
   owners = Object.fromEntries(rs.data.map((x) => [x.id, x.owner_code]));
@@ -3238,6 +3307,7 @@ async function loadCountry(silent) {
   if (error) { if (!silent) msg(error.message); return false; }
   if (/Failed to fetch/.test($("msg").textContent)) msg(""); // خطای شبکه‌ی قبلی دیگر معتبر نیست
   country = data;
+  await loadMines();
   try { const pf = await sb.from("profiles").select("vip_until").maybeSingle(); setVip(pf.data && pf.data.vip_until); } catch (e) {}
   return true;
 }
