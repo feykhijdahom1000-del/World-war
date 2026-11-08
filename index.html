@@ -178,6 +178,7 @@ nav{z-index:10}
 .hx.res.o{--rc:#e0913a}
 .hx.nown i{opacity:.55}
 .hx.unit{--rc:#4aa3ff;width:24px;height:27px}.hx.move{--rc:#ff9f43;width:24px;height:27px}
+.hx.unit,.hx.move{width:31px;height:34px}.hx.unit b svg,.hx.move b svg{width:18px;height:18px;display:block;fill:#fff}.hx.unit.g-land,.hx.move.g-land{--rc:#7ccf5a}.hx.unit.g-air,.hx.move.g-air{--rc:#c7d6f2}.hx.unit.g-sea,.hx.move.g-sea{--rc:#38bdf8}.hx.move{filter:drop-shadow(0 0 6px #ffb02e)}
 .hx.unit em.fb,.hx.move em.fb{background:#0b1424;border-radius:6px;padding:0 3px;color:#fff;font-size:9px;font-weight:700}
 .hx em.fb{top:auto;bottom:-7px;right:-8px;font-size:10px}
 /* shop */
@@ -1417,7 +1418,7 @@ function hexEl(icon, cls) {
   const m = document.createElement("div"); m.className = "mk";
   const h = document.createElement("div"); h.className = "hx " + cls;
   const i = document.createElement("i"), b = document.createElement("b");
-  b.textContent = icon;
+  if (typeof icon === "string" && icon.startsWith("<svg")) b.innerHTML = icon; else b.textContent = icon;
   h.append(i, b);
   m.append(h);
   return { m, h };
@@ -2400,6 +2401,12 @@ const UNIT_META = {
   destroyer: ["ناوشکن", "🚢"], submarine: ["زیردریایی", "🌊"], transport: ["ناو ترابری", "🛳️"], carrier: ["ناو هواپیمابر", "⚓"],
   missile: ["موشک", "🎯"], air_defense: ["پدافند هوایی", "📡"]
 };
+const SVG_IC = {
+  land: '<svg viewBox="0 0 24 24"><rect x="2.5" y="14.5" width="19" height="5" rx="2.5"/><path d="M5 14.5 7 11h10l2 3.5z"/><rect x="9" y="7.5" width="6.5" height="3.5" rx="1"/><rect x="14.5" y="8.6" width="8" height="1.4" rx=".7"/></svg>',
+  sea: '<svg viewBox="0 0 24 24"><path d="M2 14h20l-3.5 5.5h-13z"/><rect x="7.5" y="9" width="8" height="5"/><rect x="10" y="5.5" width="3" height="3.5"/><rect x="15.5" y="11" width="6" height="1.3" rx=".6"/></svg>',
+  air: '<svg viewBox="0 0 24 24"><path d="M12 2l1.8 7L22 13.5V16l-8.2-2.4-.5 5L16 21v1.5l-4-1-4 1V21l2.7-2.4-.5-5L2 16v-2.5L10.2 9z"/></svg>'
+};
+const mapIc = (g, tf) => { const v = SVG_IC[g]; return v ? (tf ? v.replace("<svg ", '<svg style="transform:' + tf + '" ') : v) : "🚀"; };
 const unitFa = (id) => (UNIT_META[id] || [id])[0], unitIc = (id) => (UNIT_META[id] || [0, "🔹"])[1];
 const GR = {
   land: { fa: "زمینی", ic: "🪖", ac: "#4aa3ff" }, air: { fa: "هوایی", ic: "✈️", ac: "#9fb4d6" },
@@ -2615,10 +2622,18 @@ function renderSiteMine() {
   mv.forEach((m) => { const t = new Date(m.arrive_at).getTime(); h += `<div data-arr="${t}">🚚 ${unitIc(m.unit_id)} ${en(m.qty)} در راه · <span class="cd" dir="ltr">${durEn(t - Date.now())}</span></div>`; });
   el.innerHTML = h;
 }
+async function dispatchRpc(a) {
+  let r = await sb.rpc("dispatch_units", a);
+  if (r.error && /function|schema cache|PGRST202|p_src|p_dst/i.test(String(r.error.message || "") + String(r.error.code || ""))) {
+    r = await sb.rpc("dispatch_units", { p_unit: a.p_unit, p_qty: a.p_qty, p_from: a.p_from, p_to: a.p_to });
+  }
+  if (r.error) console.error("dispatch_units", r.error);
+  return r;
+}
 async function recallFrom(loc, grp) {
   const rs = UL.filter((r) => r.loc === loc && Number(r.qty) > 0 && (!grp || (UC.find((u) => u.id === r.unit_id) || {}).grp === grp));
   for (const r of rs) {
-    const { error } = await sb.rpc("dispatch_units", { p_unit: r.unit_id, p_qty: Number(r.qty), p_from: loc, p_to: spawnOf(UC.find((u) => u.id === r.unit_id) || {}), p_src: +r.grp_id || 0, p_dst: +r.grp_id || 0 });
+    const { error } = await dispatchRpc({ p_unit: r.unit_id, p_qty: Number(r.qty), p_from: loc, p_to: spawnOf(UC.find((u) => u.id === r.unit_id) || {}), p_src: +r.grp_id || 0, p_dst: +r.grp_id || 0 });
     if (error) { flash(ARM_ERR[error.message] || error.message, 5000); break; }
   }
   if (rs.length) flash("↩️ یگان‌ها به‌سوی خانه حرکت کردند", 2500);
@@ -2650,7 +2665,9 @@ const SPW = {};
 function spawnPt(code, kind) {
   const k = kind + code; if (SPW[k] !== undefined) return SPW[k];
   const x = geoBase && geoBase.find((y) => y.code === code), bp = x && bigPoly({ geometry: x.geometry }), c = homeLL(code);
-  return (SPW[k] = bp && c ? (kind === "a" ? airFrom(bp, c) : portFrom(bp, c)) : null);
+  const v = bp && c ? (kind === "a" ? airFrom(bp, c) : portFrom(bp, c)) : null;
+  if (v || geoBase) SPW[k] = v;
+  return v;
 }
 const airLL = (code) => spawnPt(code, "a") || homeLL(code);
 const portLL = (code) => spawnPt(code, "p") || homeLL(code);
@@ -2660,7 +2677,8 @@ function homeLL(code) {
   if (!code) return null;
   if (HOMELL[code] === undefined) {
     const x = typeof geoBase !== "undefined" && geoBase && geoBase.find((y) => y.code === code), bp = x && bigPoly({ geometry: x.geometry });
-    HOMELL[code] = bp ? (ringCentroid(bp.ring) || [(bp.box[0][0] + bp.box[1][0]) / 2, (bp.box[0][1] + bp.box[1][1]) / 2]) : null;
+    const v = bp ? (ringCentroid(bp.ring) || [(bp.box[0][0] + bp.box[1][0]) / 2, (bp.box[0][1] + bp.box[1][1]) / 2]) : null;
+    if (v || (typeof geoBase !== "undefined" && geoBase)) HOMELL[code] = v; else return null;
   }
   return HOMELL[code];
 }
@@ -2708,15 +2726,22 @@ const dpQ = (id) => dpRows(id).reduce((a, r) => a + Number(r.qty), 0);
 const gName = (g) => (UG.find((x) => x.id === g) || {}).name || "";
 const dpList = () => UC.filter((u) => u.grp !== "missile" && dpQ(u.id) > 0);
 const lineF = (a, b) => ({ type: "Feature", geometry: { type: "LineString", coordinates: [a, b] } });
+const ROUTES = {};
 function routeSet(id, feats) {
   if (!lmap) return;
-  const d = { type: "FeatureCollection", features: feats }, src = lmap.getSource(id);
-  if (src) return src.setData(d);
-  try { lmap.addSource(id, { type: "geojson", data: d }); lmap.addLayer({ id, type: "line", source: id, layout: { "line-cap": "round" }, paint: { "line-color": "#f0cf6a", "line-width": 2.5, "line-dasharray": [2, 2], "line-opacity": 0.9 } }); } catch (_) {}
+  ROUTES[id] = feats;
+  const d = { type: "FeatureCollection", features: feats };
+  try {
+    if (!lmap.isStyleLoaded()) { lmap.once("idle", () => routeSet(id, ROUTES[id] || [])); return; }
+    if (lmap.getSource(id)) lmap.getSource(id).setData(d); else lmap.addSource(id, { type: "geojson", data: d });
+    if (!lmap.getLayer(id + "-c")) lmap.addLayer({ id: id + "-c", type: "line", source: id, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#201603", "line-width": 10, "line-opacity": 0.75 } });
+    if (!lmap.getLayer(id)) lmap.addLayer({ id, type: "line", source: id, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffd23f", "line-width": 6, "line-opacity": 1 } });
+  } catch (e) { console.warn("routeSet", id, e); }
 }
 async function openDp(from, to, grp) {
   if (!UC) await loadArmy();
   if (!UC) return flash("اطلاعات ارتش بارگذاری نشد", 3000);
+  if (!geoBase) { try { const g = await loadGeo(); geoBase = g.features.map((f) => ({ geometry: f.geometry, code: geoCode(f) })).filter((x) => x.code); } catch (_) {} }
   mvCancel();
   const st = to && SITES.find((x) => x.id === to);
   mvSel = { from: "home", grp: grp == null ? null : grp, q: {} };
@@ -2770,17 +2795,24 @@ function renderUnitMarkers() {
   old.forEach((e) => { showMk(e.mm, false); showMk(e.lm, false); });
   const gone = new Set(old.flatMap((e) => [e.mm, e.lm]));
   marks = marks.filter((k) => !gone.has(k)); ents = ents.filter((e) => e.kind !== "u");
-  const by = {};
-  UL.forEach((r) => { if (r.loc !== "transit" && r.loc !== "cargo" && Number(r.qty) > 0) by[r.loc] = (by[r.loc] || 0) + Number(r.qty); });
-  Object.entries(by).forEach(([loc, n]) => {
-    const ll = locLL(loc); if (!ll) return;
-    const { m, h } = hexEl(loc === "airfield" ? "✈️" : loc === "port" ? "⚓" : "🛡️", "unit"), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b);
+  const by = {}, perLoc = {};
+  UL.forEach((r) => {
+    if (r.loc === "transit" || r.loc === "cargo" || !(Number(r.qty) > 0)) return;
+    const g = ucOf(r.unit_id).grp || "land", k = r.loc + "|" + g; by[k] = (by[k] || 0) + Number(r.qty);
+    const a = (perLoc[r.loc] = perLoc[r.loc] || []); if (!a.includes(g)) a.push(g);
+  });
+  Object.entries(by).forEach(([k, n]) => {
+    const [loc, g] = k.split("|"), ll = locLL(loc); if (!ll) return;
+    const gs = perLoc[loc], ox = (gs.indexOf(g) - (gs.length - 1) / 2) * 34;
+    const { m, h } = hexEl(mapIc(g), "unit g-" + g), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b);
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openDp(loc); });
-    addUnitEnt(m, h, ll, "u:" + loc, [0, -26], loc === "home" ? "یگان‌های ما" : loc === "airfield" ? "فرودگاه" : loc === "port" ? "بندر" : "نیروها");
+    addUnitEnt(m, h, ll, "u:" + k, [ox, -26], "نیروی " + ((GR[g] || {}).fa || ""));
   });
   UM.forEach((mv) => {
     const a = locLL(mv.from_loc), b = locLL(mv.to_loc); if (!a || !b) return;
-    const { m, h } = hexEl(unitIc(mv.unit_id), "move"), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em);
+    const g = ucOf(mv.unit_id).grp || "land"; let dl = b[0] - a[0]; if (dl > 180) dl -= 360; if (dl < -180) dl += 360;
+    const dx0 = dl * Math.cos(((a[1] + b[1]) / 2) * rad), dy0 = b[1] - a[1], ang = Math.round((Math.atan2(dx0, dy0) * 180) / Math.PI);
+    const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : dx0 < 0 ? "scaleX(-1)" : ""), "move g-" + g), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em);
     const t1 = new Date(mv.arrive_at).getTime();
     m.addEventListener("click", (ev) => { ev.stopPropagation(); flash("🚚 " + unitFa(mv.unit_id) + " ← " + durEn(t1 - Date.now()) + " تا رسیدن", 3000); });
     addUnitEnt(m, h, a, "u:m" + mv.id, [0, 0], "", { mv: 1, a, b, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
@@ -2828,7 +2860,7 @@ async function newGid(kind) { const { data, error } = await sb.rpc("new_group", 
 function dstGroup(sel) {
   const full = mvSel.grp > 0 && dpList().every((u) => dpsEff(u) === dpQ(u.id));
   if (full) return Promise.resolve(mvSel.grp);
-  const ks = new Set(sel.map((u) => u.grp)); return newGid(ks.size === 1 ? [...ks][0] : "mix");
+  const ks = new Set(sel.map((u) => u.grp)); return newGid(ks.size === 1 ? [...ks][0] : "mix").catch((e) => { console.warn("new_group", e); return 0; });
 }
 async function mvGo() {
   if (!mvSel || !mvTo || $("dpsGo").disabled) return;
@@ -2844,7 +2876,7 @@ async function mvGo() {
         let left = dpsEff(u);
         for (const r of dpRows(u.id)) {
           if (left < 1) break; const q = Math.min(left, +r.qty);
-          const { error } = await sb.rpc("dispatch_units", { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst });
+          const { error } = await dispatchRpc({ p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst });
           if (error) { err = error; break outer; } left -= q; n += q;
         }
       }
