@@ -646,6 +646,22 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 #dps .dpsrow .dpsz{width:auto;min-width:46px;padding:0 10px;font-size:13px}
 #dps .dpsrow b{font-size:15px}
 .hx.res em.fb{top:-9px;bottom:auto;right:-13px;width:21px;height:21px;display:grid;place-items:center;font-size:14px;background:#0b1424;border:1px solid #ffffff3d;border-radius:50%;line-height:1}
+#dpsA{flex-wrap:wrap}#dpsA button{flex:1 1 calc(50% - 4px)}
+.spo{position:fixed;inset:0;z-index:99;background:#000b;display:grid;align-items:end;padding:10px}
+.spb{max-width:520px;width:100%;margin:0 auto;max-height:82vh;display:flex;flex-direction:column;background:#0a1322;border:1px solid #ffffff1f;border-radius:24px;overflow:hidden;animation:sheetUp .25s var(--ease)}
+.spb h3{margin:0;padding:14px 16px;font-size:18px;border-bottom:1px solid #ffffff14;flex:none}
+.spb .spc{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 16px 10px}
+.spb .spf{flex:none;padding:10px 16px 14px;border-top:1px solid #ffffff14}
+.spb .dpsrow{display:flex;align-items:center;gap:8px;padding:8px 0}
+.spb .dpsrow>div{flex:1;min-width:0}
+.spb .dpsrow>.dpsst{flex:none;display:flex;align-items:center;gap:4px}
+.spb .dpsi{flex:none;width:30px;text-align:center;font-size:22px}
+.spb .pmb{width:34px;height:34px;padding:0}
+.spb .dpsz{width:auto;min-width:46px;padding:0 10px;font-size:13px}
+.spb input.spq{width:62px;height:34px;padding:0 4px;text-align:center;direction:ltr;font-size:16px;border-radius:10px}
+.spb .spcard{display:block;width:100%;text-align:start;margin:8px 0;padding:12px;border-radius:18px;background:#ffffff0a;border:1px solid #ffffff1f;color:var(--txt);box-shadow:none}
+.spb .spcard b{font-size:16px}.spb .spcard small{display:block;color:var(--mut);margin:3px 0 6px}
+.spb .spcard .dpsch{display:inline-block;padding:3px 10px;margin:2px;font-size:13px}
 #frc{max-height:70vh}
 #frc h3{margin:2px 0 12px;font-size:24px}
 .frmg{position:absolute;top:12px;inset-inline-end:62px;padding:8px 14px;border-radius:18px;font-size:14px;background:#d4a73a22;color:#f6d779;border:1px solid #d4a73a99;box-shadow:none}
@@ -1037,7 +1053,7 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
   <div class="dpsb">
     <div class="dpsc" id="dpsC"></div>
     <div class="dpsp" id="dpsP">🎯 مقصد یا هدف را روی نقشه بزنید</div>
-    <div id="dpsA"><button class="ghost" id="dpsBd" onclick="dpsBoard()">⚓ سوار شوید</button><button class="ghost" onclick="openFrc()">🛡 نیروی دیگر</button></div>
+    <div id="dpsA"><button class="ghost" id="dpsBd" onclick="dpsBoard()">⚓ سوار شوید</button><button class="ghost" onclick="openFrc()">🛡 نیروی دیگر</button><button class="ghost" onclick="openSplit()">✂️ تقسیم</button><button class="ghost" onclick="openMergePick()">🔗 یکی کردن</button></div>
     <div id="dpsB" hidden></div>
     <div id="dpsD" hidden>
       <div class="dpst"><b id="dpsN"></b><small>برای تغییر مقصد، جای دیگری از نقشه را بزنید</small></div>
@@ -2684,6 +2700,70 @@ async function cancelMoves(ids, info) {
   const { error } = await sb.rpc("cancel_moves", { p_ids: ids });
   if (error) flash(ARM_ERR[error.message] || error.message, 5000); else flash("↩️ یگان‌ها در حال بازگشت‌اند", 2500);
   await loadArmy(); renderSiteMine();
+}
+/* ===== تقسیم / یکی کردن ارتش (از منوی پنل اعزام) ===== */
+["SPLIT_ALL:حداقل یک یگان باید در ارتش اصلی بماند", "IN_TRANSIT:ارتش در حال حرکت است", "HAS_CARGO:ناو بار دارد؛ اول بار را پیاده کنید", "NOT_SAME_LOC:ارتش‌ها در یک محل نیستند", "BAD_GROUP:ارتش نامعتبر است"].forEach((x) => { const [k, v] = x.split(":"); ARM_ERR[k] = ARM_ERR[k] || v; });
+function curGid() {
+  if (!mvSel || mvSel.cargo) return null;
+  if (mvSel.grp != null) return +mvSel.grp || 0;
+  const g = new Set(UL.filter((r) => r.loc === dpFrom && r.loc !== "transit" && r.loc !== "cargo" && Number(r.qty) > 0 && ucOf(r.unit_id).grp !== "missile").map((r) => +r.grp_id || 0));
+  return g.size === 1 ? [...g][0] : null;
+}
+function spOverlay(title, body, foot) {
+  const ov = document.createElement("div"); ov.className = "spo";
+  ov.innerHTML = `<div class="spb"><h3>${title}</h3><div class="spc">${body}</div><div class="spf">${foot}<button class="ghost" data-x="1" style="width:100%;margin-top:8px">انصراف</button></div></div>`;
+  ov.addEventListener("click", (e) => { if (e.target === ov || (e.target.dataset && e.target.dataset.x)) ov.remove(); });
+  document.body.append(ov); return ov;
+}
+function openSplit() {
+  const gid = curGid();
+  if (gid == null) return flash("چند ارتش در این محل هست؛ از «نیروی دیگر» یکی را انتخاب کنید", 3500);
+  if (gid > 0 && UM.some((m) => +m.group_id === gid)) return flash("این ارتش در حال حرکت است", 2500);
+  const loc = dpFrom, have = {};
+  UL.filter((r) => r.loc === loc && (+r.grp_id || 0) === gid && Number(r.qty) > 0 && ucOf(r.unit_id).grp !== "missile").forEach((r) => { have[r.unit_id] = (have[r.unit_id] || 0) + Number(r.qty); });
+  const ids = Object.keys(have), total = ids.reduce((a, i) => a + have[i], 0);
+  if (total < 2) return flash("برای تقسیم حداقل ۲ یگان لازم است", 3000);
+  const q = Object.fromEntries(ids.map((i) => [i, 0]));
+  const ov = spOverlay("✂️ تقسیم ارتش" + (gid ? " · " + frEsc(gName(gid)) : ""), "", '<button class="buy" id="spGo" style="width:100%"></button><div id="spErr" hidden style="margin-top:8px;padding:8px 10px;border-radius:12px;background:#ff6b6b22;border:1px solid #ff6b6b66;color:#ffb3b3;font-size:13px"></div>');
+  const sel = () => ids.reduce((a, i) => a + q[i], 0);
+  const draw = () => {
+    ov.querySelector(".spc").innerHTML = `<p class="lbl" style="margin:4px 0 6px">چند یگان از هر نوع را جدا کنیم تا ارتش تازه‌ای بشود؟</p>` + ids.map((i) => `<div class="dpsrow"><span class="dpsi">${unitIc(i)}</span><div><b>${frEsc(unitFa(i))}</b><small>${en(have[i])} یگان · می‌ماند ${en(have[i] - q[i])}</small></div><div class="dpsst"><button class="pmb" data-a="-1" data-u="${i}">−</button><input class="spq" type="number" inputmode="numeric" min="0" max="${have[i]}" value="${q[i]}" data-u="${i}"><button class="pmb" data-a="1" data-u="${i}">+</button></div><button class="pmb dpsz" data-a="half" data-u="${i}">نصف</button></div>`).join("");
+    const n = sel(), ok = n >= 1 && n < total, go = ov.querySelector("#spGo");
+    go.disabled = !ok; go.textContent = ok ? "ساخت ارتش جدید · " + en(n) + " یگان" : n >= total ? "حداقل یک یگان باید بماند" : "تعداد را مشخص کنید";
+  };
+  const clamp = (i, v) => Math.max(0, Math.min(have[i], Math.floor(Number(v) || 0)));
+  ov.addEventListener("click", (e) => { const b = e.target.closest("[data-a]"); if (!b) return; const i = b.dataset.u, a = b.dataset.a; q[i] = clamp(i, a === "half" ? Math.floor(have[i] / 2) : q[i] + Number(a)); draw(); });
+  ov.addEventListener("change", (e) => { const t = e.target; if (t.classList && t.classList.contains("spq")) { q[t.dataset.u] = clamp(t.dataset.u, t.value); draw(); } });
+  ov.querySelector("#spGo").onclick = async () => {
+    const go = ov.querySelector("#spGo"); go.disabled = true;
+    const items = ids.filter((i) => q[i] > 0).map((i) => ({ unit: i, qty: q[i] }));
+    const { data, error } = await sb.rpc("split_units", { p_loc: loc, p_src: gid, p_items: items });
+    if (error) { const eb = ov.querySelector("#spErr"); eb.hidden = false; eb.textContent = ARM_ERR[error.message] || error.message; go.disabled = false; return; }
+    ov.remove(); flash("✂️ ارتش جدید ساخته شد", 2500);
+    await loadArmy(); openDp(loc, null, Number(data) || 0);
+  };
+  draw();
+}
+function openMergePick() {
+  const gid = curGid();
+  if (gid == null) return flash("چند ارتش در این محل هست؛ از «نیروی دیگر» یکی را انتخاب کنید", 3500);
+  if (gid > 0 && UM.some((m) => +m.group_id === gid)) return flash("این ارتش در حال حرکت است", 2500);
+  const loc = dpFrom;
+  const cards = frCards().filter((c) => !c.mv && c.loc === loc && c.gid !== gid && c.rows.some((r) => ucOf(r.unit_id).grp !== "missile"));
+  if (!cards.length) return flash("ارتش دیگری در این محل نیست", 3000);
+  const meName = gid ? gName(gid) : "ارتش فعلی";
+  const ov = spOverlay("🔗 یکی کردن با…", `<p class="lbl" style="margin:4px 0 6px">«${frEsc(meName)}» با کدام ارتش یکی شود؟</p>` + cards.map((c, k) => `<button class="spcard" data-k="${k}"><b>${frEsc(c.name)}</b><small>${frEsc(frLoc(c.loc))}</small>${c.rows.map((r) => `<span class="dpsch">${unitIc(r.unit_id)} ${en(r.qty)}</span>`).join("")}</button>`).join(""), '<div id="spErr" hidden style="padding:8px 10px;border-radius:12px;background:#ff6b6b22;border:1px solid #ff6b6b66;color:#ffb3b3;font-size:13px"></div>');
+  ov.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    const c = cards[+b.dataset.k];
+    // ارتش بدون گروه (۰) همیشه به ارتش نام‌دار می‌پیوندد؛ در غیر این‌صورت ارتش انتخاب‌شده در ارتش فعلی ادغام می‌شود
+    const from = gid === 0 ? 0 : c.gid === 0 ? 0 : c.gid, into = gid === 0 ? c.gid : gid;
+    if (!(await askConfirm("یکی کردن؟", "«" + meName + "» با «" + c.name + "» یکی شود؟", "یکی کن"))) return;
+    const { error } = await sb.rpc("merge_armies", { p_loc: loc, p_from: from, p_into: into });
+    if (error) { const eb = ov.querySelector("#spErr"); eb.hidden = false; eb.textContent = ARM_ERR[error.message] || error.message; return; }
+    ov.remove(); flash("🔗 ارتش‌ها یکی شدند", 2500);
+    await loadArmy(); openDp(loc, null, into);
+  });
 }
 function dispatchFromSite() { if (!curSite) return; const id = curSite.id; closeMapSheet(); openDp(id); }
 Object.assign(ARM_ERR, { NOT_MOVING: "این حرکت دیگر قابل لغو نیست" });
