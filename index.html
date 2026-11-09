@@ -662,6 +662,20 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .spb .spcard{display:block;width:100%;text-align:start;margin:8px 0;padding:12px;border-radius:18px;background:#ffffff0a;border:1px solid #ffffff1f;color:var(--txt);box-shadow:none}
 .spb .spcard b{font-size:16px}.spb .spcard small{display:block;color:var(--mut);margin:3px 0 6px}
 .spb .spcard .dpsch{display:inline-block;padding:3px 10px;margin:2px;font-size:13px}
+.dpspw{margin:0 0 8px;padding:9px 12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14;font-size:14px;line-height:1.8}
+.dpspw b{font-size:16px;color:var(--gold)}.dpspw b.g{color:var(--ok)}.dpspw small{display:block;color:var(--mut);font-size:12px}
+.repb{display:inline-block;min-width:18px;padding:0 6px;border-radius:9px;background:#e5484d;color:#fff;font-size:12px;line-height:18px;margin-inline-start:6px;text-align:center}
+.hx.res em.df{position:absolute;left:-14px;bottom:-7px;top:auto;right:auto;padding:0 5px;border-radius:9px;background:#0b1424e6;border:1px solid #4aa3ff77;color:#9fd0ff;font-size:10px;line-height:15px;white-space:nowrap;font-style:normal}
+.hx.res em.df.z{border-color:#ff6b6b99;color:#ffb3b3}
+#resSheet .def b{color:var(--gold);font-size:16px}#resSheet .def small{display:block;color:var(--mut);margin-top:2px}
+.rpres{padding:10px 12px;border-radius:14px;font-weight:700;margin:4px 0 6px}
+.rpres.ok{background:#3ddc9722;border:1px solid #3ddc9766;color:#8ff0bd}.rpres.bad{background:#ff6b6b22;border:1px solid #ff6b6b66;color:#ffb3b3}
+.rpgrid{display:grid;gap:10px;margin-top:8px}
+.rpside{padding:10px 12px;border-radius:16px;background:#ffffff08;border:1px solid #ffffff1a}.rpside.win{border-color:#d4a73a88;background:#d4a73a12}
+.rph{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.rph small{color:var(--mut)}
+.rppw{margin:4px 0 6px;font-size:13px;color:var(--mut)}.rppw b{color:var(--gold);font-size:16px}
+.rprow{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid #ffffff0f;font-size:14px}.rprow>span:first-child{flex:1}
+.rpq{direction:ltr}.rpl{min-width:44px;text-align:end;color:var(--mut)}.rpl.r{color:#ff8a8a}
 #frc{max-height:70vh}
 #frc h3{margin:2px 0 12px;font-size:24px}
 .frmg{position:absolute;top:12px;inset-inline-end:62px;padding:8px 14px;border-radius:18px;font-size:14px;background:#d4a73a22;color:#f6d779;border:1px solid #d4a73a99;box-shadow:none}
@@ -977,12 +991,12 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
     <h3 id="rt"></h3>
     <div class="own"><span>در اختیار</span><span class="chip"><span class="cf" id="rcf" hidden></span><b id="rcn"></b></span></div>
     <div class="out" id="rout"></div>
-    <div class="def">🔒 دفاعش ناشناخته است؛ با شناسایی ماهواره‌ای روشن می‌شود</div>
-    <button class="gb" onclick="soon()">شناسایی ماهواره‌ای دفاع 🛰️</button>
+    <div class="def" id="rdef">🔒 دفاعش ناشناخته است؛ با شناسایی ماهواره‌ای روشن می‌شود</div>
+    <button class="gb" id="rrec" onclick="soon()">شناسایی ماهواره‌ای دفاع 🛰️</button>
     <p class="hint2" id="rhint"></p>
     <div class="hint2" id="rmine"></div>
     <button class="gb" id="rfrom" onclick="dispatchFromSite()" hidden style="margin-bottom:8px">↗️ اعزام از این موضع</button>
-    <button class="gb" onclick="openDp(null,curSite&&curSite.id)">🧭 اعزام یگان به این معدن</button>
+    <button class="gb" id="rsend" onclick="openDp(null,curSite&&curSite.id)">🧭 اعزام یگان به این معدن</button>
   </div></div>
   <div id="mapSheet" hidden><div class="in">
     <div class="hd">
@@ -1058,6 +1072,7 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
     <div id="dpsD" hidden>
       <div class="dpst"><b id="dpsN"></b><small>برای تغییر مقصد، جای دیگری از نقشه را بزنید</small></div>
       <div class="dpsg"><div><small>⏱ تا رسیدن</small><b id="dpsE">—</b></div><div><small>📏 مسافت</small><b id="dpsK">—</b></div></div>
+      <div id="dpsPw" class="dpspw" hidden></div>
       <div id="dpsR"></div>
     </div>
   </div>
@@ -2282,9 +2297,10 @@ async function loadMines() {
   try {
     const r = await sb.rpc("list_my_mines");
     if (r.error) { console.warn("list_my_mines", r.error); MINES = []; }
-    else MINES = (r.data || []).map((x) => ({ id: x.id, kind: x.kind, rate: Number(x.rate) || 0, t: new Date(x.tick).getTime() }));
+    else MINES = (r.data || []).map((x) => ({ id: x.id, kind: x.kind, rate: Number(x.rate) || 0, t: new Date(x.tick).getTime(), power: x.power == null ? null : Number(x.power) }));
   } catch (e) { MINES = []; }
   try { if (!$("inf").hidden) renderInf(); } catch (_) {}
+  try { markDef(); renderSiteDef(); } catch (_) {}
 }
 const resNet = (k) => resProd(k) - unitUse(k) + mineDay(k);
 const msSince = (t) => Math.max(0, Date.now() - (t ? new Date(t).getTime() : Date.now()));
@@ -2497,16 +2513,18 @@ async function loadArmy() {
     sb.from("country_units").select("unit_id,loc,qty,grp_id"),
     sb.from("unit_queue").select("id,unit_id,factory_id,qty,start_at,ready_at").eq("done", false).order("ready_at"),
     sb.rpc("army_status"),
-    sb.from("unit_moves").select("id,unit_id,qty,from_loc,to_loc,depart_at,arrive_at,group_id").eq("done", false).order("arrive_at"),
+    sb.from("unit_moves").select("id,unit_id,qty,from_loc,to_loc,depart_at,arrive_at,group_id,path").eq("done", false).order("arrive_at"),
     sb.from("unit_groups").select("id,name").order("id")
   ]);
+  let mvx = mv; if (mvx && mvx.error) mvx = await sb.from("unit_moves").select("id,unit_id,qty,from_loc,to_loc,depart_at,arrive_at,group_id").eq("done", false).order("arrive_at");
   const bad = cat.error || us.error || qs.error || st.error || !st.data || !cat.data;
   if (bad) { $("aMsg").textContent = "اطلاعات ارتش از سرور دریافت نشد؛ مطمئن شوید فایل SQL ارتش اجرا شده است."; return; }
   $("aMsg").textContent = "";
-  UC = cat.data; UL = us.data; UQ = qs.data; AS = st.data; UM = (mv && mv.data) || []; UG = (gs && gs.data) || [];
+  UC = cat.data; UL = us.data; UQ = qs.data; AS = st.data; UM = (mvx && mvx.data) || []; UG = (gs && gs.data) || [];
   await loadCountry(); render();
   $("power").textContent = armTotal(AS);
   renderArmy(); renderUnitMarkers(); if (!$("frc").hidden) frRender();
+  loadReports();
 }
 function setArmTab(t) { armTab = t; renderArmy(); }
 function renderArmy() {
@@ -2527,6 +2545,7 @@ function renderArmy() {
   };
   $("aTop").innerHTML = `<div class="ix-box"><div class="ar-hd"><div><div class="t">🛡️ قدرت ارتش</div><small>${en(base)} پایه + ${en(total - base)} یگان‌ها</small></div><b class="n">${en(total)}</b></div><div class="ar-bs">${slots}</div></div>`
     + `<div class="ix-box"><div class="rm-top"><b>📦 ذخایر</b><small>مصرف یگان‌ها از موجودی کم می‌شود</small></div>${rl("steel", "فولاد", "⛏️")}${rl("oil", "نفت", "🛢️")}${rl("uranium", "اورانیوم", "☢️")}${rl("food", "غذا", "🌾")}</div>`;
+  $("aTop").insertAdjacentHTML("beforeend", `<button class="ghost" style="width:100%;margin:0 0 10px" onclick="openReports()">📜 گزارش نبردها <b class="repb" hidden></b></button>`); repBadge();
   $("aTabs").innerHTML = Object.keys(GR).map((g) => {
     const n = UC.filter((u) => u.grp === g).reduce((a, u) => a + unitTotal(u.id), 0);
     return `<button class="tab${armTab === g ? " on" : ""}" onclick="setArmTab('${g}')"><span>${GR[g].ic} ${GR[g].fa}</span><small>${en(n)}</small></button>`;
@@ -2678,6 +2697,7 @@ function renderSiteMine() {
   if (!curSite) { el.innerHTML = ""; return; }
   const rs = UL.filter((r) => r.loc === curSite.id && Number(r.qty) > 0), mv = UM.filter((m) => m.to_loc === curSite.id);
   { const bf = $("rfrom"); if (bf) bf.hidden = !rs.length; }
+  renderSiteDef();
   let h = "";
   if (rs.length) h += `🪖 یگان‌های شما این‌جا: ${rs.map((r) => unitIc(r.unit_id) + " " + en(r.qty)).join(" ")} <button class="gb" onclick="recallFrom('${curSite.id}')">↩️ بازگشت همه به خانه</button>`;
   mv.forEach((m) => { const t = new Date(m.arrive_at).getTime(); h += `<div data-arr="${t}">🚚 ${unitIc(m.unit_id)} ${en(m.qty)} در راه · <span class="cd" dir="ltr">${durEn(t - Date.now())}</span> <button class="gb" style="padding:4px 12px;margin:0 6px" onclick="cancelMoves([${m.id}])">لغو</button></div>`; });
@@ -2709,9 +2729,9 @@ function curGid() {
   const g = new Set(UL.filter((r) => r.loc === dpFrom && r.loc !== "transit" && r.loc !== "cargo" && Number(r.qty) > 0 && ucOf(r.unit_id).grp !== "missile").map((r) => +r.grp_id || 0));
   return g.size === 1 ? [...g][0] : null;
 }
-function spOverlay(title, body, foot) {
+function spOverlay(title, body, foot, closeLabel) {
   const ov = document.createElement("div"); ov.className = "spo";
-  ov.innerHTML = `<div class="spb"><h3>${title}</h3><div class="spc">${body}</div><div class="spf">${foot}<button class="ghost" data-x="1" style="width:100%;margin-top:8px">انصراف</button></div></div>`;
+  ov.innerHTML = `<div class="spb"><h3>${title}</h3><div class="spc">${body}</div><div class="spf">${foot}<button class="ghost" data-x="1" style="width:100%;margin-top:8px">${closeLabel || "انصراف"}</button></div></div>`;
   ov.addEventListener("click", (e) => { if (e.target === ov || (e.target.dataset && e.target.dataset.x)) ov.remove(); });
   document.body.append(ov); return ov;
 }
@@ -2765,14 +2785,84 @@ function openMergePick() {
     await loadArmy(); openDp(loc, null, into);
   });
 }
+/* قدرت دفاعی معدن: برای معدن خودمان دقیق، برای مال دیگران ناشناخته تا شناسایی */
+function renderSiteDef() {
+  const el = $("rdef"); if (!el || !curSite) return;
+  const own = owners[curSite.id], mine = !!(country && own === country.code), m = MINES.find((x) => x.id === curSite.id), rec = $("rrec"), sd = $("rsend");
+  const okg = SITE_OK[curSite.type] || [];
+  const rs = UL.filter((r) => r.loc === curSite.id && Number(r.qty) > 0 && okg.includes(ucOf(r.unit_id).grp));
+  if (rec) rec.hidden = mine || !own;
+  if (mine) {
+    const pw = m ? Number(m.power) || 0 : forcePow(rs.map((r) => ({ id: r.unit_id, q: Number(r.qty) }))).p;
+    el.innerHTML = pw > 0 ? `🛡 قدرت دفاعی: <b>${en(pw)}</b> <small>${rs.map((r) => unitIc(r.unit_id) + " " + en(r.qty)).join(" ")}</small>` : "⚠️ این معدن مدافع ندارد؛ با اعزام یگان تقویتش کنید";
+    if (sd) sd.textContent = "🛡 تقویت دفاع · اعزام یگان به این معدن";
+  } else if (!own) { el.textContent = "🏳️ بدون مالک و بدون مدافع؛ تسخیرش آسان است"; if (sd) sd.textContent = "🧭 اعزام یگان برای تسخیر"; }
+  else { el.textContent = "🔒 دفاعش ناشناخته است؛ با شناسایی ماهواره‌ای روشن می‌شود"; if (sd) sd.textContent = "⚔️ حمله · اعزام یگان به این معدن"; }
+}
+/* نشانگر قدرت دفاعی روی معدن‌های خودم */
+function markDef() {
+  if (!ents) return;
+  const mp = Object.fromEntries(MINES.map((m) => [m.id, m]));
+  ents.forEach((e) => {
+    if (e.kind !== "r" || !e.h) return;
+    const old = e.h.querySelector("em.df"); if (old) old.remove();
+    const m = mp[e.code]; if (!m || m.power == null) return;
+    const b = document.createElement("em"); b.className = "df" + (m.power > 0 ? "" : " z"); b.textContent = "🛡" + shN(m.power); e.h.append(b);
+  });
+}
+/* ===== گزارش نبرد ===== */
+let REP = [], repBusy = false;
+const repSeen = () => { try { const v = localStorage.getItem("wm_rep_seen"); return v === null ? NaN : Number(v); } catch (_) { return NaN; } };
+const repMark = (id) => { try { localStorage.setItem("wm_rep_seen", String(id)); } catch (_) {} };
+function repBadge() { const sn = repSeen() || 0, n = REP.filter((r) => r.id > sn).length; document.querySelectorAll(".repb").forEach((b) => { b.hidden = !n; b.textContent = n ? en(n) : ""; }); return n; }
+async function loadReports() {
+  if (repBusy) return; repBusy = true;
+  try {
+    const r = await sb.rpc("my_battle_reports", { p_limit: 30 });
+    if (r.error || !r.data) { REP = []; return; }
+    REP = r.data;
+    if (Number.isNaN(repSeen())) repMark(REP.length ? REP[0].id : 0);   // اولین اجرا: قدیمی‌ها «دیده‌شده» حساب می‌شوند
+    const sn = repSeen() || 0, unseen = REP.filter((x) => x.id > sn);
+    repBadge();
+    if (unseen.length && !mvSel && !document.querySelector(".spo")) { repMark(unseen[0].id); repBadge(); openReport(unseen[0]); }
+  } catch (_) {} finally { repBusy = false; }
+}
+const repName = (code) => (code && byCode[code] ? byCode[code].name_fa : code || "بدون مالک");
+const repFlag = (code) => (/^[A-Z]{2}$/.test(code || "") ? flagOf(code) + " " : "");
+function repUnits(b, a) {
+  const ids = Object.keys(b || {}); if (!ids.length) return '<div class="lbl" style="padding:4px 0">بدون یگان</div>';
+  return ids.map((id) => { const x = Number(b[id]), y = Number((a || {})[id] || 0), l = x - y; return `<div class="rprow"><span>${unitIc(id)} ${frEsc(unitFa(id))}</span><span class="rpq">${en(x)} ← ${en(y)}</span><span class="rpl ${l > 0 ? "r" : ""}">${l > 0 ? "−" + en(l) : "—"}</span></div>`; }).join("");
+}
+const repSide = (label, code, pw, b, a, won) => `<div class="rpside${won ? " win" : ""}"><div class="rph"><b>${repFlag(code)}${frEsc(repName(code))}</b><small>${label}${won ? " · 🏆" : ""}</small></div><div class="rppw">قدرت <b>${en(Math.round(pw || 0))}</b></div>${repUnits(b, a)}</div>`;
+const repOutcome = (r) => { const me = r.role === "attacker", won = (r.winner === "attacker") === me; return { me, won, txt: me ? (won ? "پیروزی — معدن تسخیر شد" : "شکست در حمله") : (won ? "دفاع موفق" : "معدن از دست رفت") }; };
+const repTime = (r) => new Date(r.created_at).toLocaleString("fa-IR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+function openReport(r) {
+  const st = SITES.find((x) => x.id === r.site_id), t = st ? RES[st.type] : null, o = repOutcome(r);
+  return spOverlay("⚔️ نبرد " + (t ? t.icon + " " : "") + frEsc(st ? st.fa : r.site_id),
+    `<div class="rpres ${o.won ? "ok" : "bad"}">${o.won ? "🏆" : "💥"} ${o.txt}</div><small class="lbl">${repTime(r)}</small><div class="rpgrid">`
+    + repSide("مهاجم", r.att_code, r.att_power, r.att_before, r.att_after, r.winner === "attacker")
+    + repSide("مدافع", r.def_code, r.def_power, r.def_before, r.def_after, r.winner === "defender")
+    + `</div><p class="lbl" style="margin:8px 0 0;line-height:1.8">قدرت هر طرف = جذر (حمله × جان) یگان‌های مناسب آن معدن. طرف قوی‌تر می‌برد و فقط بخشی از نیرویش می‌ماند.</p>`, "", "بستن");
+}
+function openReports() {
+  if (!REP.length) return flash("هنوز نبردی ثبت نشده", 2500);
+  repMark(REP[0].id); repBadge();
+  const rows = REP.map((r, k) => { const st = SITES.find((x) => x.id === r.site_id), t = st ? RES[st.type] : null, o = repOutcome(r); return `<button class="spcard" data-k="${k}"><b>${t ? t.icon + " " : ""}${frEsc(st ? st.fa : r.site_id)}</b><small>${o.me ? "حمله‌ی شما" : "حمله به شما"} · ${o.won ? "✅" : "❌"} ${o.txt} · ${repTime(r)}</small></button>`; }).join("");
+  const ov = spOverlay("📜 گزارش نبردها", rows, "", "بستن");
+  ov.addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (b) openReport(REP[+b.dataset.k]); });
+}
 function dispatchFromSite() { if (!curSite) return; const id = curSite.id; closeMapSheet(); openDp(id); }
-Object.assign(ARM_ERR, { NOT_MOVING: "این حرکت دیگر قابل لغو نیست" });
+Object.assign(ARM_ERR, { NOT_MOVING: "این حرکت دیگر قابل لغو نیست", BAD_PATH: "مسیر نامعتبر است" });
 async function dispatchRpc(a) {
   const base = { p_unit: a.p_unit, p_qty: a.p_qty, p_from: a.p_from, p_to: a.p_to };
+  const fnErr = (e) => e && /function|schema cache|PGRST202|p_src|p_dst|p_path/i.test(String(e.message || "") + String(e.code || ""));
   let used = a, r = await sb.rpc("dispatch_units", used);
-  if (r.error && /function|schema cache|PGRST202|p_src|p_dst/i.test(String(r.error.message || "") + String(r.error.code || ""))) {
-    used = base; r = await sb.rpc("dispatch_units", used);
+  // سرور مسیر را نپذیرفت یا هنوز نسخه‌ی جدید را ندارد → بدون مسیر (خط مستقیم) تلاش کن
+  if (r.error && a.p_path && (r.error.message === "BAD_PATH" || fnErr(r.error))) {
+    console.warn("dispatch_units بدون مسیر", r.error);
+    used = Object.assign({}, a); delete used.p_path; r = await sb.rpc("dispatch_units", used);
   }
+  if (r.error && fnErr(r.error)) { used = base; r = await sb.rpc("dispatch_units", used); }
   if (r.error && r.error.message === "BAD_GROUP") {
     // گروه نامعتبر: اول با همان گروه مبدأ ، بعد بدون گروه (۰) دوباره تلاش می‌کنیم؛ اعزام ناموفق چیزی را تغییر نمی‌دهد
     for (const t of [{ p_src: a.p_src, p_dst: a.p_src }, { p_src: 0, p_dst: 0 }]) {
@@ -2841,9 +2931,148 @@ function kmBetween(a, b) {
   const x = Math.sin(((b[1] - a[1]) * rad) / 2) ** 2 + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(((b[0] - a[0]) * rad) / 2) ** 2;
   return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(x)));
 }
+/* ===== مسیر واقعی: ماسک خشکی/آب (شبکه‌ی ۰٫۲۵ درجه) + A* ===== */
+const MW = 1440, MH = 720, MRES = 4;
+let MASK = null;
+function buildMask() {
+  if (MASK) return MASK;
+  if (typeof geoBase === "undefined" || !geoBase) return null;
+  const cv = document.createElement("canvas"); cv.width = MW; cv.height = MH;
+  const cx = cv.getContext("2d", { willReadFrequently: true });
+  cx.fillStyle = "#000";
+  const X = (lng) => (lng + 180) * MRES, Y = (lat) => (90 - lat) * MRES;
+  for (const x of geoBase) {
+    const g = x.geometry; if (!g) continue;
+    const polys = g.type === "MultiPolygon" ? g.coordinates : g.type === "Polygon" ? [g.coordinates] : [];
+    for (const p of polys) {
+      cx.beginPath();
+      for (const ring of p) { ring.forEach((q, i) => (i ? cx.lineTo(X(q[0]), Y(q[1])) : cx.moveTo(X(q[0]), Y(q[1])))); cx.closePath(); }
+      cx.fill("evenodd");
+    }
+  }
+  const d = cx.getImageData(0, 0, MW, MH).data, land = new Uint8Array(MW * MH);
+  for (let i = 0; i < land.length; i++) land[i] = d[i * 4 + 3] > 110 ? 1 : 0;
+  P_G = new Float32Array(P_N); P_P = new Int32Array(P_N); P_S = new Uint32Array(P_N); P_C = new Uint32Array(P_N);
+  return (MASK = land);
+}
+const pCell = (ll) => [((Math.floor((ll[0] + 180) * MRES) % MW) + MW) % MW, Math.max(0, Math.min(MH - 1, Math.floor((90 - ll[1]) * MRES)))];
+const pCellLL = (x, y) => [(((x % MW) + MW) % MW + 0.5) / MRES - 180, 90 - (y + 0.5) / MRES];
+const pOk = (kind, x, y) => { if (y < 0 || y >= MH) return false; const v = MASK[y * MW + (((x % MW) + MW) % MW)]; return kind === "land" ? v === 1 : v === 0; };
+function pSnap(kind, x, y, R) {
+  if (pOk(kind, x, y)) return [x, y];
+  for (let r = 1; r <= R; r++) {
+    let best = null, bd = 1e9;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+      if (pOk(kind, x + dx, y + dy)) { const d = dx * dx + dy * dy; if (d < bd) { bd = d; best = [x + dx, y + dy]; } }
+    }
+    if (best) return best;
+  }
+  return null;
+}
+/* خط دید روی ماسک (x ها بازشده‌اند، یعنی ممکن است از 0..MW بیرون باشند) */
+function pLos(kind, x0, y0, x1, y1) {
+  let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, err = dx - dy, x = x0, y = y0;
+  for (;;) {
+    if (!pOk(kind, x, y)) return false;
+    if (x === x1 && y === y1) return true;
+    const e2 = 2 * err;
+    if (e2 > -dy) { err -= dy; x += sx; }
+    if (e2 < dx) { err += dx; y += sy; }
+  }
+}
+const P_N = MW * MH, P_HK = new Float32Array(MH); let P_G, P_P, P_S, P_C;
+let P_STAMP = 0;
+for (let y = 0; y < MH; y++) P_HK[y] = (111.32 / MRES) * Math.max(0.05, Math.cos((90 - (y + 0.5) / MRES) * Math.PI / 180));
+const P_V = 111.19 / MRES;
+function pAstar(kind, sx, sy, tx, ty) {
+  const st = ++P_STAMP, hf = [], hi = [];
+  const push = (f, i) => { let k = hf.length; hf.push(f); hi.push(i); while (k > 0) { const p = (k - 1) >> 1; if (hf[p] <= hf[k]) break; [hf[p], hf[k]] = [hf[k], hf[p]]; [hi[p], hi[k]] = [hi[k], hi[p]]; k = p; } };
+  const pop = () => { const top = hi[0], lf = hf.pop(), li = hi.pop(); if (hf.length) { hf[0] = lf; hi[0] = li; let k = 0; for (;;) { let l = 2 * k + 1, r = l + 1, m = k; if (l < hf.length && hf[l] < hf[m]) m = l; if (r < hf.length && hf[r] < hf[m]) m = r; if (m === k) break; [hf[m], hf[k]] = [hf[k], hf[m]]; [hi[m], hi[k]] = [hi[k], hi[m]]; k = m; } } return top; };
+  const W = 1.25, H = (x, y) => { let dx = Math.abs(x - tx); if (dx > MW / 2) dx = MW - dx; const dy = Math.abs(y - ty); return W * Math.hypot(dx * P_HK[(y + ty) >> 1], dy * P_V); };
+  const s = sy * MW + sx, t = ty * MW + tx;
+  P_G[s] = 0; P_P[s] = -1; P_S[s] = st; push(H(sx, sy), s);
+  let n = 0;
+  while (hf.length) {
+    const cur = pop(); if (P_C[cur] === st) continue; P_C[cur] = st;
+    if (cur === t) { const out = []; for (let i = t; i !== -1; i = P_P[i]) out.push(i); return out.reverse(); }
+    if (++n > 900000) return null;
+    const cy = (cur / MW) | 0, cx = cur - cy * MW;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      if (!dx && !dy) continue;
+      const ny = cy + dy; if (ny < 0 || ny >= MH) continue;
+      const nx = (cx + dx + MW) % MW;
+      if (!pOk(kind, nx, ny)) continue;
+      if (dx && dy && !pOk(kind, cx + dx, cy) && !pOk(kind, cx, cy + dy)) continue;
+      const step = dx && dy ? Math.hypot((P_HK[cy] + P_HK[ny]) / 2, P_V) : dx ? P_HK[cy] : P_V, ni = ny * MW + nx, ng = P_G[cur] + step;
+      if (P_S[ni] !== st || ng < P_G[ni]) { P_S[ni] = st; P_G[ni] = ng; P_P[ni] = cur; push(ng + H(nx, ny), ni); }
+    }
+  }
+  return null;
+}
+const pKm = (a, b) => { const x = Math.sin(((b[1] - a[1]) * Math.PI / 180) / 2) ** 2 + Math.cos(a[1] * Math.PI / 180) * Math.cos(b[1] * Math.PI / 180) * Math.sin(((b[0] - a[0]) * Math.PI / 180) / 2) ** 2; return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(x))); };
+const ROUTE_CACHE = {};
+/* مسیر یک یگان: {pts:[[lng,lat],...], km} یا null اگر مسیر وجود ندارد. هوایی همیشه مستقیم است. */
+function routeFor(grp, from, to) {
+  const a = locLL(from), b = locLL(to); if (!a || !b) return null;
+  const direct = { pts: [a, b], km: kmBetween(a, b) };
+  if (grp !== "land" && grp !== "sea") return direct;
+  const key = grp + "|" + a[0].toFixed(3) + "," + a[1].toFixed(3) + "|" + b[0].toFixed(3) + "," + b[1].toFixed(3);
+  if (key in ROUTE_CACHE) return ROUTE_CACHE[key];
+  let res = direct;
+  try { if (buildMask()) res = pathOnMask(grp, a, b) || null; } catch (e) { console.warn("route", e); res = direct; }
+  return (ROUTE_CACHE[key] = res);
+}
+function pathOnMask(kind, a, b) {
+  let [sx, sy] = pCell(a), [tx, ty] = pCell(b);
+  const s = pSnap(kind, sx, sy, 8), t = pSnap(kind, tx, ty, 8);
+  if (!s || !t) return null;
+  [sx, sy] = s; [tx, ty] = t;
+  let cells;
+  // اگر خط مستقیم از روی ماسک بدون مانع باشد، همان را می‌دهیم
+  let ux = tx; if (ux - sx > MW / 2) ux -= MW; else if (sx - ux > MW / 2) ux += MW;
+  if (pLos(kind, sx, sy, ux, ty)) cells = [[sx, sy], [ux, ty]];
+  else {
+    const idx = pAstar(kind, sx, sy, tx, ty); if (!idx) return null;
+    // بازکردن طول جغرافیایی تا پیوسته شود
+    let off = 0, px = null; const raw = idx.map((i) => { const y = (i / MW) | 0, x = i - y * MW; if (px !== null) { const d = x - px; if (d > MW / 2) off -= MW; else if (d < -MW / 2) off += MW; } px = x; return [x + off, y]; });
+    // ساده‌سازی بازگشتی با خط دید
+    const keep = new Uint8Array(raw.length); keep[0] = keep[raw.length - 1] = 1;
+    const stack = [[0, raw.length - 1]];
+    while (stack.length) {
+      const [lo, hi] = stack.pop(); if (hi - lo < 2) continue;
+      if (pLos(kind, raw[lo][0], raw[lo][1], raw[hi][0], raw[hi][1])) continue;
+      const mid = (lo + hi) >> 1; keep[mid] = 1; stack.push([lo, mid], [mid, hi]);
+    }
+    cells = raw.filter((_, i) => keep[i]);
+  }
+  let pts = [a].concat(cells.map(([x, y]) => pCellLL(x, y)), [b]);
+  // نقطه‌های تکراری/خیلی نزدیک را حذف کن
+  pts = pts.filter((p, i) => i === 0 || i === pts.length - 1 || pKm(pts[i - 1], p) > 1);
+  if (pts.length > 70) { const k = Math.ceil(pts.length / 70); pts = pts.filter((_, i) => i % k === 0 || i === pts.length - 1); }
+  let km = 0; for (let i = 1; i < pts.length; i++) km += pKm(pts[i - 1], pts[i]);
+  return { pts, km };
+}
+function cumKm(pts) { const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + kmBetween(pts[i - 1], pts[i])); return c; }
+/* موقعیت روی مسیر در کسر f (۰ تا ۱) + جهت افقی قطعه */
+function posAlong(pts, cum, f) {
+  const tot = cum[cum.length - 1], tg = Math.max(0, Math.min(1, f)) * tot;
+  let i = 1; while (i < cum.length - 1 && cum[i] < tg) i++;
+  const a = pts[i - 1], b = pts[i], seg = cum[i] - cum[i - 1], t = seg > 0 ? Math.max(0, Math.min(1, (tg - cum[i - 1]) / seg)) : 0;
+  let dx = b[0] - a[0]; if (dx > 180) dx -= 360; if (dx < -180) dx += 360;
+  let x = a[0] + dx * t; if (x > 180) x -= 360; if (x < -180) x += 360;
+  return { p: [x, a[1] + (b[1] - a[1]) * t], dir: dx };
+}
+/* خط قابل‌رسم روی نقشه (طول جغرافیایی پیوسته در گذر از خط تاریخ) */
+function linePF(pts) {
+  const c = []; let off = 0, prev = null;
+  pts.forEach((q) => { if (prev !== null) { const d = q[0] + off - prev; if (d > 180) off -= 360; else if (d < -180) off += 360; } prev = q[0] + off; c.push([q[0] + off, q[1]]); });
+  return { type: "Feature", geometry: { type: "LineString", coordinates: c } };
+}
+
 function etaSecs(u, from, to) {
-  const a = locLL(from), b = locLL(to), sp = Number(u.speed_kmh);
-  return !a || !b || !(sp > 0) ? 600 : Math.max(60, (kmBetween(a, b) / sp) * 3600);
+  const r = routeFor(u.grp, from, to), sp = Number(u.speed_kmh);
+  return !r || !(sp > 0) ? 600 : Math.max(60, (r.km / sp) * 3600);
 }
 async function openCoordsTool() {
   closeSettings();
@@ -2908,11 +3137,35 @@ async function openDp(from, to, grp) {
 }
 function closeDp() { mvCancel(); }
 function mvErr(u, to) {
+  const e = mvErr0(u, to); if (e) return e;
+  if (!mvSel || mvSel.cargo || u.grp === "air") return "";
+  return routeFor(u.grp, mvSel.from, to) ? "" : u.grp === "land" ? "مسیر زمینی وجود ندارد؛ با ناو حمل کنید" : "مسیر دریایی وجود ندارد";
+}
+function mvErr0(u, to) {
   const ll = locLL(to); if (!ll) return "مقصد نامعتبر";
   if (mvSel.cargo) { if (!to.startsWith("p:")) return "فقط روی نقطه‌ی ساحل"; if (!landAt(ll)) return "مقصد باید خشکی باشد"; const a = locLL(mvSel.from); return a && kmBetween(a, ll) > 50 ? "بیش از ۵۰ کیلومتر از ناو" : ""; }
   if (to === mvSel.from) return "مبدأ و مقصد یکی است";
   if (to.startsWith("p:")) { const land = landAt(ll); return u.grp === "land" && !land ? "نیروی زمینی روی آب نمی‌رود" : u.grp === "sea" && land ? "ناو روی خشکی نمی‌رود" : ""; }
   const s = SITES.find((x) => x.id === to); return s && SITE_OK[s.type].includes(u.grp) ? "" : "برای این یگان مجاز نیست";
+}
+const shN = (n) => { n = Math.round(Number(n) || 0); return n >= 1e6 ? (n / 1e6).toFixed(1).replace(".0", "") + "M" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".0", "") + "k" : String(n); };
+const forcePow = (rows) => { let a = 0, h = 0; rows.forEach(({ id, q }) => { const u = ucOf(id); a += q * Number(u.attack || 0); h += q * Number(u.hp || 0); }); return { a, h, p: Math.round(Math.sqrt(a * h)) }; };
+/* قدرت = جذر (حمله × جان) ؛ مهاجم وقتی می‌برد که قدرتش از مدافع بیشتر باشد */
+function dpsPower(ref) {
+  const el = $("dpsPw"); if (!el) return;
+  const st = mvTo && !mvTo.startsWith("p:") && SITES.find((x) => x.id === mvTo);
+  if (!st) { el.hidden = true; return; }
+  const sel = (ref || []).filter((u) => SITE_OK[st.type].includes(u.grp) && dpsEff(u) > 0).map((u) => ({ id: u.id, q: dpsEff(u) }));
+  const add = forcePow(sel), own = owners[st.id], mine = country && own === country.code;
+  let h;
+  if (mine) {
+    const cur = forcePow(UL.filter((r) => r.loc === st.id && Number(r.qty) > 0 && SITE_OK[st.type].includes(ucOf(r.unit_id).grp)).map((r) => ({ id: r.unit_id, q: Number(r.qty) })));
+    const nw = forcePow([...sel, ...UL.filter((r) => r.loc === st.id && Number(r.qty) > 0 && SITE_OK[st.type].includes(ucOf(r.unit_id).grp)).map((r) => ({ id: r.unit_id, q: Number(r.qty) }))]);
+    h = `🛡 تقویت دفاع: <b>${en(cur.p)}</b> ← <b class="g">${en(nw.p)}</b>`;
+  } else {
+    h = `⚔️ قدرت حمله‌ی این نیروها: <b>${en(add.p)}</b>` + (own ? '<small>دفاع مدافع ناشناخته است (شناسایی ماهواره‌ای)</small>' : "<small>معدن بدون مالک است</small>");
+  }
+  el.innerHTML = h; el.hidden = false;
 }
 const dpsEff = (u) => (mvTo && mvErr(u, mvTo) ? 0 : mvSel.q[u.id] || 0);
 function dpsAdj(id, d) { mvSel.q[id] = Math.max(0, Math.min(dpQ(id), (mvSel.q[id] || 0) + d)); dpsRender(); }
@@ -2930,7 +3183,13 @@ function dpsRender() {
   const sec = Math.max(0, ...ref.map((u) => etaSecs(u, mvSel.from, mvTo))), a = locLL(mvSel.from), b = locLL(mvTo);
   $("dpsN").textContent = mvTo.startsWith("p:") ? "نقطه روی نقشه" : siteName(mvTo);
   $("dpsE").textContent = ref.length ? durEn(sec * 1000) : "—";
-  $("dpsK").textContent = a && b ? en(Math.round(kmBetween(a, b))) + " km" : "—";
+  {
+    const rts = ref.map((u) => routeFor(u.grp, mvSel.from, mvTo)).filter(Boolean);
+    $("dpsK").textContent = rts.length ? en(Math.round(Math.max(...rts.map((r) => r.km)))) + " km" : "—";
+    const uniq = [...new Map(rts.map((r) => [r.km.toFixed(1), r])).values()];
+    routeSet("mvroute", uniq.length ? uniq.map((r) => linePF(r.pts)) : a && b ? [lineF(a, b)] : []);
+    dpsPower(ref);
+  }
   $("dpsR").innerHTML = l.map((u) => { const e = mvErr(u, mvTo), q = dpsEff(u), mx = dpQ(u.id);
     return `<div class="dpsrow${e ? " off" : ""}"><span class="dpsi">${unitIc(u.id)}</span><div><b>${unitFa(u.id)}</b><small>${e || en(mx) + " در " + here}</small></div><div class="dpsst"><button class="pmb" onclick="dpsAdj('${u.id}',-1)" ${e || q < 1 ? "disabled" : ""}>−</button><b class="dpsq">${en(q)}</b><button class="pmb" onclick="dpsAdj('${u.id}',1)" ${e || q >= mx ? "disabled" : ""}>+</button></div><button class="pmb dpsz" onclick="dpsAdj('${u.id}',${q >= mx ? -9999 : 9999})" ${e ? "disabled" : ""}>${q >= mx ? "هیچ" : "همه"}</button></div>`; }).join("");
   $("dpsGo").textContent = (mvSel.cargo ? "پیاده کنید · " : "اعزام کنید · ") + en(tot) + " یگان"; $("dpsGo").disabled = tot < 1;
@@ -2964,21 +3223,22 @@ function renderUnitMarkers() {
   });
   UM.forEach((mv) => {
     const a = locLL(mv.from_loc), b = locLL(mv.to_loc); if (!a || !b) return;
+    const pts = Array.isArray(mv.path) && mv.path.length > 1 ? mv.path : [a, b], cum = cumKm(pts), p0 = posAlong(pts, cum, 0);
     const g = ucOf(mv.unit_id).grp || "land"; let dl = b[0] - a[0]; if (dl > 180) dl -= 360; if (dl < -180) dl += 360;
     const dx0 = dl * Math.cos(((a[1] + b[1]) / 2) * rad), dy0 = b[1] - a[1], ang = Math.round((Math.atan2(dx0, dy0) * 180) / Math.PI);
-    const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : dx0 < 0 ? "scaleX(-1)" : ""), "move g-" + g), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em);
+    const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : p0.dir < 0 ? "scaleX(-1)" : ""), "move g-" + g), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em);
     const t1 = new Date(mv.arrive_at).getTime();
     m.addEventListener("click", (ev) => { ev.stopPropagation(); cancelMoves(moveIds(mv), "🚚 " + unitFa(mv.unit_id) + " · " + durEn(t1 - Date.now()) + " تا رسیدن"); });
-    addUnitEnt(m, h, a, "u:m" + mv.id, [0, 0], "", { mv: 1, a, b, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
+    addUnitEnt(m, h, a, "u:m" + mv.id, [0, 0], "", { mv: 1, pts, cum, a, b, grp: g, svg: h.querySelector("svg"), flip: p0.dir < 0, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
   });
-  routeSet("umoves", UM.map((mv) => { const a = locLL(mv.from_loc), b = locLL(mv.to_loc); return a && b ? lineF(a, b) : null; }).filter(Boolean));
+  routeSet("umoves", UM.map((mv) => { const a = locLL(mv.from_loc), b = locLL(mv.to_loc); return a && b ? linePF(Array.isArray(mv.path) && mv.path.length > 1 ? mv.path : [a, b]) : null; }).filter(Boolean));
+  markDef();
   ents.sort((x, y) => y.prio - x.prio); declutter();
 }
 function moveTick(e, now) {
-  const f = Math.min(1, Math.max(0, (now - e.t0) / Math.max(1, e.t1 - e.t0)));
-  let dx = e.b[0] - e.a[0]; if (dx > 180) dx -= 360; if (dx < -180) dx += 360;
-  const p = [e.a[0] + dx * f, e.a[1] + (e.b[1] - e.a[1]) * f];
+  const f = Math.min(1, Math.max(0, (now - e.t0) / Math.max(1, e.t1 - e.t0))), r = posAlong(e.pts, e.cum, f), p = r.p;
   e.ll = p; e.mm.setLngLat(p); e.lm.setLngLat(p);
+  if (e.svg && e.grp !== "air" && Math.abs(r.dir) > 1e-6 && (r.dir < 0) !== e.flip) { e.flip = r.dir < 0; e.svg.style.transform = e.flip ? "scaleX(-1)" : ""; }
   e.lb.textContent = durEn(e.t1 - now);
 }
 
@@ -3032,6 +3292,7 @@ async function mvGo() {
           if (left < 1) break; const q = Math.min(left, +r.qty);
           const a = { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst };
           if (dst < 0) a.p_kind = kind;
+          { const rt = u.grp !== "air" ? routeFor(u.grp, mvSel.from, mvTo) : null; if (rt && rt.pts.length > 1) a.p_path = rt.pts.map((q) => [Math.round(q[0] * 1000) / 1000, Math.round(q[1] * 1000) / 1000]); }
           const { data, error } = await dispatchRpc(a);
           if (error) { err = error; break outer; }
           if (dst < 0 && Number(data) > 0) dst = Number(data);
