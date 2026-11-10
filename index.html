@@ -692,6 +692,18 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .frs{padding:3px 10px;border-radius:12px;font-size:12px;border:1px solid #43e0a0;color:#43e0a0}.frs.mv{border-color:#e2b64e;color:#e2b64e}
 .frcd .pgb{margin:6px 0}.frcd .dpsch{padding:4px 10px;font-size:13px;display:inline-block;margin:2px}
 #dpsA{display:flex;gap:8px;margin-top:10px}#dpsA button{flex:1}
+/* ---- آیکون نیروها: دایره با حلقه‌ی رنگی بر اساس رابطه + پرچم کوچک ---- */
+.hx.unit,.hx.move{--sz:26px;width:var(--sz);height:var(--sz);filter:drop-shadow(0 1px 3px #000a)}
+.hx.unit i,.hx.unit b,.hx.move i,.hx.move b{clip-path:none;border-radius:50%}
+.hx.unit i,.hx.move i{inset:0;background:var(--rc)}
+.hx.unit b,.hx.move b{inset:2px;background:#0b1424}
+.hx.unit b svg,.hx.move b svg{width:14px;height:14px}
+.hx.unit.rel-mine,.hx.move.rel-mine{--rc:#d4a73a}
+.hx.unit.rel-ally,.hx.move.rel-ally{--rc:#3ddc97}
+.hx.unit.rel-enemy,.hx.move.rel-enemy{--rc:#ff4d4d}
+.hx.unit.rel-other,.hx.move.rel-other{--rc:#8b6cf0}
+.hx.unit em.fl,.hx.move em.fl{position:absolute;bottom:-4px;right:-5px;top:auto;width:13px;height:13px;border-radius:50%;background:#0b1424;border:1px solid #0b1424;display:grid;place-items:center;font-size:9px;line-height:1;overflow:hidden}
+.hx.unit em.fb,.hx.move em.fb{top:-7px;bottom:auto;right:-9px;font-size:9px}
 </style>
 </head>
 <body>
@@ -1117,6 +1129,10 @@ const $ = (id) => document.getElementById(id);
 const msg = (t) => ($("msg").textContent = t || "");
 const flagOf = (code) => String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt()));
 let country = null, picked = null;
+/* رابطه‌ی کشورها: وقتی سیستم اتحاد/جنگ اضافه شد فقط این دو مجموعه را پر کنید */
+const ALLIES = new Set(), ENEMIES = new Set();
+const relOf = (code) => !country || code === country.code ? "mine" : ALLIES.has(code) ? "ally" : ENEMIES.has(code) ? "enemy" : "other";
+const unitFlag = (h, code) => { const f = document.createElement("em"); f.className = "fl"; f.textContent = flagOf(code); h.append(f); };
 
 let lmap = null, mapReady = null;
 const FILTER = { labels: true, flags: true, straits: true, resources: true, taken: true, free: true };
@@ -3217,7 +3233,7 @@ function renderUnitMarkers() {
   Object.entries(by).forEach(([k, n]) => {
     const [loc, g] = k.split("|"), ll = locLL(loc); if (!ll) return;
     const gs = perLoc[loc], ox = (gs.indexOf(g) - (gs.length - 1) / 2) * 34;
-    const { m, h } = hexEl(mapIc(g), "unit g-" + g), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b);
+    const oc = country ? country.code : "", { m, h } = hexEl(mapIc(g), "unit g-" + g + " rel-" + relOf(oc)), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b); if (oc) unitFlag(h, oc);
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openDp(loc); });
     addUnitEnt(m, h, ll, "u:" + k, [ox, -26], "نیروی " + ((GR[g] || {}).fa || ""));
   });
@@ -3226,7 +3242,7 @@ function renderUnitMarkers() {
     const pts = Array.isArray(mv.path) && mv.path.length > 1 ? mv.path : [a, b], cum = cumKm(pts), p0 = posAlong(pts, cum, 0);
     const g = ucOf(mv.unit_id).grp || "land"; let dl = b[0] - a[0]; if (dl > 180) dl -= 360; if (dl < -180) dl += 360;
     const dx0 = dl * Math.cos(((a[1] + b[1]) / 2) * rad), dy0 = b[1] - a[1], ang = Math.round((Math.atan2(dx0, dy0) * 180) / Math.PI);
-    const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : p0.dir < 0 ? "scaleX(-1)" : ""), "move g-" + g), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em);
+    const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : p0.dir < 0 ? "scaleX(-1)" : ""), "move g-" + g + " rel-" + relOf(country ? country.code : "")), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em); if (country) unitFlag(h, country.code);
     const t1 = new Date(mv.arrive_at).getTime();
     m.addEventListener("click", (ev) => { ev.stopPropagation(); cancelMoves(moveIds(mv), "🚚 " + unitFa(mv.unit_id) + " · " + durEn(t1 - Date.now()) + " تا رسیدن"); });
     addUnitEnt(m, h, a, "u:m" + mv.id, [0, 0], "", { mv: 1, pts, cum, a, b, grp: g, svg: h.querySelector("svg"), flip: p0.dir < 0, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
