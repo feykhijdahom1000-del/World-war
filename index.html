@@ -3935,6 +3935,31 @@ if (!TG) {
     setTimeout(() => route(s), 0); // جلوگیری از قفل شدن supabase داخل callback
   });
   boot();
+  // ضربان حضور برای پنل ادمین (آنلاین/آخرین بازدید)
+  // ثبت مشخصات دستگاه برای تشخیص چند حساب روی یک گوشی
+  let devSent = false, devTries = 0;
+  const collectDevice = async () => {
+    let id = "none";
+    try { id = localStorage.getItem("ww_dev") || ""; if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(16).slice(2)); localStorage.setItem("ww_dev", id); } } catch (_) { id = "none"; }
+    let gpu = "";
+    try { const c = document.createElement("canvas"), g = c.getContext("webgl") || c.getContext("experimental-webgl"), e = g && g.getExtension("WEBGL_debug_renderer_info"); gpu = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL) || "") : ""; } catch (_) {}
+    const w = Math.min(screen.width, screen.height), h = Math.max(screen.width, screen.height);
+    const m = (navigator.userAgent.match(/;\s*([^;)]+?)\s+Build\//) || [])[1] || "";
+    const info = { platform: TG ? TG.platform : "", tgv: TG ? TG.version : "", model: m.length > 2 ? m : "", gpu, scr: w + "x" + h, dpr: window.devicePixelRatio || 1, cores: navigator.hardwareConcurrency || 0, mem: navigator.deviceMemory || 0, tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || ""), touch: navigator.maxTouchPoints || 0 };
+    const raw = [info.platform, info.model, gpu, info.scr, info.dpr, info.cores, info.mem, info.tz, info.touch].join("|");
+    let fp = raw;
+    try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw)); fp = [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 32); } catch (_) {}
+    return { id, fp, info };
+  };
+  const sendDevice = async () => {
+    if (devSent || devTries >= 4 || !authed) return;
+    devTries++;
+    try { const d = await collectDevice(); const { error } = await sb.rpc("report_device", { p_device_id: d.id, p_fp: d.fp, p_info: d.info }); if (!error) devSent = true; } catch (_) {}
+  };
+  const beat = () => { if (authed && document.visibilityState === "visible") { Promise.resolve(sb.rpc("touch_seen")).catch(() => {}); sendDevice(); } };
+  setInterval(beat, 30000);
+  document.addEventListener("visibilitychange", beat);
+  setTimeout(beat, 4000);
   setInterval(render, 1000);
   setInterval(async () => {
     if (!country) {
