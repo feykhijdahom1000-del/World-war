@@ -3944,7 +3944,8 @@ if (!TG) {
     let gpu = "";
     try { const c = document.createElement("canvas"), g = c.getContext("webgl") || c.getContext("experimental-webgl"), e = g && g.getExtension("WEBGL_debug_renderer_info"); gpu = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL) || "") : ""; } catch (_) {}
     const w = Math.min(screen.width, screen.height), h = Math.max(screen.width, screen.height);
-    const m = (navigator.userAgent.match(/;\s*([^;)]+?)\s+Build\//) || [])[1] || "";
+    let m = (navigator.userAgent.match(/;\s*([^;)]+?)\s+Build\//) || [])[1] || "";
+    if (m.length <= 2 || m === "K") { try { const hv = await navigator.userAgentData?.getHighEntropyValues(["model"]); if (hv && hv.model) m = hv.model; } catch (_) {} }
     const info = { platform: TG ? TG.platform : "", tgv: TG ? TG.version : "", model: m.length > 2 ? m : "", gpu, scr: w + "x" + h, dpr: window.devicePixelRatio || 1, cores: navigator.hardwareConcurrency || 0, mem: navigator.deviceMemory || 0, tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || ""), touch: navigator.maxTouchPoints || 0 };
     const raw = [info.platform, info.model, gpu, info.scr, info.dpr, info.cores, info.mem, info.tz, info.touch].join("|");
     let fp = raw;
