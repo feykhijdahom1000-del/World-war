@@ -2045,7 +2045,7 @@ const MAXLV = 5;
 // فرمول سطح‌ها (سرور مرجع است؛ این‌ها فقط برای نمایش‌اند و باید با bld_price / bld_income / bld_minutes یکی باشند)
 const LV_F = [1, 1.4, 2, 3, 4];
 const pAt = (b, lv) => Math.round(b.price * Math.pow(1.1, lv - 1));
-const iAt = (b, lv) => Math.round(b.income * Math.pow(1.1, lv - 1));
+const iAt = (b, lv) => Math.round(b.income * lv); // سود خطی: سطح n = n × سطح ۱ (باید با bld_income سرور یکی باشد)
 const mAt = (b, lv) => Math.round(b.mins * LV_F[lv - 1]);
 const upCost = (b, lv) => pv(pAt(b, lv + 1));
 let vipMul = 1; // ۰٫۸ وقتی VIP فعال است (فقط نمایش؛ سرور مرجع است)
