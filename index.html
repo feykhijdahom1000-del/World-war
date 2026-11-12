@@ -733,6 +733,13 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .bc .dots i.on{background:var(--ac,var(--gold))}
 .bc .bt b{color:var(--ac,var(--txt))}
 .bc .bi b{color:var(--ac,var(--ok))}
+#enm{position:fixed;top:78px;inset-inline:8px;z-index:33;max-width:520px;margin-inline:auto;padding:14px;background:#0a1322f2;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid #ff4d4d88;border-radius:22px;box-shadow:0 12px 34px #000b;animation:sheetUp .25s var(--ease)}
+#enm[hidden]{display:none}
+#enm .eh2{display:flex;align-items:center;gap:10px;margin-bottom:8px}#enm .eh2 .fl{width:44px;height:44px;font-size:24px}#enm .eh2 b{display:block;font-size:18px}#enm .eh2 small{color:var(--mut)}
+#enm .eh2 .ic{margin-inline-start:auto;width:36px;height:36px;font-size:15px}
+#enm .dpsch{display:inline-block;margin:2px}
+#enm .ep{margin:8px 0;color:var(--mut);font-size:14px}#enm .ep b{color:#ff8a8a;font-size:18px}
+#enm .wrow button{min-width:0}
 </style>
 </head>
 <body>
@@ -1137,6 +1144,7 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
   <small style="color:var(--mut)">نیروهای من</small><h3>کدام نیرو فرمان می‌گیرد؟</h3>
   <div class="frt" id="frT"></div><div class="frf" id="frF"></div><div id="frL"></div>
 </div>
+<div id="enm" hidden></div>
 <div id="toast"></div>
 <div id="notg" hidden style="position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;text-align:center;line-height:2"><div><div style="font-size:48px">✈️</div><h2 id="notgT">این بازی فقط داخل تلگرام اجرا می‌شود</h2><p class="lbl" id="notgP">لطفاً بازی را از طریق ربات تلگرام باز کنید.</p></div></div>
 
@@ -1768,7 +1776,7 @@ function screen(n) {
   document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" || n === "army" || n === "war" ? "home" : n)));
   closeSettings();
   if (n !== "chat") { chatStop(); $("chBar").hidden = true; }
-  if (n !== "worldmap") closeMapSheet();
+  if (n !== "worldmap") { closeMapSheet(); closeEnemy(); }
   window.scrollTo(0, 0);
   if (n === "worldmap") showMap();
   if (country) warPoll();
@@ -2583,6 +2591,7 @@ async function loadArmy() {
   UC = cat.data; UL = us.data; UQ = qs.data; AS = st.data; UM = (mvx && mvx.data) || []; UG = (gs && gs.data) || [];
   await loadCountry(); render();
   $("power").textContent = armTotal(AS);
+  await loadWorldUnits();
   renderArmy(); renderUnitMarkers(); if (!$("frc").hidden) frRender();
   loadReports();
 }
@@ -3215,6 +3224,10 @@ const forcePow = (rows) => { let a = 0, h = 0; rows.forEach(({ id, q }) => { con
 /* قدرت = جذر (حمله × جان) ؛ مهاجم وقتی می‌برد که قدرتش از مدافع بیشتر باشد */
 function dpsPower(ref) {
   const el = $("dpsPw"); if (!el) return;
+  if (mvSel && mvSel.atk) {
+    const at = (ref || []).filter((u) => dpsEff(u) > 0).map((u) => ({ id: u.id, q: dpsEff(u) })), mp = forcePow(at).p, ep = forcePow(enemyRows(mvSel.atk).map((r) => ({ id: r.unit_id, q: Number(r.qty) }))).p;
+    el.innerHTML = `⚔️ قدرت حمله‌ی شما: <b class="${mp > ep ? "g" : ""}">${en(mp)}</b> · قدرت دشمن: <b>${en(ep)}</b><small>${mp > ep ? "برتری با شماست" : "قدرت شما کمتر است؛ نیروی بیشتری بفرستید"}</small>`; el.hidden = false; return;
+  }
   const st = mvTo && !mvTo.startsWith("p:") && SITES.find((x) => x.id === mvTo);
   if (mvTo && mvTo.startsWith("c:")) { el.innerHTML = warAt(mvTo.slice(2)) ? "⚔️ با این کشور در جنگید؛ اگر در نبرد پایتخت پیروز شوید و نیروی زمینی بماند، اشغال شروع می‌شود." : "⚠️ جنگ اعلان نشده؛ می‌توانید حمله کنید ولی تسخیر ممکن نیست."; el.hidden = false; return; }
   if (!st) { el.hidden = true; return; }
@@ -3295,6 +3308,7 @@ function renderUnitMarkers() {
     m.addEventListener("click", (ev) => { ev.stopPropagation(); cancelMoves(moveIds(mv), "🚚 " + unitFa(mv.unit_id) + " · " + durEn(t1 - Date.now()) + " تا رسیدن"); });
     addUnitEnt(m, h, a, "u:m" + mv.id, [0, 0], "", { mv: 1, pts, cum, a, b, grp: g, svg: h.querySelector("svg"), flip: p0.dir < 0, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
   });
+  renderForeign();
   routeSet("umoves", UM.map((mv) => { const a = locLL(mv.from_loc), b = locLL(mv.to_loc); return a && b ? linePF(Array.isArray(mv.path) && mv.path.length > 1 ? mv.path : [a, b]) : null; }).filter(Boolean));
   markDef();
   ents.sort((x, y) => y.prio - x.prio); declutter();
@@ -3326,8 +3340,9 @@ function mvCancel() {
   if (mvMk) { mvMk.remove(); mvMk = null; }
   routeSet("mvroute", []);
 }
-function mvSet(to) {
+function mvSet(to, keep) {
   const ll = locLL(to); if (!ll || !mvSel) return;
+  if (!keep) mvSel.atk = null;
   mvTo = to;
   if (!mvMk) { const el = document.createElement("div"); el.className = "mvt"; el.innerHTML = "<i></i><u></u><span></span>"; mvMk = new maplibregl.Marker({ element: el }); }
   mvMk.setLngLat(ll).addTo(lmap);
@@ -3357,7 +3372,10 @@ async function mvGo() {
           const a = { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst };
           if (dst < 0) a.p_kind = kind;
           { const rt = u.grp !== "air" ? routeFor(u.grp, mvSel.from, mvTo) : null; if (rt && rt.pts.length > 1) a.p_path = rt.pts.map((q) => [Math.round(q[0] * 1000) / 1000, Math.round(q[1] * 1000) / 1000]); }
-          const { data, error } = await dispatchRpc(a);
+          let res;
+          if (mvSel.atk) res = await sb.rpc("attack_units", { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_target_code: mvSel.atk.code, p_target_loc: mvSel.atk.loc || null, p_target_move: mvSel.atk.move || null, p_src: +r.grp_id || 0, p_dst: dst, p_path: a.p_path || null, p_kind: dst < 0 ? kind : null });
+          else res = await dispatchRpc(a);
+          const { data, error } = res;
           if (error) { err = error; break outer; }
           if (dst < 0 && Number(data) > 0) dst = Number(data);
           left -= q; n += q;
@@ -3365,6 +3383,7 @@ async function mvGo() {
       }
     }
   } catch (e) { err = { message: String((e && e.message) || e) }; }
+  if (err && /function|schema cache|PGRST202/i.test(String(err.message || "") + String(err.code || ""))) err.message = "NO_ATK_RPC";
   if (err) { flash(ARM_ERR[err.message] || err.message, 5000); const eb = $("dpsErr"); if (eb) { eb.hidden = false; eb.textContent = "خطا: " + [err.message, err.code, err.details, err.hint].filter(Boolean).join(" | "); } } else flash(mvSel.cargo ? "نیروها در حال پیاده شدن‌اند" : "یگان‌ها اعزام شدند", 2500);
   if (!err || n) mvCancel(); else $("dpsGo").disabled = false;
   await loadArmy(); renderSiteMine(); if (mvSel) dpsRender();
@@ -4184,6 +4203,7 @@ function repSiteName(id) {
   const nm = (code) => (byCode[code] ? byCode[code].name_fa : code);
   if (id.startsWith("c:")) return "🏰 کشور " + nm(id.slice(2));
   if (id.startsWith("r:")) return "🛡 پایتخت " + nm(id.slice(2));
+  if (id.startsWith("p:")) return "📍 نقطه‌ای روی نقشه";
   return id;
 }
 function repTxt(r, me, won) {
@@ -4192,6 +4212,80 @@ function repTxt(r, me, won) {
   if (id.startsWith("r:")) return me ? (won ? "پایتخت آزاد شد" : "شکست در پس‌گرفتن پایتخت") : (won ? "پایتخت را حفظ کردید" : "پایتخت از دست رفت");
   return me ? (won ? "پیروزی — معدن تسخیر شد" : "شکست در حمله") : (won ? "دفاع موفق" : "معدن از دست رفت");
 }
+
+/* ===== نیروهای سایر کشورها روی نقشه ===== */
+// سرور باید RPC به نام list_world_units بدهد: {units:[{code,unit_id,loc,qty}], moves:[{id,code,unit_id,qty,from_loc,to_loc,depart_at,arrive_at,path}]}
+let WU = { units: [], moves: [] };
+Object.assign(ARM_ERR, { NO_ATK_RPC: "سرور هنوز حمله به یگان‌های دیگران را پشتیبانی نمی‌کند (باید SQL مربوطه اجرا شود)", NO_ENEMY: "این نیرو دیگر آن‌جا نیست", NOT_VISIBLE: "نیروی در حال حرکت یا مستقر روی پایتخت کشور دیگر قابل حمله نیست" });
+async function loadWorldUnits() {
+  if (!country) return;
+  try {
+    const r = await sb.rpc("list_world_units");
+    if (r.error || !r.data) { WU = { units: [], moves: [] }; return; }
+    const d = r.data;
+    WU = { units: (d.units || []).filter((x) => x.code !== country.code), moves: (d.moves || []).filter((x) => x.code !== country.code) };
+  } catch (_) { WU = { units: [], moves: [] }; }
+}
+const locLLc = (loc, code) => (loc === "home" ? homeLL(code) : loc === "airfield" ? airLL(code) : loc === "port" ? portLL(code) : locLL(loc));
+const cNameOf = (code) => (byCode[code] ? byCode[code].name_fa : code);
+function enemyRows(a) {
+  if (a.move) { const m = WU.moves.find((x) => String(x.id) === String(a.move)); return m ? [m] : []; }
+  const HM = ["home", "airfield", "port"], isH = HM.includes(a.loc);
+  return WU.units.filter((r) => r.code === a.code && (isH ? HM.includes(r.loc) : r.loc === a.loc) && Number(r.qty) > 0);
+}
+function renderForeign() {
+  if (!UC) return;
+  const by = {}, per = {};
+  WU.units.forEach((r) => {
+    if (!(Number(r.qty) > 0) || r.loc === "transit" || r.loc === "cargo") return;
+    const g = ucOf(r.unit_id).grp || "land", k = r.code + "|" + r.loc + "|" + g;
+    by[k] = (by[k] || 0) + Number(r.qty);
+    const pk = r.code + "|" + r.loc, a = (per[pk] = per[pk] || []); if (!a.includes(g)) a.push(g);
+  });
+  Object.entries(by).forEach(([k, n]) => {
+    const [code, loc, g] = k.split("|"), ll = locLLc(loc, code); if (!ll) return;
+    const gs = per[code + "|" + loc], gi = gs.indexOf(g);
+    const off = loc === "port" ? [-46 - gi * 34, 0] : loc === "airfield" ? [46 + gi * 34, -30] : loc === "home" || loc.startsWith("c:") ? [46 + gi * 34, 0] : [(gi - (gs.length - 1) / 2) * 34, -26];
+    const { m, h } = hexEl(mapIc(g), "unit g-" + g + " rel-" + relOf(code)), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b); unitFlag(h, code);
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); openEnemy({ code, loc }); });
+    addUnitEnt(m, h, ll, "w:" + k, off, cNameOf(code));
+  });
+  WU.moves.forEach((mv) => {
+    const a = locLLc(mv.from_loc, mv.code), b = locLLc(mv.to_loc, mv.code); if (!a || !b) return;
+    const pts = Array.isArray(mv.path) && mv.path.length > 1 ? mv.path : [a, b], cum = cumKm(pts), p0 = posAlong(pts, cum, 0);
+    const g = ucOf(mv.unit_id).grp || "land"; let dl = b[0] - a[0]; if (dl > 180) dl -= 360; if (dl < -180) dl += 360;
+    const ang = Math.round((Math.atan2(dl * Math.cos(((a[1] + b[1]) / 2) * rad), b[1] - a[1]) * 180) / Math.PI);
+    const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : p0.dir < 0 ? "scaleX(-1)" : ""), "move g-" + g + " rel-" + relOf(mv.code)), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em); unitFlag(h, mv.code);
+    const t1 = new Date(mv.arrive_at).getTime();
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); openEnemy({ code: mv.code, move: mv.id }); });
+    addUnitEnt(m, h, a, "w:m" + mv.id, [0, 0], "", { mv: 1, pts, cum, a, b, grp: g, svg: h.querySelector("svg"), flip: p0.dir < 0, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
+  });
+}
+function closeEnemy() { const e = $("enm"); if (e) e.hidden = true; }
+const enLoc = (l) => (l === "home" ? "پایتخت" : l === "airfield" ? "فرودگاه" : l === "port" ? "بندر" : frLoc(l));
+function openEnemy(a) {
+  const rows = enemyRows(a); if (!rows.length) return flash(ARM_ERR.NO_ENEMY, 2500);
+  const code = a.code, rel = relOf(code), pw = forcePow(rows.map((r) => ({ id: r.unit_id, q: Number(r.qty) }))).p;
+  const relTxt = { ally: "متحد", enemy: "دشمن", other: "کشور دیگر" }[rel] || "";
+  const chips = rows.map((r) => `<span class="dpsch">${unitIc(r.unit_id)} ${en(r.qty)} ${frEsc(unitFa(r.unit_id))}</span>`).join("");
+  const where = a.move ? "در حال حرکت" : enLoc(a.loc);
+  $("enm").innerHTML = `<div class="eh2"><div class="fl">${flagOf(code)}</div><div><b>${frEsc(cNameOf(code))}</b><small>${relTxt} · ${frEsc(where)}</small></div><button class="ic" onclick="closeEnemy()" aria-label="بستن">✕</button></div><div>${chips}</div><div class="ep">قدرت این نیرو: <b>${en(pw)}</b></div>${a.move ? '<div class="ep">نیروی در حال حرکت قابل حمله نیست؛ وقتی به مقصد رسید و مستقر شد حمله کنید.</div>' : ""}<div class="wrow">${a.move ? "" : '<button onclick="enemyAttack()">⚔️ انتخاب نیرو و حمله</button>'}<button class="ghost" onclick="closeEnemy()">بستن</button></div>`;
+  window.ENM = a; $("enm").hidden = false;
+}
+async function enemyAttack() {
+  const a = window.ENM; if (!a) return;
+  const rows = enemyRows(a); if (!rows.length) return flash(ARM_ERR.NO_ENEMY, 2500);
+  let tgt;
+  if (a.move) {
+    const mv = rows[0], f = locLLc(mv.from_loc, mv.code), t = locLLc(mv.to_loc, mv.code); if (!f || !t) return;
+    const pts = Array.isArray(mv.path) && mv.path.length > 1 ? mv.path : [f, t], cum = cumKm(pts), t0 = new Date(mv.depart_at || mv.arrive_at).getTime(), t1 = new Date(mv.arrive_at).getTime();
+    const ll = posAlong(pts, cum, (Date.now() - t0) / Math.max(1, t1 - t0)).p; tgt = "p:" + ll[0].toFixed(3) + "," + ll[1].toFixed(3);
+  } else { const ll = locLLc(a.loc, a.code); if (!ll) return; tgt = ["home", "airfield", "port"].includes(a.loc) ? "c:" + a.code : a.loc.startsWith("c:") ? a.loc : SITES.some((x) => x.id === a.loc) ? a.loc : "p:" + ll[0].toFixed(3) + "," + ll[1].toFixed(3); }
+  closeEnemy();
+  await openDp(null, tgt);
+  if (mvSel) { mvSel.atk = { code: a.code, loc: a.loc || null, move: a.move || null }; dpsRender(); }
+}
+setInterval(() => { if (!$("worldmap").hidden && country && UC && !document.hidden) loadWorldUnits().then(renderUnitMarkers).catch(() => {}); }, 15000);
 </script>
 </body>
 </html>
