@@ -727,6 +727,94 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 #conq{position:fixed;inset:0;z-index:9999;background:#0a111df7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
 #conq[hidden]{display:none}
 #conq>div{max-width:420px}
+/* ================= CLASSIC BLACK & GOLD THEME ================= */
+:root{--bg:#050505;--card:#0d0d0d;--line:#2b2414;--gd:#3b3015;--gold:#c9a227;--gold2:#e6cc78;--gold3:#8a6d1a;--txt:#f0ead8;--mut:#9b927c;--ok:#7cc79a;--err:#e07b6e;--ink:#120d02}
+body{background:radial-gradient(90% 40% at 50% -10%,#1c1606 0,transparent 70%),#050505;background-repeat:no-repeat;background-attachment:fixed}
+body::before,#inf::before{display:none}
+::selection{background:#c9a22744}
+h2,.eh h2,#inf .eh h2{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2);font-weight:800;font-size:25px}
+
+/* buttons */
+button{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border-radius:10px}
+section>button:not([class]),#go,#vipBuy,#chSend,#cartGo,.vip>button,.pk>button{box-shadow:none}
+button.ghost{background:transparent;border:1px solid var(--gd);color:var(--gold2)}
+button.danger{background:#7a2a22;color:#f3d9d4;box-shadow:none}
+.ic,.ic.g{background:#0f0f0f;border:1px solid var(--gd);color:var(--gold2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.ic.gold{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;box-shadow:none}
+.buy,.ix-c .buy{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;border-radius:10px;box-shadow:none;font-weight:800}
+.buy.poor,.ix-c .buy.poor{background:transparent;border:1px solid #7a3b34;color:var(--err)}
+.up,.ix-c .up{background:transparent;border:1px solid var(--line);color:var(--mut);box-shadow:none}
+input{background:#0a0a0a;border:1px solid var(--line);border-radius:10px}
+input:not([type=checkbox]):focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px #c9a22733}
+
+/* cards */
+.ecard,.ix-box,.syn,.bc,.ix-c,.ix-r,.cbox,.cpay,.pbox,.pbox2,.vps,.vpt,.rfc,.wcard,.phead,.cartbar,.gp,.eb,.chi,.frcd,.spb .spcard{background:#0c0c0c;border:1px solid var(--gd);border-radius:14px;box-shadow:inset 0 1px 0 #c9a22733;-webkit-backdrop-filter:none;backdrop-filter:none}
+.ix-s,.mil-s,.ar-b,.ar-lr,.pml,.dpsg>div,.cmr,.gp .stats>div,.rpside,.dpspw,.frt>div{background:#111;border:1px solid var(--line);border-radius:10px}
+.wcard.red{border-color:#8a3b34;background:#140b0a}.wcard.grn{border-color:#2f5f45;background:#0a120d}.wcard.gld{border-color:var(--gold)}
+.ix-c,.ix-r{--ac:#c9a227!important;--a2:#c9a22712!important;--a3:#c9a22744!important}
+.ix-r::after{display:none}
+.ix-rn,.gp .stats b,.trow .big{text-shadow:none}
+.ix-p{filter:none}
+.ix-box>.lbl{color:var(--gold2)}
+.ebig b{text-shadow:none}
+.cr{color:var(--gold2);text-shadow:none}
+
+/* icons: monochrome gold, square-ish */
+.eic,.ix-i,.ix-ri,.cic{border-radius:10px;background:#120f06;border:1px solid var(--gold3);box-shadow:none;filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
+.eic{width:46px;height:46px;font-size:22px}
+.ix-i{width:50px;height:50px;font-size:25px}
+.ix-ri{width:40px;height:40px;font-size:21px}
+
+/* tabs, chips, bars */
+.tab,.sc,.chp,.ar-chip,.dpsch{border-radius:8px;background:transparent;border:1px solid var(--gd);color:var(--txt);box-shadow:none}
+.tab.on{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border-color:transparent;box-shadow:none}
+.tab.on small{color:#4a3a0e}
+.sc.on{background:#c9a22722;color:var(--gold2);border-color:var(--gold)}
+.chp.g{color:var(--ok);border-color:#3f6a52}.chp.r{color:var(--err);border-color:#7a3b34}
+.ar-chip.g{color:var(--gold2);border-color:var(--gold3)}
+.dots i{border-radius:1px;height:4px;background:#2a2416}.dots i.on,.ix-c .dots i.on{background:var(--gold)}
+.pgb,.pgb.big{background:#1b170c}.pgb.big{height:10px;border-radius:4px}
+.pg,.pgb .pg{background:linear-gradient(90deg,#a97c22,#e6cc78);box-shadow:none}.pgb.big .pg{border-radius:4px}
+.sw{background:#1b170c;border-color:var(--gd)}.sw::after{background:#6b6450}
+.sw.on{background:#c9a22722;border-color:var(--gold)}.sw.on::after{background:var(--gold)}
+
+/* home */
+.main{background:linear-gradient(180deg,#14110a,#0a0a0a);border:1px solid var(--gd);border-radius:18px;box-shadow:none}
+.main::before{background:radial-gradient(circle at 15% 10%,#c9a22722,transparent 40%)}
+.main::after{display:none}
+.flag{border:2px solid var(--gold);box-shadow:none}
+.fl,.cf,.flag{background:#0a0a0a}
+.pill{background:#0f0f0f;border-color:var(--gd);color:var(--gold2)}
+.vipbd{background:linear-gradient(150deg,#2a2208,#0c0a04);border-radius:14px;box-shadow:none}
+.tile,.tile.army,.tile.war,.tile.eco,.tile.dip,.tile.mkt,.tile.inf,.tile.ref{--ta:var(--gold);background:linear-gradient(180deg,#121212,#0a0a0a);border:1px solid var(--gd);border-radius:14px;box-shadow:none;text-shadow:none;color:var(--gold2)}
+.tile.ref{border-color:var(--gold)}
+.tile::before{display:none}
+.tile::after{background:var(--gold);box-shadow:none;height:2px;inset-inline:16px;opacity:.7}
+.tile span{font-size:34px;filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
+.tile.mini span{font-size:26px}
+nav div{background:#0a0a0a;border:1px solid var(--gd);border-radius:18px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 -4px 20px #000c}
+nav button i{filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.05)}
+nav button.on{color:var(--gold2)}
+nav button[data-t=home].on{background:linear-gradient(180deg,#e0c050,#b08a1e);color:var(--ink);box-shadow:0 0 0 5px #050505}
+
+/* sheets and dialogs */
+#sheet,#mapSheet,#resSheet,.cmbox,#setSheet{background:#0a0a0a;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:16px 16px 0 0;border-top:1px solid var(--gold);box-shadow:0 -10px 30px #000d}
+#dps,#frc,.spb{background:#0a0a0a;border:1px solid var(--gd);border-radius:16px;-webkit-backdrop-filter:none;backdrop-filter:none}
+#cm,#setBack{-webkit-backdrop-filter:none;backdrop-filter:none}
+#toast{background:#0a0a0a;border:1px solid var(--gold);border-radius:10px;-webkit-backdrop-filter:none;backdrop-filter:none}
+#mapHud,.mctl,#fPanel{background:#0a0a0af2;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:14px}
+
+/* shop */
+.vip,.vpc{background:linear-gradient(150deg,#241c07,#0b0a05);border-radius:16px;box-shadow:none}
+.vip::after{opacity:.06}
+.vpc .crown{box-shadow:none}
+.pk{background:#0d0d0d;border:1px solid var(--gd);border-radius:14px;box-shadow:none}
+.pk.plus{border-color:var(--gold);background:linear-gradient(160deg,#211a07,#0b0a05);box-shadow:none}
+.tr,.c{border-radius:14px}
+.tr.premium_plus,.c.premium_plus{box-shadow:none}
+.tr.on,.c.on{box-shadow:0 0 0 2px var(--gold) inset}
+.chm.me .chb{background:#1a1608;border-color:var(--gd)}
+.chb{background:#0d0d0d;border-radius:12px}
 </style>
 </head>
 <body>
@@ -3169,8 +3257,8 @@ function routeSet(id, feats) {
   try {
     if (!lmap.isStyleLoaded()) { lmap.once("idle", () => routeSet(id, ROUTES[id] || [])); return; }
     if (lmap.getSource(id)) lmap.getSource(id).setData(d); else lmap.addSource(id, { type: "geojson", data: d });
-    if (!lmap.getLayer(id + "-c")) lmap.addLayer({ id: id + "-c", type: "line", source: id, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#201603", "line-width": 10, "line-opacity": 0.75 } });
-    if (!lmap.getLayer(id)) lmap.addLayer({ id, type: "line", source: id, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffd23f", "line-width": 6, "line-opacity": 1 } });
+    if (!lmap.getLayer(id + "-c")) lmap.addLayer({ id: id + "-c", type: "line", source: id, layout: { "line-cap": "butt", "line-join": "round" }, paint: { "line-color": "#201603", "line-width": 5, "line-opacity": 0.7, "line-dasharray": [1.2, 0.9] } });
+    if (!lmap.getLayer(id)) lmap.addLayer({ id, type: "line", source: id, layout: { "line-cap": "butt", "line-join": "round" }, paint: { "line-color": "#ffd23f", "line-width": 3, "line-opacity": 1, "line-dasharray": [2, 1.5] } });
   } catch (e) { console.warn("routeSet", id, e); }
 }
 async function openDp(from, to, grp) {
