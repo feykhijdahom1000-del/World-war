@@ -704,6 +704,29 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .hx.unit.rel-other,.hx.move.rel-other{--rc:#8b6cf0}
 .hx.unit em.fl,.hx.move em.fl{position:absolute;bottom:-4px;right:-5px;top:auto;width:13px;height:13px;border-radius:50%;background:#0b1424;border:1px solid #0b1424;display:grid;place-items:center;font-size:9px;line-height:1;overflow:hidden}
 .hx.unit em.fb,.hx.move em.fb{top:-7px;bottom:auto;right:-9px;font-size:9px}
+
+/* ===== جنگ ===== */
+.wcard{background:#ffffff14;border:1px solid #ffffff2e;border-radius:20px;padding:14px;margin:12px 0;line-height:1.9;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.wcard.red{border-color:#c4505a;background:linear-gradient(160deg,#4a1f24cc,#1d1216cc)}
+.wcard.grn{border-color:#2f8f68;background:linear-gradient(160deg,#17402fcc,#0f1a18cc)}
+.wcard.gld{border-color:var(--gold)}
+.wcard .wt{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px}
+.wbar{height:12px;border-radius:8px;background:#ffffff1f;overflow:hidden;margin:8px 0}
+.wbar u{display:block;height:100%;background:repeating-linear-gradient(45deg,#ff6b6b,#ff6b6b 8px,#d94a4a 8px,#d94a4a 16px);transition:width .6s}
+.wbar.g u{background:repeating-linear-gradient(45deg,#3ddc97,#3ddc97 8px,#2bb87b 8px,#2bb87b 16px)}
+.wrow{display:flex;gap:8px;flex-wrap:wrap}
+.wrow button{flex:1;margin:4px 0;padding:10px;font-size:15px;min-width:130px}
+.wchip{display:inline-block;border-radius:14px;padding:1px 10px;font-size:12px;font-weight:700;border:1px solid #ff8a8a;color:#ff8a8a}
+.wchip.ok{border-color:var(--ok);color:var(--ok)}
+.wit{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #ffffff14}
+.wit:last-child{border-bottom:0}
+.wit>b{flex:1}
+.wit>button{width:auto;margin:0;padding:8px 14px;font-size:14px}
+.tile.war em{position:absolute;top:12px;inset-inline-start:12px;font-style:normal;font-size:13px;background:#c4505a;color:#fff;border-radius:14px;padding:2px 10px;z-index:1}
+#mwar{margin-top:10px}
+#conq{position:fixed;inset:0;z-index:9999;background:#0a111df7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+#conq[hidden]{display:none}
+#conq>div{max-width:420px}
 </style>
 </head>
 <body>
@@ -783,7 +806,7 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
     </div>
     <div class="tiles">
       <button class="tile army" onclick="openArmy()"><span>🛡️</span>ارتش</button>
-      <button class="tile war" onclick="soon()"><span>⚔️</span>جنگ</button>
+      <button class="tile war" onclick="openWar()"><span>⚔️</span><em id="warBd" hidden>در جنگ</em>جنگ</button>
       <button class="tile eco" onclick="openEco()"><span>📈</span>اقتصاد</button>
       <button class="tile dip" onclick="soon()"><span>📜</span>دیپلماسی</button>
       <button class="tile mkt" onclick="soon()"><span>🏪</span>بازار جهانی</button>
@@ -959,6 +982,13 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
     <div class="lbl" id="aMsg" style="text-align:center;line-height:1.9"></div>
   </section>
 
+  <!-- جنگ -->
+  <section id="war" hidden>
+    <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>جنگ</h2></div>
+    <div class="tabs" id="warTabs"></div>
+    <div id="warBody"></div>
+  </section>
+
   <!-- ارتباطات -->
   <section id="chat" hidden>
     <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>ارتباطات</h2></div>
@@ -1021,10 +1051,12 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
       <div id="mst2"><span class="lbl" id="mil">درآمد روزانه</span><b id="mi"></b></div>
     </div>
     <div class="perk" id="mperk"></div>
+    <div id="mwar" hidden></div>
   </div></div>
 </section>
 
 <div id="chBar" hidden><input id="chIn" maxlength="300" placeholder="پیام بنویسید…" autocomplete="off"><button id="chSend" onclick="chatSend()">ارسال</button></div>
+<div id="conq" hidden><div><div style="font-size:64px">🏴</div><h2>کشور شما تسخیر شد</h2><p class="lbl" id="conqT" style="line-height:2"></p><button onclick="warPoll(true)">بررسی دوباره</button></div></div>
 <nav id="nav" hidden><div>
   <button data-t="chat" onclick="openChat()"><i>💬<b class="bdg" id="chBdg" hidden></b></i>ارتباطات</button>
   <button onclick="soon()"><i>🏪</i>بازار جهانی</button>
@@ -1604,8 +1636,9 @@ function declutter() {
         for (let k = 0; k < spots.length && at < 0; k++) {
           const p = k ? lmap.project(spots[k]) : p0;
           if (p.x < -20 || p.y < -20 || p.x > W + 20 || p.y > H + 20) continue;
-          const hr = sm ? { x: p.x - 12, y: p.y - 13, w: 24, h: 26 } : { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
-          const lr = { x: p.x - e.lw / 2, y: p.y + (sm ? 12 : 16), w: e.lw, h: 14 };
+          const o = e.off || [0, 0];
+          const hr = sm ? { x: p.x - 12 + o[0], y: p.y - 13 + o[1], w: 24, h: 26 } : { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
+          const lr = { x: p.x - e.lw / 2 + o[0], y: p.y + (sm ? 12 : 16) + o[1], w: e.lw, h: 14 };
           if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; at = k; }
           else if (!placed.some((q) => hit(q, hr))) { placed.push(hr); at = k; }
         }
@@ -1680,6 +1713,7 @@ function openMapSheet(c) {
   $("mi").textContent = fmt(mine ? country.daily_income : c.start_income);
   $("mst2").hidden = false;
   $("mperk").textContent = seaText(c) + (c.tier !== "normal" ? " · " + TIER_LABEL[c.tier] + TIER_ICON[c.tier] : "");
+  warMapBtns(c, mine);
   showSheet();
 }
 function openStrait(s) {
@@ -1693,6 +1727,7 @@ function openStrait(s) {
   $("mp").textContent = s.by.map(flagOf).join(" ");
   $("mst2").hidden = true;
   $("mperk").textContent = s.note;
+  $("mwar").hidden = true;
   showSheet();
 }
 function openResource(r) {
@@ -1721,14 +1756,15 @@ function closeMapSheet() {
 
 function screen(n) {
   $("boot").hidden = true;
-  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "army", "vip", "ref", "cart", "pay", "chat"]) $(s).hidden = s !== n;
-  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "army" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay" && n !== "chat";
-  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" || n === "army" ? "home" : n)));
+  for (const s of ["pick", "home", "shop", "worldmap", "eco", "inf", "army", "vip", "ref", "cart", "pay", "chat", "war"]) $(s).hidden = s !== n;
+  $("nav").hidden = !country || n !== "home" && n !== "shop" && n !== "worldmap" && n !== "eco" && n !== "inf" && n !== "army" && n !== "vip" && n !== "ref" && n !== "cart" && n !== "pay" && n !== "chat" && n !== "war";
+  document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.t === (n === "vip" || n === "cart" || n === "pay" ? "shop" : n === "ref" || n === "inf" || n === "army" || n === "war" ? "home" : n)));
   closeSettings();
   if (n !== "chat") { chatStop(); $("chBar").hidden = true; }
   if (n !== "worldmap") closeMapSheet();
   window.scrollTo(0, 0);
   if (n === "worldmap") showMap();
+  if (country) warPoll();
 }
 function flash(t, ms) {
   $("toast").textContent = t;
@@ -2342,9 +2378,9 @@ const fuAt = (p, lv) => +(p.use * (1 + 0.25 * (lv - 1))).toFixed(1);
 let infTab = "power";
 const liveFood = () => { const c = country || {}; if (c.food == null) return null; return Math.max(0, Math.floor(Number(c.food) + (resProd("food") * msSince(c.food_tick) - unitUse("food") * msSince(c.unit_tick)) / 86400000)); };
 function setInfTab(t) { infTab = t; renderInf(); }
-const pwAt = (p, lv) => Math.round(p.power * (1 + 0.25 * (lv - 1)));
+const pwAt = (p, lv) => Math.round(p.power * 1.5 * (1 + 0.25 * (lv - 1)));
 const mtAt = (p, lv) => Math.round(p.maint * Math.pow(1.1, lv - 1));
-const useAt = (b, lv) => Math.max(1, Math.round((b.price / 150000) * lv)); // مصرف برق ساختمان‌های اقتصادی: فرمول موقت
+const useAt = (b, lv) => Math.max(1, Math.round((b.price / 150000) * lv)) / 2; // مصرف برق ساختمان‌های اقتصادی: فرمول موقت
 const en = (n) => Number(n).toLocaleString("en-US");
 const durEn = (ms) => dur(ms).replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
 const btEn = (m) => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + " ساعت" : "") + (h && r ? " " : "") + (r ? r + " دقیقه" : ""); };
@@ -2694,7 +2730,7 @@ setInterval(() => {
 Object.assign(ARM_ERR, { NO_SEA: "کشور شما دریا ندارد؛ ناو ساخته نمی‌شود", NOT_ALLOWED: "این یگان به این مقصد نمی‌رود", NO_UNITS: "یگان کافی در مبدأ نیست", BAD_LOC: "مقصد نامعتبر است", SAME_LOC: "مبدأ و مقصد یکی است" });
 const SITE_OK = { u: ["land", "air"], s: ["land", "air"], o: ["sea", "air"] };
 const MOVE_MIN = { land: 10, sea: 15, air: 5 };
-const siteName = (loc) => { if (loc === "airfield") return "🛫 فرودگاه"; if (loc === "port") return "⚓ بندر"; if (String(loc).startsWith("p:")) { const q = loc.slice(2).split(","); return "📍 " + (+q[0]).toFixed(1) + "، " + (+q[1]).toFixed(1); } const s = SITES.find((x) => x.id === loc); return loc === "home" ? "🏠 خانه" : s ? RES[s.type].icon + " " + s.fa : loc; };
+const siteName = (loc) => { if (String(loc).startsWith("c:")) { const cc = byCode[loc.slice(2)]; return "🏰 پایتخت " + (cc ? cc.name_fa : loc.slice(2)); } if (loc === "airfield") return "🛫 فرودگاه"; if (loc === "port") return "⚓ بندر"; if (String(loc).startsWith("p:")) { const q = loc.slice(2).split(","); return "📍 " + (+q[0]).toFixed(1) + "، " + (+q[1]).toFixed(1); } const s = SITES.find((x) => x.id === loc); return loc === "home" ? "🏠 خانه" : s ? RES[s.type].icon + " " + s.fa : loc; };
 function armDeployBox(units, home) {
   const ids = units.map((u) => u.id), rows = {};
   UL.filter((r) => ids.includes(r.unit_id) && !SPAWNS.includes(r.loc) && r.loc !== "transit" && r.loc !== "cargo" && Number(r.qty) > 0).forEach((r) => { (rows[r.loc] = rows[r.loc] || []).push(r); });
@@ -2850,11 +2886,11 @@ function repUnits(b, a) {
   return ids.map((id) => { const x = Number(b[id]), y = Number((a || {})[id] || 0), l = x - y; return `<div class="rprow"><span>${unitIc(id)} ${frEsc(unitFa(id))}</span><span class="rpq">${en(x)} ← ${en(y)}</span><span class="rpl ${l > 0 ? "r" : ""}">${l > 0 ? "−" + en(l) : "—"}</span></div>`; }).join("");
 }
 const repSide = (label, code, pw, b, a, won) => `<div class="rpside${won ? " win" : ""}"><div class="rph"><b>${repFlag(code)}${frEsc(repName(code))}</b><small>${label}${won ? " · 🏆" : ""}</small></div><div class="rppw">قدرت <b>${en(Math.round(pw || 0))}</b></div>${repUnits(b, a)}</div>`;
-const repOutcome = (r) => { const me = r.role === "attacker", won = (r.winner === "attacker") === me; return { me, won, txt: me ? (won ? "پیروزی — معدن تسخیر شد" : "شکست در حمله") : (won ? "دفاع موفق" : "معدن از دست رفت") }; };
+const repOutcome = (r) => { const me = r.role === "attacker", won = (r.winner === "attacker") === me; return { me, won, txt: repTxt(r, me, won) }; };
 const repTime = (r) => new Date(r.created_at).toLocaleString("fa-IR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 function openReport(r) {
   const st = SITES.find((x) => x.id === r.site_id), t = st ? RES[st.type] : null, o = repOutcome(r);
-  return spOverlay("⚔️ نبرد " + (t ? t.icon + " " : "") + frEsc(st ? st.fa : r.site_id),
+  return spOverlay("⚔️ نبرد " + (t ? t.icon + " " : "") + frEsc(st ? st.fa : repSiteName(r.site_id)),
     `<div class="rpres ${o.won ? "ok" : "bad"}">${o.won ? "🏆" : "💥"} ${o.txt}</div><small class="lbl">${repTime(r)}</small><div class="rpgrid">`
     + repSide("مهاجم", r.att_code, r.att_power, r.att_before, r.att_after, r.winner === "attacker")
     + repSide("مدافع", r.def_code, r.def_power, r.def_before, r.def_after, r.winner === "defender")
@@ -2863,7 +2899,7 @@ function openReport(r) {
 function openReports() {
   if (!REP.length) return flash("هنوز نبردی ثبت نشده", 2500);
   repMark(REP[0].id); repBadge();
-  const rows = REP.map((r, k) => { const st = SITES.find((x) => x.id === r.site_id), t = st ? RES[st.type] : null, o = repOutcome(r); return `<button class="spcard" data-k="${k}"><b>${t ? t.icon + " " : ""}${frEsc(st ? st.fa : r.site_id)}</b><small>${o.me ? "حمله‌ی شما" : "حمله به شما"} · ${o.won ? "✅" : "❌"} ${o.txt} · ${repTime(r)}</small></button>`; }).join("");
+  const rows = REP.map((r, k) => { const st = SITES.find((x) => x.id === r.site_id), t = st ? RES[st.type] : null, o = repOutcome(r); return `<button class="spcard" data-k="${k}"><b>${t ? t.icon + " " : ""}${frEsc(st ? st.fa : repSiteName(r.site_id))}</b><small>${o.me ? "حمله‌ی شما" : "حمله به شما"} · ${o.won ? "✅" : "❌"} ${o.txt} · ${repTime(r)}</small></button>`; }).join("");
   const ov = spOverlay("📜 گزارش نبردها", rows, "", "بستن");
   ov.addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (b) openReport(REP[+b.dataset.k]); });
 }
@@ -2942,7 +2978,7 @@ function homeLL(code) {
   }
   return HOMELL[code];
 }
-const locLL = (loc) => { if (loc === "home") return homeLL(country && country.code); if (loc === "airfield") return airLL(country && country.code); if (loc === "port") return portLL(country && country.code); if (String(loc).startsWith("p:")) { const q = loc.slice(2).split(",").map(Number); return q.length === 2 && q.every(isFinite) ? q : null; } const s = SITES.find((x) => x.id === loc); return s ? s.ll : null; };
+const locLL = (loc) => { if (String(loc).startsWith("c:")) return homeLL(loc.slice(2)); if (loc === "home") return homeLL(country && country.code); if (loc === "airfield") return airLL(country && country.code); if (loc === "port") return portLL(country && country.code); if (String(loc).startsWith("p:")) { const q = loc.slice(2).split(",").map(Number); return q.length === 2 && q.every(isFinite) ? q : null; } const s = SITES.find((x) => x.id === loc); return s ? s.ll : null; };
 function kmBetween(a, b) {
   const x = Math.sin(((b[1] - a[1]) * rad) / 2) ** 2 + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(((b[0] - a[0]) * rad) / 2) ** 2;
   return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(x)));
@@ -3161,6 +3197,7 @@ function mvErr0(u, to) {
   const ll = locLL(to); if (!ll) return "مقصد نامعتبر";
   if (mvSel.cargo) { if (!to.startsWith("p:")) return "فقط روی نقطه‌ی ساحل"; if (!landAt(ll)) return "مقصد باید خشکی باشد"; const a = locLL(mvSel.from); return a && kmBetween(a, ll) > 50 ? "بیش از ۵۰ کیلومتر از ناو" : ""; }
   if (to === mvSel.from) return "مبدأ و مقصد یکی است";
+  if (to.startsWith("c:")) { const cc = byCode[to.slice(2)]; return !cc || !cc.taken || (country && cc.code === country.code) ? "این کشور فرمانده ندارد" : ""; }
   if (to.startsWith("p:")) { const land = landAt(ll); return u.grp === "land" && !land ? "نیروی زمینی روی آب نمی‌رود" : u.grp === "sea" && land ? "ناو روی خشکی نمی‌رود" : ""; }
   const s = SITES.find((x) => x.id === to); return s && SITE_OK[s.type].includes(u.grp) ? "" : "برای این یگان مجاز نیست";
 }
@@ -3170,6 +3207,7 @@ const forcePow = (rows) => { let a = 0, h = 0; rows.forEach(({ id, q }) => { con
 function dpsPower(ref) {
   const el = $("dpsPw"); if (!el) return;
   const st = mvTo && !mvTo.startsWith("p:") && SITES.find((x) => x.id === mvTo);
+  if (mvTo && mvTo.startsWith("c:")) { el.innerHTML = warAt(mvTo.slice(2)) ? "⚔️ با این کشور در جنگید؛ اگر در نبرد پایتخت پیروز شوید و نیروی زمینی بماند، اشغال شروع می‌شود." : "⚠️ جنگ اعلان نشده؛ می‌توانید حمله کنید ولی تسخیر ممکن نیست."; el.hidden = false; return; }
   if (!st) { el.hidden = true; return; }
   const sel = (ref || []).filter((u) => SITE_OK[st.type].includes(u.grp) && dpsEff(u) > 0).map((u) => ({ id: u.id, q: dpsEff(u) }));
   const add = forcePow(sel), own = owners[st.id], mine = country && own === country.code;
@@ -3216,7 +3254,7 @@ function dpsRender() {
 function addUnitEnt(m, h, ll, key, off, text, extra) {
   const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = text;
   const mm = addMarker(m, ll, { offset: off }), lm = addMarker(lb, ll, { anchor: "top", offset: [off[0], off[1] + 13] });
-  ents.push(Object.assign({ kind: "u", key, code: key, ll, prio: 600, minZ: 0, m, lb, lw: 70, h, mm, lm }, extra || {}));
+  ents.push(Object.assign({ kind: "u", key, code: key, ll, off, prio: 600, minZ: 0, m, lb, lw: 70, h, mm, lm }, extra || {}));
 }
 function renderUnitMarkers() {
   if (!lmap || !UC || !ents) return;
@@ -3232,10 +3270,11 @@ function renderUnitMarkers() {
   });
   Object.entries(by).forEach(([k, n]) => {
     const [loc, g] = k.split("|"), ll = locLL(loc); if (!ll) return;
-    const gs = perLoc[loc], ox = (gs.indexOf(g) - (gs.length - 1) / 2) * 34;
+    const gs = perLoc[loc], gi = gs.indexOf(g), SPo = String(loc).startsWith("c:") ? [46, 0, 1] : { home: [46, 0, 1], airfield: [46, -30, 1], port: [-46, 0, -1] }[loc];
+    const uoff = SPo ? [SPo[0] + SPo[2] * gi * 34, SPo[1]] : [(gi - (gs.length - 1) / 2) * 34, -26];
     const oc = country ? country.code : "", { m, h } = hexEl(mapIc(g), "unit g-" + g + " rel-" + relOf(oc)), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b); if (oc) unitFlag(h, oc);
     m.addEventListener("click", (ev) => { ev.stopPropagation(); openDp(loc); });
-    addUnitEnt(m, h, ll, "u:" + k, [ox, -26], "نیروی " + ((GR[g] || {}).fa || ""));
+    addUnitEnt(m, h, ll, "u:" + k, uoff, "نیروی " + ((GR[g] || {}).fa || ""));
   });
   UM.forEach((mv) => {
     const a = locLL(mv.from_loc), b = locLL(mv.to_loc); if (!a || !b) return;
@@ -3972,6 +4011,177 @@ if (!TG) {
     if (error && (error.status === 401 || error.status === 403)) return location.reload();
     Promise.resolve(sb.rpc("settle_all")).catch(() => {}).then(() => loadCountry(true)).then((ok) => { if (ok && !country) { flash("بازی ریست شده؛ دوباره کشور انتخاب کنید", 4000); route(true); } }); // به‌روزرسانی پس‌زمینه: خطای گذرای شبکه نمایش داده نشود
   }, 30000);
+}
+
+/* ===== جنگ: اعلان جنگ، تسخیر پایتخت، آتش‌بس، ساعت جنگ ===== */
+Object.assign(ARM_ERR, {
+  BAD_TARGET: "این کشور هدف معتبر نیست", ALREADY_AT_WAR: "از قبل با این کشور در جنگ هستید",
+  TOO_MANY_WARS: "به سقف جنگ‌های هم‌زمان (۵) رسیده‌اید", PEACE: "دوران صلح است؛ اعلان جنگ و حمله ممکن نیست",
+  CONQUERED: "کشور شما تسخیر شده است", CONQUERED_TARGET: "این کشور تسخیر شده و قابل حمله نیست",
+  NO_TARGET: "این کشور فرمانده ندارد", NO_WAR: "این جنگ دیگر فعال نیست",
+  ALREADY_REQUESTED: "درخواست آتش‌بس را قبلاً فرستاده‌اید", NO_REQUEST: "درخواست آتش‌بسی وجود ندارد",
+  NOT_OCCUPIED: "پایتخت شما اشغال نشده است", NO_FORCES: "یگانی در خاک خودتان برای پس‌گرفتن پایتخت ندارید",
+  NOT_WAR_HOURS: "الان ساعت جنگ نیست (۱۲ ظهر تا ۱۲ شب به وقت تهران)"
+});
+let WAR = null, warTab = "wars", warTargets = null, warFeed = null, warHist = null, warQ = "", warPollAt = 0, warTimer = null;
+const wFa = (n) => Number(n || 0).toLocaleString("fa-IR");
+const wDur = (s) => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return h ? wFa(h) + " ساعت و " + wFa(m) + " دقیقه" : wFa(s > 0 ? Math.max(m, 1) : 0) + " دقیقه"; };
+const wFlag = (code) => (/^[A-Z]{2}$/.test(code || "") ? flagOf(code) + " " : "");
+const wName = (code, nm) => wFlag(code) + frEsc(nm || (byCode[code] && byCode[code].name_fa) || code);
+const wTime = (t) => new Date(t).toLocaleString("fa-IR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+const warAt = (code) => !!(WAR && (WAR.wars || []).some((w) => w.enemy_code === code));
+function warLeft(o) { const open = WAR && WAR.clock && WAR.clock.open; return Math.max(0, Number(o.seconds_left) - (open ? (Date.now() - WAR._at) / 1000 : 0)); }
+function warPct(o) { const tot = ((WAR && WAR.occupy_hours) || 6) * 3600; return Math.max(0, Math.min(100, (1 - warLeft(o) / tot) * 100)); }
+
+async function warPoll(force) {
+  if (!country || typeof sb === "undefined") return;
+  if (!force && Date.now() - warPollAt < 60000) return;
+  warPollAt = Date.now();
+  const r = await sb.rpc("war_status");
+  if (r.error || !r.data) return;
+  WAR = r.data; WAR._at = Date.now();
+  warBadge(); warConq();
+  if (!$("war").hidden) warRender();
+}
+function warBadge() { const b = $("warBd"); if (b) b.hidden = !(WAR && (WAR.wars || []).length); }
+function warConq() {
+  const el = $("conq"); if (!el) return;
+  const c = WAR && WAR.conquered;
+  if (!c) { el.hidden = true; return; }
+  $("conqT").innerHTML = wName(c.by_code, c.by_name) + " کشور شما را تسخیر کرد، فرمانده. تا پایان فصل نمی‌توانید بازی کنید و تمام درآمد کشورتان به او می‌رسد." + (c.ends_at ? "<br>پایان محدودیت: " + wTime(c.ends_at) : "");
+  el.hidden = false;
+}
+async function openWar() {
+  screen("war"); warRender();
+  try { await sb.rpc("settle_all"); } catch (_) {}
+  await warPoll(true);
+  if (warTab === "declare") warLoadTargets(); else if (warTab === "news") warLoadFeed(); else if (warTab === "hist") warLoadHist();
+  clearInterval(warTimer);
+  warTimer = setInterval(() => { if ($("war").hidden) { clearInterval(warTimer); return; } if (Date.now() - warPollAt > 30000) warPoll(true); else warRender(); }, 15000);
+}
+function warSetTab(k) {
+  warTab = k;
+  if (k === "declare") warLoadTargets(); else if (k === "news") warLoadFeed(); else if (k === "hist") warLoadHist();
+  warRender();
+}
+async function warLoadTargets() { const r = await sb.rpc("war_targets"); warTargets = r.data || []; if (warTab === "declare") warRender(); }
+async function warLoadFeed() { const r = await sb.rpc("war_feed", { p_limit: 40 }); warFeed = r.data || []; if (warTab === "news") warRender(); }
+async function warLoadHist() { const r = await sb.rpc("war_history", { p_limit: 30 }); warHist = r.data || []; if (warTab === "hist") warRender(); }
+
+function warRender() {
+  const body = $("warBody"); if (!body) return;
+  const tabs = [["wars", "⚔️", "جنگ‌ها"], ["declare", "📣", "اعلان جنگ"], ["news", "📰", "اخبار"], ["hist", "📜", "تاریخچه"]];
+  $("warTabs").innerHTML = tabs.map(([k, i, n]) => `<button class="tab${warTab === k ? " on" : ""}" onclick="warSetTab('${k}')"><span>${i} ${n}</span></button>`).join("");
+  if (!WAR) { body.innerHTML = '<div class="lbl" style="text-align:center;padding:24px">در حال بارگذاری…</div>'; return; }
+  const ck = WAR.clock || {}, nc = ck.next_change ? (new Date(ck.next_change).getTime() - Date.now()) / 1000 : 0;
+  let h = "";
+  if (ck.reason === "peace") h += `<div class="wcard"><div class="wt">🕊️ دوران صلح</div><div class="lbl">تا پایان صلح اعلان جنگ و حمله ممکن نیست.</div><div class="lbl">⏳ ${wDur(nc)} تا پایان دوران صلح</div></div>`;
+  else if (ck.open) h += `<div class="wcard gld"><div class="wt">⚖️ نبرد آزاد است</div><div class="lbl">ساعت جنگ است، فرمانده.</div><div class="lbl">🕛 ساعت جنگ ۱۲:۰۰ تا ۰:۰۰ (وقت تهران) · ${wDur(nc)} تا پایان ساعت جنگ</div></div>`;
+  else h += `<div class="wcard"><div class="wt">🌙 نبرد بسته است</div><div class="lbl">خارج از ساعت جنگ هیچ نبردی انجام نمی‌شود و نوار تسخیر متوقف است.</div><div class="lbl">🕛 ساعت جنگ ۱۲:۰۰ تا ۰:۰۰ (وقت تهران) · ${wDur(nc)} تا شروع</div></div>`;
+  if (WAR.season && WAR.season.ends_at) { const d = Math.max(0, Math.ceil((new Date(WAR.season.ends_at).getTime() - Date.now()) / 86400000)); h += `<div class="lbl" style="text-align:center">📅 ${wFa(d)} روز تا پایان فصل</div>`; }
+  const mc = WAR.my_capital;
+  if (mc) {
+    const p = warPct(mc);
+    h += `<div class="wcard red"><div class="wt">⚔️ پایتخت سقوط کرد</div><div><b>پایتخت در دست ${wName(mc.by_code, mc.by_name)}</b></div>`
+      + `<div class="lbl" style="display:flex;justify-content:space-between"><span>دشمن پایتخت را در دست دارد</span><b style="color:#ff8a8a">${wFa(Math.round(p))}٪</b></div><div class="wbar"><u style="width:${p.toFixed(1)}%"></u></div>`
+      + `<div class="lbl">${wDur(warLeft(mc))} زمان جنگ دیگر تا سقوط کامل کشور${ck.open ? "" : " (الان متوقف است)"}</div>`
+      + `<p class="lbl" style="color:#ff8a8a;line-height:1.9">پایتخت را با یگان‌های خودتان یا با آتش‌بس پس بگیرید، فرمانده. تا آن موقع ۳۰٪ درآمد روزانه‌ی شما به او می‌رسد.</p>`
+      + `<div class="wrow"><button onclick="warRetake(this)">🛡 پس‌گرفتن پایتخت</button></div></div>`;
+  }
+  (WAR.holding || []).forEach((o) => {
+    const p = warPct(o);
+    h += `<div class="wcard grn"><div class="wt">🏰 پایتخت ${wName(o.target_code, o.target_name)} در اشغال شماست</div><div class="lbl" style="display:flex;justify-content:space-between"><span>پیشرفت تسخیر</span><b>${wFa(Math.round(p))}٪</b></div><div class="wbar g"><u style="width:${p.toFixed(1)}%"></u></div><div class="lbl">${wDur(warLeft(o))} زمان جنگ تا سقوط کشور · تا آن موقع ۳۰٪ درآمد روزانه‌ی او مال شماست. یگان زمینی را از پایتخت خارج نکنید.</div><div class="wrow"><button onclick="warRecall('${o.target_code}')">↩️ بازگشت یگان‌ها</button></div></div>`;
+  });
+  if ((WAR.ruled || []).length) h += `<div class="wcard gld"><div class="wt">🏴 کشورهای تسخیرشده‌ی شما</div>` + WAR.ruled.map((x) => `<div class="wit"><b>${wName(x.code, x.name)}</b><span class="lbl">+$${wFa(x.per_day)} در روز</span></div>`).join("") + `<div class="lbl">تا پایان فصل تمام درآمد این کشورها به شما می‌رسد.</div></div>`;
+
+  if (warTab === "wars") {
+    const ws = WAR.wars || [];
+    h += `<div class="wcard"><div class="wt" style="justify-content:space-between"><span>⚔️ جنگ‌های اعلان‌شده</span><span class="lbl">${wFa(ws.length)} / ${wFa(WAR.max_wars || 5)}</span></div>`;
+    if (!ws.length) h += `<div class="lbl">جنگی اعلان نشده است. از تب «اعلان جنگ» شروع کنید.</div>`;
+    ws.forEach((w) => {
+      const txt = w.declared_by_me ? `شما به ${frEsc(w.enemy_name)} اعلان جنگ داده‌اید؛ برای تسخیر، نیروی زمینی را به پایتخت او ببرید و در ساعت جنگ پیروز شوید.` : `${frEsc(w.enemy_name)} به ما اعلان جنگ داده است؛ او می‌تواند پایتخت ما را تسخیر کند.`;
+      let cf = "";
+      if (w.ceasefire === "them") cf = `<button onclick="warAnswer(${w.id}, true)">✅ پذیرفتن آتش‌بس</button><button class="ghost" onclick="warAnswer(${w.id}, false)">✖ رد</button>`;
+      else if (w.ceasefire === "me") cf = `<button class="ghost" disabled>🕊️ درخواست آتش‌بس ارسال شد</button>`;
+      else cf = `<button class="ghost" onclick="warCease(${w.id})">🕊️ درخواست آتش‌بس</button>`;
+      h += `<div class="wit" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:8px"><b style="font-size:18px">${wName(w.enemy_code, w.enemy_name)}</b><span class="wchip">در جنگ</span></div><div class="lbl" style="line-height:1.9">${txt}</div><div class="wrow"><button onclick="warAttack('${w.enemy_code}')">🎯 حمله روی نقشه</button>${cf}</div></div>`;
+    });
+    h += `</div>`;
+  } else if (warTab === "declare") {
+    h += `<div class="wcard"><div class="wt">⚔️ اعلان جنگ</div><p class="lbl" style="line-height:1.9">برای تسخیر یک کشور، اول به آن اعلان جنگ کنید، فرمانده. بدون اعلان جنگ هم می‌توانید حمله کنید ولی تسخیر ممکن نیست. با اعلان جنگ و پیروزی نیروی زمینی در پایتخت، تسخیر شروع می‌شود.</p><input id="warSrch" placeholder="جستجوی کشور…" value="${frEsc(warQ)}" oninput="warQ=this.value;warList()" autocomplete="off"><div id="warList"></div></div>`;
+  } else if (warTab === "news") {
+    h += `<div class="wcard"><div class="wt">📰 اخبار جنگ</div>` + (!warFeed ? `<div class="lbl">در حال بارگذاری…</div>` : !warFeed.length ? `<div class="lbl">هنوز خبری نیست.</div>` : warFeed.map((e) => `<div class="wit" style="flex-direction:column;align-items:stretch"><div style="line-height:1.9">${frEsc(e.txt)}</div><small class="lbl">${wTime(e.ts)}</small></div>`).join("")) + `</div>`;
+  } else {
+    const EB = { conquest: "تسخیر کشور", ceasefire: "آتش‌بس", abandoned: "رها شدن کشور" };
+    h += `<div class="wcard"><div class="wt">📜 تاریخچه‌ی جنگ‌ها</div>` + (!warHist ? `<div class="lbl">در حال بارگذاری…</div>` : !warHist.length ? `<div class="lbl">جنگ تمام‌شده‌ای ثبت نشده است.</div>` : warHist.map((x) => `<div class="wit"><b>${wName(x.enemy_code, x.enemy_name)}<br><small class="lbl">${wTime(x.declared_at)} ← ${x.ended_at ? wTime(x.ended_at) : ""} · ${EB[x.ended_by] || ""}</small></b><span class="wchip ${x.result === "won" ? "ok" : ""}">${x.result === "won" ? "پیروزی" : x.result === "lost" ? "شکست" : "بی‌نتیجه"}</span></div>`).join("")) + `</div>`;
+  }
+  body.innerHTML = h;
+  if (warTab === "declare") warList();
+}
+function warList() {
+  const el = $("warList"); if (!el) return;
+  if (!warTargets) { el.innerHTML = '<div class="lbl">در حال بارگذاری…</div>'; return; }
+  const q = warQ.trim(), l = warTargets.filter((t) => !q || t.name.includes(q));
+  el.innerHTML = l.length ? l.map((t) => `<div class="wit"><b>${wName(t.code, t.name)}</b>${t.at_war ? '<span class="wchip">در جنگ</span>' : `<button onclick="warDeclare('${t.code}', this)">⚔️ اعلان جنگ</button>`}</div>`).join("") : '<div class="lbl">کشوری پیدا نشد (فقط کشورهای دارای فرمانده فهرست می‌شوند).</div>';
+}
+async function warDeclare(code, btn, stay) {
+  if (btn.dataset.sure !== "1") {
+    btn.dataset.sure = "1"; const t = btn.textContent; btn.textContent = "تأیید اعلان جنگ؟";
+    setTimeout(() => { if (btn.isConnected) { btn.dataset.sure = ""; btn.textContent = t; } }, 4000);
+    return;
+  }
+  btn.disabled = true;
+  const { error } = await sb.rpc("declare_war", { p_code: code });
+  if (error) { flash(ARM_ERR[error.message] || error.message, 5000); btn.disabled = false; return; }
+  flash("⚔️ جنگ اعلام شد", 2500);
+  warTargets = null; warFeed = null;
+  await warPoll(true);
+  if (!stay) { warTab = "wars"; warRender(); }
+}
+async function warCease(id) { const { error } = await sb.rpc("request_ceasefire", { p_war: id }); flash(error ? ARM_ERR[error.message] || error.message : "🕊️ درخواست آتش‌بس فرستاده شد", error ? 5000 : 2500); warFeed = null; await warPoll(true); }
+async function warAnswer(id, ok) { const { error } = await sb.rpc("answer_ceasefire", { p_war: id, p_accept: ok }); flash(error ? ARM_ERR[error.message] || error.message : ok ? "🕊️ آتش‌بس برقرار شد" : "درخواست آتش‌بس رد شد", error ? 5000 : 2500); warFeed = null; warHist = null; await warPoll(true); }
+async function warRetake(btn) {
+  btn.disabled = true;
+  const { error } = await sb.rpc("retake_capital");
+  btn.disabled = false;
+  if (error) return flash(ARM_ERR[error.message] || error.message, 5000);
+  flash("نبرد برای پایتخت انجام شد؛ نتیجه را در گزارش نبردها ببینید", 4000);
+  warFeed = null; warHist = null; await warPoll(true);
+  try { loadReports(); } catch (_) {}
+}
+async function warToMap() {
+  screen("worldmap");
+  for (let i = 0; i < 60 && !(lmap && mapReady); i++) await new Promise((r) => setTimeout(r, 100));
+  try { await mapReady; } catch (_) {}
+}
+async function warAttack(code) { await warToMap(); openDp(null, "c:" + code); }
+async function warRecall(code) { await warToMap(); openDp("c:" + code, "home"); }
+
+/* دکمه‌های اعلان جنگ / حمله روی کارت کشور در نقشه */
+function warMapBtns(c, mine) {
+  const el = $("mwar"); if (!el) return;
+  if (mine || !c.taken) { el.hidden = true; return; }
+  if (!WAR) warPoll(true).then(() => { if (WAR && selCode === c.code) warMapBtns(c, mine); });
+  const at = warAt(c.code);
+  el.innerHTML = (at ? '<span class="wchip">در جنگ با این کشور</span>' : "") + '<div class="wrow">' + (at ? "" : `<button onclick="warDeclareMap('${c.code}', this)">⚔️ اعلان جنگ</button>`) + `<button class="${at ? "" : "ghost"}" onclick="warAttackMap('${c.code}')">🎯 حمله${at ? "" : " (بدون تسخیر)"}</button></div>`;
+  el.hidden = false;
+}
+async function warDeclareMap(code, btn) { await warDeclare(code, btn, true); const c = byCode[code]; if (c) warMapBtns(c, false); }
+function warAttackMap(code) { closeMapSheet(); openDp(null, "c:" + code); }
+
+/* گزارش نبرد کشورها */
+function repSiteName(id) {
+  id = String(id || "");
+  const nm = (code) => (byCode[code] ? byCode[code].name_fa : code);
+  if (id.startsWith("c:")) return "🏰 کشور " + nm(id.slice(2));
+  if (id.startsWith("r:")) return "🛡 پایتخت " + nm(id.slice(2));
+  return id;
+}
+function repTxt(r, me, won) {
+  const id = String(r.site_id || "");
+  if (id.startsWith("c:")) return me ? (won ? "پیروزی — از دفاع کشور عبور کردید" : "شکست در حمله") : (won ? "دفاع موفق" : "نیروهای دفاعی شما شکست خوردند");
+  if (id.startsWith("r:")) return me ? (won ? "پایتخت آزاد شد" : "شکست در پس‌گرفتن پایتخت") : (won ? "پایتخت را حفظ کردید" : "پایتخت از دست رفت");
+  return me ? (won ? "پیروزی — معدن تسخیر شد" : "شکست در حمله") : (won ? "دفاع موفق" : "معدن از دست رفت");
 }
 </script>
 </body>
