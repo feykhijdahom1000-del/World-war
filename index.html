@@ -727,50 +727,12 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 #conq{position:fixed;inset:0;z-index:9999;background:#0a111df7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
 #conq[hidden]{display:none}
 #conq>div{max-width:420px}
-/* ===== classic black & gold: economy + infrastructure only ===== */
-#eco,#inf,#cm{--gold:#c9a227;--gold2:#e6cc78;--gold3:#8a6d1a;--txt:#f0ead8;--mut:#9b927c;--ok:#7cc79a;--err:#e07b6e;--line:#2b2414;--gd:#3b3015;--ink:#120d02}
-#eco .eh h2,#inf .eh h2{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2);font-weight:800;font-size:25px}
-#eco .ic,#eco .ic.g,#inf .ic,#inf .ic.g{background:#0f0f0f;border:1px solid var(--gd);color:var(--gold2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
-#eco .buy,#eco .ix-c .buy,#inf .buy,#inf .ix-c .buy{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;border-radius:10px;box-shadow:none;font-weight:800}
-#eco .buy.poor,#eco .ix-c .buy.poor,#inf .buy.poor,#inf .ix-c .buy.poor{background:transparent;border:1px solid #7a3b34;color:var(--err)}
-#eco .up,#eco .ix-c .up,#inf .up,#inf .ix-c .up{background:transparent;border:1px solid var(--line);color:var(--mut);box-shadow:none}
-#eco .ecard,#eco .ix-box,#eco .syn,#eco .bc,#eco .ix-c,#eco .ix-r,#inf .ecard,#inf .ix-box,#inf .syn,#inf .bc,#inf .ix-c,#inf .ix-r{background:#0c0c0c;border:1px solid var(--gd);border-radius:14px;box-shadow:inset 0 1px 0 #c9a22733;-webkit-backdrop-filter:none;backdrop-filter:none}
-#eco .bc.no,#eco .ix-c.no,#inf .bc.no,#inf .ix-c.no{border-style:dashed}
-#eco .ix-s,#eco .eb,#eco .mil-s,#eco .ar-b,#eco .ar-lr,#inf .ix-s,#inf .eb,#inf .mil-s,#inf .ar-b,#inf .ar-lr{background:#111;border:1px solid var(--line);border-radius:10px}
-#eco .ix-c,#eco .ix-r,#inf .ix-c,#inf .ix-r{--ac:#c9a227!important;--a2:#c9a22712!important;--a3:#c9a22744!important}
-#eco .ix-r::after,#inf .ix-r::after{display:none}
-#eco .ix-rn,#inf .ix-rn{text-shadow:none}
-#eco .ix-p,#inf .ix-p{filter:none}
-#eco .ix-box>.lbl,#inf .ix-box>.lbl{color:var(--gold2)}
-#eco .ebig b,#inf .ebig b{text-shadow:none}
-#eco .eic,#eco .ix-i,#eco .ix-ri,#inf .eic,#inf .ix-i,#inf .ix-ri{border-radius:10px;background:#120f06;border:1px solid var(--gold3);box-shadow:none;filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
-#eco .eic,#inf .eic{width:46px;height:46px;font-size:22px}
-#eco .ix-i,#inf .ix-i{width:50px;height:50px;font-size:25px}
-#eco .ix-ri,#inf .ix-ri{width:40px;height:40px;font-size:21px}
-#eco .tab,#eco .sc,#eco .chp,#inf .tab,#inf .sc,#inf .chp{border-radius:8px;background:transparent;border:1px solid var(--gd);color:var(--txt);box-shadow:none}
-#eco .tab.on,#inf .tab.on{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border-color:transparent;box-shadow:none}
-#eco .tab.on small,#inf .tab.on small{color:#4a3a0e}
-#eco .sc.on,#inf .sc.on{background:#c9a22722;color:var(--gold2);border-color:var(--gold)}
-#eco .chp.g,#inf .chp.g{color:var(--ok);border-color:#3f6a52}
-#eco .chp.r,#inf .chp.r{color:var(--err);border-color:#7a3b34}
-#eco .dots i,#inf .dots i{border-radius:1px;height:4px;background:#2a2416}
-#eco .dots i.on,#eco .ix-c .dots i.on,#inf .dots i.on,#inf .ix-c .dots i.on{background:var(--gold)}
-#eco .pgb,#eco .pgb.big,#inf .pgb,#inf .pgb.big{background:#1b170c}
-#eco .pgb.big,#inf .pgb.big{height:10px;border-radius:4px}
-#eco .pg,#eco .pgb .pg,#inf .pg,#inf .pgb .pg{background:linear-gradient(90deg,#a97c22,#e6cc78);box-shadow:none}
-#eco .pgb.big .pg,#inf .pgb.big .pg{border-radius:4px}
-#eco .sw,#inf .sw{background:#1b170c;border-color:var(--gd)}
-#eco .sw::after,#inf .sw::after{background:#6b6450}
-#eco .sw.on,#inf .sw.on{background:#c9a22722;border-color:var(--gold)}
-#eco .sw.on::after,#inf .sw.on::after{background:var(--gold)}
-#inf::before{display:none}
-#inf .eh h2{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2)}
-#cm .cmbox{background:#0a0a0a;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:16px 16px 0 0;border-top:1px solid var(--gold);box-shadow:0 -10px 30px #000d}
-#cm .cmr{background:#111;border:1px solid var(--line);border-radius:10px}
-#cm .eic{border-radius:10px;background:#120f06;border:1px solid var(--gold3);filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
-#cm .buy{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;border-radius:10px;box-shadow:none;font-weight:800}
-#cm .buy:disabled{opacity:.4}
-#cm button.ghost{background:transparent;border:1px solid var(--gd);color:var(--gold2)}
+/* ===== رنگ کارت‌های اقتصاد ===== */
+.bc{background:linear-gradient(160deg,var(--a2,#ffffff0d),#0e1422 70%);border-color:var(--a3,#ffffff2e)}
+.bc .eic{background:var(--a2,#d4a73a22);border-color:var(--ac,#d4a73a);box-shadow:0 0 18px var(--a3,#d4a73a40)}
+.bc .dots i.on{background:var(--ac,var(--gold))}
+.bc .bt b{color:var(--ac,var(--txt))}
+.bc .bi b{color:var(--ac,var(--ok))}
 </style>
 </head>
 <body>
@@ -1565,6 +1527,7 @@ async function drawGeo() {
   applyFilter(true);
   buildMarkers();
   flyHome(false);
+  if (!UC) loadArmy().catch(() => {});
 }
 
 /* ---------- نشانگرهای شش‌ضلعی و برچسب فارسی ---------- */
@@ -2085,6 +2048,7 @@ const BLD = [
   { id: "shipping", fa: "کشتیرانی", cat: "trn", icon: "🚢", price: 2520000, income: 1440000 },
   { id: "airline", fa: "شرکت هواپیمایی", cat: "trn", icon: "✈️", price: 4200000, income: 2500000 }
 ];
+const CAT_AC = { fin: "#e2b64e", ind: "#4aa3ff", srv: "#43e0a0", trn: "#a78bfa" };
 const MAXLV = 5;
 // فرمول سطح‌ها (سرور مرجع است؛ این‌ها فقط برای نمایش‌اند و باید با bld_price / bld_income / bld_minutes یکی باشند)
 const LV_F = [1, 1.4, 2, 3, 4];
@@ -2181,7 +2145,7 @@ function renderEco() {
     const head = `<div class="bh"><div class="eic">${b.icon}</div><div class="bt"><b>${b.fa}</b><div class="dots">${dots}</div></div>`;
     if (rdy) {
       const st = rdy - vm(b.mins) * 60000;
-      return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>در حال ساخت</small></div></div>
+      return `<div class="bc build" style="${acs(CAT_AC[b.cat])}" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>در حال ساخت</small></div></div>
         <div class="tmr"><small>زمان باقی‌مانده تا پایان ساخت</small><b class="cd" dir="ltr">${dur(rdy - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
         <div class="chips"><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز پس از ساخت</span></div>
@@ -2189,13 +2153,13 @@ function renderEco() {
     }
     if (upg[b.id]) {
       const ur = upg[b.id], to = upgTo[b.id], ust = ur - vm(mAt(b, to)) * 60000;
-      return `<div class="bc build" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>در حال ارتقا به سطح ${faNum(to)}</small></div></div>
+      return `<div class="bc build" style="${acs(CAT_AC[b.cat])}" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>در حال ارتقا به سطح ${faNum(to)}</small></div></div>
         <div class="tmr"><small>زمان باقی‌مانده تا پایان ارتقا</small><b class="cd" dir="ltr">${dur(ur - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - ust) / (ur - ust)) * 100))}%"></u></div>
         <div class="chips"><span class="chp g">↑ <span dir="ltr">${fmt(iAt(b, to))}</span> در روز پس از ارتقا</span></div>
         <button class="buy" onclick="speedUpgrade('${b.id}',this)">تکمیل سریع — <span class="spc">${faNum(spCost(ur - now))}</span> 💎</button></div>`;
     }
-    return `<div class="bc${has ? "" : " no"}">${head}
+    return `<div class="bc${has ? "" : " no"}" style="${acs(CAT_AC[b.cat])}">${head}
         <div class="bi">${has ? `<b>${fmt(iAt(b, lv))}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
       <div class="chips"><span class="chp">بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">ارتقا: ${buildText(vm(mAt(b, lv + 1)))}</span><span class="chp${pwShort(b, lv + 1) ? " r" : ""}">${pf1(pwNeed(b, lv + 1))}+ برق</span>` : "") : `<span class="chp">ساخت: ${buildText(vm(b.mins))}</span><span class="chp${pwShort(b, 1) ? " r" : ""}">${pf1(pwNeed(b, 1))} برق</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
       ${has ? (lv >= MAXLV ? `<button class="up" disabled>حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) || pwShort(b, lv + 1) ? " poor" : ""}" onclick="askUp('${b.id}')">ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${priceH(pAt(b, lv + 1))}</span></button>`)
@@ -2675,9 +2639,10 @@ function renderArmy() {
       : noF
       ? `<button class="buy poor" onclick="setInfTab('mil');openInf()">🔨 اول «${fa}» را بسازید</button>`
       : `<button class="buy${I.max < 1 ? " poor" : ""}" onclick="openPm('${u.id}')">⚙️ تولید</button>`;
-    return `<div class="ix-c" style="${acs(g.ac)}"><div class="ix-h"><div class="ix-i">${unitIc(u.id)}</div><div class="ix-t2"><b>${unitFa(u.id)}</b><small>قدرت کل ${en(n * u.power)}</small></div></div>
-      <div class="ar-chips"><span class="ar-chip">${en(n)} واحد</span><span class="ar-chip">❤️ جان ${en(u.hp)}</span><span class="ar-chip">⚔️ آسیب ${en(u.attack)}</span><span class="ar-chip">🎯 برد ${en(u.range_km)} km</span><span class="ar-chip">💰 ${fmt(pv(u.price))} ساخت</span></div>
-      <div style="height:12px"></div>${btn}</div>`;
+    const udots = Array.from({ length: MAXLV }, (_, i) => `<i${n > 0 && i < Math.min(MAXLV, Math.ceil(Math.log10(n + 1) * 1.5)) ? ' class="on"' : ""}></i>`).join("");
+    return `<div class="ix-c${n ? "" : " no"}" style="${acs(g.ac)}"><div class="ix-h"><div class="ix-i">${unitIc(u.id)}</div><div class="ix-t2"><b>${unitFa(u.id)}</b><div class="dots">${udots}</div><small>${n ? en(n) + " یگان · قدرت کل " + en(n * u.power) : "تولید نشده"}</small></div><div class="ix-pw"><b>${en(n)}</b><small>واحد</small></div></div>
+      <div class="ix-ss f4"><div class="ix-s"><small>❤️ جان</small><b>${en(u.hp)}</b></div><div class="ix-s"><small>⚔️ آسیب</small><b>${en(u.attack)}</b></div><div class="ix-s"><small>🎯 برد</small><b>${en(u.range_km)} km</b></div><div class="ix-s"><small>💰 هزینه</small><b>${fmt(pv(u.price))}</b></div></div>
+      ${btn}</div>`;
   }).join("");
   $("aBody").innerHTML = h;
 }
