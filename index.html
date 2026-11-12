@@ -727,94 +727,50 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 #conq{position:fixed;inset:0;z-index:9999;background:#0a111df7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
 #conq[hidden]{display:none}
 #conq>div{max-width:420px}
-/* ================= CLASSIC BLACK & GOLD THEME ================= */
-:root{--bg:#050505;--card:#0d0d0d;--line:#2b2414;--gd:#3b3015;--gold:#c9a227;--gold2:#e6cc78;--gold3:#8a6d1a;--txt:#f0ead8;--mut:#9b927c;--ok:#7cc79a;--err:#e07b6e;--ink:#120d02}
-body{background:radial-gradient(90% 40% at 50% -10%,#1c1606 0,transparent 70%),#050505;background-repeat:no-repeat;background-attachment:fixed}
-body::before,#inf::before{display:none}
-::selection{background:#c9a22744}
-h2,.eh h2,#inf .eh h2{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2);font-weight:800;font-size:25px}
-
-/* buttons */
-button{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border-radius:10px}
-section>button:not([class]),#go,#vipBuy,#chSend,#cartGo,.vip>button,.pk>button{box-shadow:none}
-button.ghost{background:transparent;border:1px solid var(--gd);color:var(--gold2)}
-button.danger{background:#7a2a22;color:#f3d9d4;box-shadow:none}
-.ic,.ic.g{background:#0f0f0f;border:1px solid var(--gd);color:var(--gold2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
-.ic.gold{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;box-shadow:none}
-.buy,.ix-c .buy{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;border-radius:10px;box-shadow:none;font-weight:800}
-.buy.poor,.ix-c .buy.poor{background:transparent;border:1px solid #7a3b34;color:var(--err)}
-.up,.ix-c .up{background:transparent;border:1px solid var(--line);color:var(--mut);box-shadow:none}
-input{background:#0a0a0a;border:1px solid var(--line);border-radius:10px}
-input:not([type=checkbox]):focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px #c9a22733}
-
-/* cards */
-.ecard,.ix-box,.syn,.bc,.ix-c,.ix-r,.cbox,.cpay,.pbox,.pbox2,.vps,.vpt,.rfc,.wcard,.phead,.cartbar,.gp,.eb,.chi,.frcd,.spb .spcard{background:#0c0c0c;border:1px solid var(--gd);border-radius:14px;box-shadow:inset 0 1px 0 #c9a22733;-webkit-backdrop-filter:none;backdrop-filter:none}
-.ix-s,.mil-s,.ar-b,.ar-lr,.pml,.dpsg>div,.cmr,.gp .stats>div,.rpside,.dpspw,.frt>div{background:#111;border:1px solid var(--line);border-radius:10px}
-.wcard.red{border-color:#8a3b34;background:#140b0a}.wcard.grn{border-color:#2f5f45;background:#0a120d}.wcard.gld{border-color:var(--gold)}
-.ix-c,.ix-r{--ac:#c9a227!important;--a2:#c9a22712!important;--a3:#c9a22744!important}
-.ix-r::after{display:none}
-.ix-rn,.gp .stats b,.trow .big{text-shadow:none}
-.ix-p{filter:none}
-.ix-box>.lbl{color:var(--gold2)}
-.ebig b{text-shadow:none}
-.cr{color:var(--gold2);text-shadow:none}
-
-/* icons: monochrome gold, square-ish */
-.eic,.ix-i,.ix-ri,.cic{border-radius:10px;background:#120f06;border:1px solid var(--gold3);box-shadow:none;filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
-.eic{width:46px;height:46px;font-size:22px}
-.ix-i{width:50px;height:50px;font-size:25px}
-.ix-ri{width:40px;height:40px;font-size:21px}
-
-/* tabs, chips, bars */
-.tab,.sc,.chp,.ar-chip,.dpsch{border-radius:8px;background:transparent;border:1px solid var(--gd);color:var(--txt);box-shadow:none}
-.tab.on{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border-color:transparent;box-shadow:none}
-.tab.on small{color:#4a3a0e}
-.sc.on{background:#c9a22722;color:var(--gold2);border-color:var(--gold)}
-.chp.g{color:var(--ok);border-color:#3f6a52}.chp.r{color:var(--err);border-color:#7a3b34}
-.ar-chip.g{color:var(--gold2);border-color:var(--gold3)}
-.dots i{border-radius:1px;height:4px;background:#2a2416}.dots i.on,.ix-c .dots i.on{background:var(--gold)}
-.pgb,.pgb.big{background:#1b170c}.pgb.big{height:10px;border-radius:4px}
-.pg,.pgb .pg{background:linear-gradient(90deg,#a97c22,#e6cc78);box-shadow:none}.pgb.big .pg{border-radius:4px}
-.sw{background:#1b170c;border-color:var(--gd)}.sw::after{background:#6b6450}
-.sw.on{background:#c9a22722;border-color:var(--gold)}.sw.on::after{background:var(--gold)}
-
-/* home */
-.main{background:linear-gradient(180deg,#14110a,#0a0a0a);border:1px solid var(--gd);border-radius:18px;box-shadow:none}
-.main::before{background:radial-gradient(circle at 15% 10%,#c9a22722,transparent 40%)}
-.main::after{display:none}
-.flag{border:2px solid var(--gold);box-shadow:none}
-.fl,.cf,.flag{background:#0a0a0a}
-.pill{background:#0f0f0f;border-color:var(--gd);color:var(--gold2)}
-.vipbd{background:linear-gradient(150deg,#2a2208,#0c0a04);border-radius:14px;box-shadow:none}
-.tile,.tile.army,.tile.war,.tile.eco,.tile.dip,.tile.mkt,.tile.inf,.tile.ref{--ta:var(--gold);background:linear-gradient(180deg,#121212,#0a0a0a);border:1px solid var(--gd);border-radius:14px;box-shadow:none;text-shadow:none;color:var(--gold2)}
-.tile.ref{border-color:var(--gold)}
-.tile::before{display:none}
-.tile::after{background:var(--gold);box-shadow:none;height:2px;inset-inline:16px;opacity:.7}
-.tile span{font-size:34px;filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
-.tile.mini span{font-size:26px}
-nav div{background:#0a0a0a;border:1px solid var(--gd);border-radius:18px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 -4px 20px #000c}
-nav button i{filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.05)}
-nav button.on{color:var(--gold2)}
-nav button[data-t=home].on{background:linear-gradient(180deg,#e0c050,#b08a1e);color:var(--ink);box-shadow:0 0 0 5px #050505}
-
-/* sheets and dialogs */
-#sheet,#mapSheet,#resSheet,.cmbox,#setSheet{background:#0a0a0a;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:16px 16px 0 0;border-top:1px solid var(--gold);box-shadow:0 -10px 30px #000d}
-#dps,#frc,.spb{background:#0a0a0a;border:1px solid var(--gd);border-radius:16px;-webkit-backdrop-filter:none;backdrop-filter:none}
-#cm,#setBack{-webkit-backdrop-filter:none;backdrop-filter:none}
-#toast{background:#0a0a0a;border:1px solid var(--gold);border-radius:10px;-webkit-backdrop-filter:none;backdrop-filter:none}
-#mapHud,.mctl,#fPanel{background:#0a0a0af2;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:14px}
-
-/* shop */
-.vip,.vpc{background:linear-gradient(150deg,#241c07,#0b0a05);border-radius:16px;box-shadow:none}
-.vip::after{opacity:.06}
-.vpc .crown{box-shadow:none}
-.pk{background:#0d0d0d;border:1px solid var(--gd);border-radius:14px;box-shadow:none}
-.pk.plus{border-color:var(--gold);background:linear-gradient(160deg,#211a07,#0b0a05);box-shadow:none}
-.tr,.c{border-radius:14px}
-.tr.premium_plus,.c.premium_plus{box-shadow:none}
-.tr.on,.c.on{box-shadow:0 0 0 2px var(--gold) inset}
-.chm.me .chb{background:#1a1608;border-color:var(--gd)}
-.chb{background:#0d0d0d;border-radius:12px}
+/* ===== classic black & gold: economy + infrastructure only ===== */
+#eco,#inf,#cm{--gold:#c9a227;--gold2:#e6cc78;--gold3:#8a6d1a;--txt:#f0ead8;--mut:#9b927c;--ok:#7cc79a;--err:#e07b6e;--line:#2b2414;--gd:#3b3015;--ink:#120d02}
+#eco .eh h2,#inf .eh h2{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2);font-weight:800;font-size:25px}
+#eco .ic,#eco .ic.g,#inf .ic,#inf .ic.g{background:#0f0f0f;border:1px solid var(--gd);color:var(--gold2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+#eco .buy,#eco .ix-c .buy,#inf .buy,#inf .ix-c .buy{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;border-radius:10px;box-shadow:none;font-weight:800}
+#eco .buy.poor,#eco .ix-c .buy.poor,#inf .buy.poor,#inf .ix-c .buy.poor{background:transparent;border:1px solid #7a3b34;color:var(--err)}
+#eco .up,#eco .ix-c .up,#inf .up,#inf .ix-c .up{background:transparent;border:1px solid var(--line);color:var(--mut);box-shadow:none}
+#eco .ecard,#eco .ix-box,#eco .syn,#eco .bc,#eco .ix-c,#eco .ix-r,#inf .ecard,#inf .ix-box,#inf .syn,#inf .bc,#inf .ix-c,#inf .ix-r{background:#0c0c0c;border:1px solid var(--gd);border-radius:14px;box-shadow:inset 0 1px 0 #c9a22733;-webkit-backdrop-filter:none;backdrop-filter:none}
+#eco .bc.no,#eco .ix-c.no,#inf .bc.no,#inf .ix-c.no{border-style:dashed}
+#eco .ix-s,#eco .eb,#eco .mil-s,#eco .ar-b,#eco .ar-lr,#inf .ix-s,#inf .eb,#inf .mil-s,#inf .ar-b,#inf .ar-lr{background:#111;border:1px solid var(--line);border-radius:10px}
+#eco .ix-c,#eco .ix-r,#inf .ix-c,#inf .ix-r{--ac:#c9a227!important;--a2:#c9a22712!important;--a3:#c9a22744!important}
+#eco .ix-r::after,#inf .ix-r::after{display:none}
+#eco .ix-rn,#inf .ix-rn{text-shadow:none}
+#eco .ix-p,#inf .ix-p{filter:none}
+#eco .ix-box>.lbl,#inf .ix-box>.lbl{color:var(--gold2)}
+#eco .ebig b,#inf .ebig b{text-shadow:none}
+#eco .eic,#eco .ix-i,#eco .ix-ri,#inf .eic,#inf .ix-i,#inf .ix-ri{border-radius:10px;background:#120f06;border:1px solid var(--gold3);box-shadow:none;filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
+#eco .eic,#inf .eic{width:46px;height:46px;font-size:22px}
+#eco .ix-i,#inf .ix-i{width:50px;height:50px;font-size:25px}
+#eco .ix-ri,#inf .ix-ri{width:40px;height:40px;font-size:21px}
+#eco .tab,#eco .sc,#eco .chp,#inf .tab,#inf .sc,#inf .chp{border-radius:8px;background:transparent;border:1px solid var(--gd);color:var(--txt);box-shadow:none}
+#eco .tab.on,#inf .tab.on{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border-color:transparent;box-shadow:none}
+#eco .tab.on small,#inf .tab.on small{color:#4a3a0e}
+#eco .sc.on,#inf .sc.on{background:#c9a22722;color:var(--gold2);border-color:var(--gold)}
+#eco .chp.g,#inf .chp.g{color:var(--ok);border-color:#3f6a52}
+#eco .chp.r,#inf .chp.r{color:var(--err);border-color:#7a3b34}
+#eco .dots i,#inf .dots i{border-radius:1px;height:4px;background:#2a2416}
+#eco .dots i.on,#eco .ix-c .dots i.on,#inf .dots i.on,#inf .ix-c .dots i.on{background:var(--gold)}
+#eco .pgb,#eco .pgb.big,#inf .pgb,#inf .pgb.big{background:#1b170c}
+#eco .pgb.big,#inf .pgb.big{height:10px;border-radius:4px}
+#eco .pg,#eco .pgb .pg,#inf .pg,#inf .pgb .pg{background:linear-gradient(90deg,#a97c22,#e6cc78);box-shadow:none}
+#eco .pgb.big .pg,#inf .pgb.big .pg{border-radius:4px}
+#eco .sw,#inf .sw{background:#1b170c;border-color:var(--gd)}
+#eco .sw::after,#inf .sw::after{background:#6b6450}
+#eco .sw.on,#inf .sw.on{background:#c9a22722;border-color:var(--gold)}
+#eco .sw.on::after,#inf .sw.on::after{background:var(--gold)}
+#inf::before{display:none}
+#inf .eh h2{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2)}
+#cm .cmbox{background:#0a0a0a;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:16px 16px 0 0;border-top:1px solid var(--gold);box-shadow:0 -10px 30px #000d}
+#cm .cmr{background:#111;border:1px solid var(--line);border-radius:10px}
+#cm .eic{border-radius:10px;background:#120f06;border:1px solid var(--gold3);filter:grayscale(1) sepia(.7) saturate(1.6) brightness(1.1)}
+#cm .buy{background:linear-gradient(180deg,#d9b84a,#b8921f);color:var(--ink);border:0;border-radius:10px;box-shadow:none;font-weight:800}
+#cm .buy:disabled{opacity:.4}
+#cm button.ghost{background:transparent;border:1px solid var(--gd);color:var(--gold2)}
 </style>
 </head>
 <body>
@@ -1036,12 +992,12 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
   <section id="eco" hidden>
     <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>اقتصاد</h2></div>
     <div class="ecard">
-      <div class="lbl">💰 درآمد روزانه‌ی ساختمان‌ها</div>
+      <div class="lbl">درآمد روزانه‌ی ساختمان‌ها</div>
       <div class="ebig"><b id="eInv"></b><small>در روز</small></div>
       <div class="e2">
         <div class="eb"><span class="lbl">موجودی</span><b id="eBal"></b></div>
         <div class="eb"><span class="lbl">خالص روزانه</span><b id="eNet" class="grn"></b></div>
-        <div class="eb" style="grid-column:1/-1"><span class="lbl">⚡ برق آزاد (برای ساخت و ارتقا)</span><b id="ePw"></b></div>
+        <div class="eb" style="grid-column:1/-1"><span class="lbl">برق آزاد (برای ساخت و ارتقا)</span><b id="ePw"></b></div>
       </div>
     </div>
     <div class="tabs" id="eTabs"></div>
@@ -1054,8 +1010,8 @@ setTimeout(function(){var b=g("boot");if(b&&!b.hidden)show("Login timeout (20s):
   <!-- زیرساخت -->
   <section id="inf" hidden>
     <div class="eh"><button class="ic g" onclick="screen('home')" aria-label="بازگشت">→</button><h2>زیرساخت</h2></div>
-    <div class="ix-box"><div class="lbl">📦 ذخایر کشور</div><div class="res4" id="iRes"></div></div>
-    <div class="ix-box"><div class="lbl">⚡ شبکه‌ی برق</div><div class="pwr" id="iGrid"></div></div>
+    <div class="ix-box"><div class="lbl">ذخایر کشور</div><div class="res4" id="iRes"></div></div>
+    <div class="ix-box"><div class="lbl">شبکه‌ی برق</div><div class="pwr" id="iGrid"></div></div>
     <div class="tabs" id="iTabs"></div>
     <div id="iList"></div>
     <div class="lbl" id="iMsg" style="text-align:center;line-height:1.9"></div>
@@ -2207,11 +2163,11 @@ function renderEco() {
   const tot = (c) => BLD.filter((b) => c === "all" || b.cat === c).length;
   $("eInv").textContent = fmt(BLD.reduce((a, b) => a + (owned[b.id] ? iAt(b, owned[b.id]) : 0), 0));
   { const el = $("ePw"); if (el) { el.textContent = pw ? pf1(pw.free) + " / " + pf1(pw.prod) : "—"; el.className = pw && Number(pw.free) < 0 ? "bad" : "grn"; el.style.color = pw && Number(pw.free) < 0 ? "var(--err)" : ""; } }
-  $("eTabs").innerHTML = [["all", "📁", "همه"], ...Object.entries(CATS).map(([k, v]) => [k, v.icon, v.fa])]
-    .map(([k, ic, fa]) => `<button class="tab${ecoCat === k ? " on" : ""}" onclick="setEcoCat('${k}')"><span>${ic} ${fa}</span><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></button>`).join("");
+  $("eTabs").innerHTML = [["all", "", "همه"], ...Object.entries(CATS).map(([k, v]) => [k, v.icon, v.fa])]
+    .map(([k, ic, fa]) => `<button class="tab${ecoCat === k ? " on" : ""}" onclick="setEcoCat('${k}')"><span>${fa}</span><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></button>`).join("");
   $("eSort").innerHTML = Object.entries(SORTS).map(([k, fa]) => `<button class="sc${ecoSort === k ? " on" : ""}" onclick="setEcoSort('${k}')">${fa}</button>`).join("");
-  $("eSyn").innerHTML = "<h3>🔗 هم‌افزایی بخش‌ها</h3>" + Object.entries(CATS)
-    .map(([k, v]) => `<div class="sr"><span>${v.icon} ${v.fa}</span><i><u style="width:${(cnt(k) / tot(k)) * 100}%"></u></i><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></div>`).join("");
+  $("eSyn").innerHTML = "<h3>هم‌افزایی بخش‌ها</h3>" + Object.entries(CATS)
+    .map(([k, v]) => `<div class="sr"><span>${v.fa}</span><i><u style="width:${(cnt(k) / tot(k)) * 100}%"></u></i><small>${faNum(cnt(k))}/${faNum(tot(k))}</small></div>`).join("");
   const sorters = {
     income: (a, b) => (owned[b.id] ? iAt(b, owned[b.id]) : b.income) - (owned[a.id] ? iAt(a, owned[a.id]) : a.income),
     price: (a, b) => a.price - b.price,
@@ -2225,24 +2181,24 @@ function renderEco() {
     const head = `<div class="bh"><div class="eic">${b.icon}</div><div class="bt"><b>${b.fa}</b><div class="dots">${dots}</div></div>`;
     if (rdy) {
       const st = rdy - vm(b.mins) * 60000;
-      return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>🔨 در حال ساخت</small></div></div>
-        <div class="tmr"><small>⏱️ زمان باقی‌مانده تا پایان ساخت</small><b class="cd" dir="ltr">${dur(rdy - now)}</b></div>
+      return `<div class="bc build" data-rdy="${rdy}" data-st="${st}">${head}<div class="bi"><small>در حال ساخت</small></div></div>
+        <div class="tmr"><small>زمان باقی‌مانده تا پایان ساخت</small><b class="cd" dir="ltr">${dur(rdy - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (rdy - st)) * 100))}%"></u></div>
         <div class="chips"><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز پس از ساخت</span></div>
-        <button class="buy" onclick="speedUp('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(rdy - now))}</span> 💎</button></div>`;
+        <button class="buy" onclick="speedUp('${b.id}',this)">تکمیل سریع — <span class="spc">${faNum(spCost(rdy - now))}</span> 💎</button></div>`;
     }
     if (upg[b.id]) {
       const ur = upg[b.id], to = upgTo[b.id], ust = ur - vm(mAt(b, to)) * 60000;
-      return `<div class="bc build" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>⬆ در حال ارتقا به سطح ${faNum(to)}</small></div></div>
-        <div class="tmr"><small>⬆ زمان باقی‌مانده تا پایان ارتقا</small><b class="cd" dir="ltr">${dur(ur - now)}</b></div>
+      return `<div class="bc build" data-rdy="${ur}" data-st="${ust}">${head}<div class="bi"><b>${fmt(iAt(b, lv))}</b><small>در حال ارتقا به سطح ${faNum(to)}</small></div></div>
+        <div class="tmr"><small>زمان باقی‌مانده تا پایان ارتقا</small><b class="cd" dir="ltr">${dur(ur - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - ust) / (ur - ust)) * 100))}%"></u></div>
         <div class="chips"><span class="chp g">↑ <span dir="ltr">${fmt(iAt(b, to))}</span> در روز پس از ارتقا</span></div>
-        <button class="buy" onclick="speedUpgrade('${b.id}',this)">⚡ تکمیل سریع — <span class="spc">${faNum(spCost(ur - now))}</span> 💎</button></div>`;
+        <button class="buy" onclick="speedUpgrade('${b.id}',this)">تکمیل سریع — <span class="spc">${faNum(spCost(ur - now))}</span> 💎</button></div>`;
     }
     return `<div class="bc${has ? "" : " no"}">${head}
         <div class="bi">${has ? `<b>${fmt(iAt(b, lv))}</b><small>در روز</small>` : "<small>خریداری نشده</small>"}</div></div>
-      <div class="chips"><span class="chp">⏳ بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">⬆ سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">⏱️ ارتقا: ${buildText(vm(mAt(b, lv + 1)))}</span><span class="chp${pwShort(b, lv + 1) ? " r" : ""}">⚡ ${pf1(pwNeed(b, lv + 1))}+ برق</span>` : "") : `<span class="chp">🔨 ساخت: ${buildText(vm(b.mins))}</span><span class="chp${pwShort(b, 1) ? " r" : ""}">⚡ ${pf1(pwNeed(b, 1))} برق</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
-      ${has ? (lv >= MAXLV ? `<button class="up" disabled>✅ حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) || pwShort(b, lv + 1) ? " poor" : ""}" onclick="askUp('${b.id}')">⬆ ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${priceH(pAt(b, lv + 1))}</span></button>`)
+      <div class="chips"><span class="chp">بازگشت در ${paybackText(b)}</span>${has ? (lv < MAXLV ? `<span class="chp g">سطح ${faNum(lv + 1)}: <span dir="ltr">${fmt(iAt(b, lv + 1))}</span> در روز</span><span class="chp">ارتقا: ${buildText(vm(mAt(b, lv + 1)))}</span><span class="chp${pwShort(b, lv + 1) ? " r" : ""}">${pf1(pwNeed(b, lv + 1))}+ برق</span>` : "") : `<span class="chp">ساخت: ${buildText(vm(b.mins))}</span><span class="chp${pwShort(b, 1) ? " r" : ""}">${pf1(pwNeed(b, 1))} برق</span><span class="chp g">↑ <span dir="ltr">${fmt(b.income)}</span> در روز</span>`}</div>
+      ${has ? (lv >= MAXLV ? `<button class="up" disabled>حداکثر سطح</button>` : `<button class="buy${t < upCost(b, lv) || pwShort(b, lv + 1) ? " poor" : ""}" onclick="askUp('${b.id}')">ارتقا به سطح ${faNum(lv + 1)} — <span dir="ltr">${priceH(pAt(b, lv + 1))}</span></button>`)
             : `<button class="buy${t < pv(b.price) || pwShort(b, 1) ? " poor" : ""}" onclick="askBuy('${b.id}')">شروع ساخت — <span dir="ltr">${priceH(b.price)}</span></button>`}
     </div>`;
   }).join("");
@@ -2259,7 +2215,7 @@ async function speedUp(id, btn) {
     const E = { NO_COUNTRY: "شما کشوری ندارید", NOT_PENDING: "این ساختمان در حال ساخت نیست", NO_CRYSTALS: "الماس کافی ندارید", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
     return flash(E[error.message] || error.message, 5000);
   }
-  flash("⚡ ساخت تمام شد", 2000);
+  flash("ساخت تمام شد", 2000);
   await loadCountry();
   render();
   await loadEco();
@@ -2291,13 +2247,13 @@ function askBuy(id) {
   openCm({
     ic: b.icon, title: "ساخت " + b.fa, sub: "سطح ۱",
     rows: [
-      ["💰 هزینه ساخت", priceH(b.price)],
-      ["⏱️ مدت ساخت", buildText(vm(b.mins))],
-      ["📈 سود روزانه", fmt(b.income), "good"],
-      ["⚡ برق مورد نیاز", pf1(nd), short ? "bad" : ""],
-      ...(pw ? [["⚡ برق آزاد", pf1(pw.free), short ? "bad" : ""]] : []),
-      ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
-      ...(poor ? [] : [["🧾 موجودی بعد از ساخت", fmt(t - pv(b.price))]])
+      ["هزینه ساخت", priceH(b.price)],
+      ["مدت ساخت", buildText(vm(b.mins))],
+      ["سود روزانه", fmt(b.income), "good"],
+      ["برق مورد نیاز", pf1(nd), short ? "bad" : ""],
+      ...(pw ? [["برق آزاد", pf1(pw.free), short ? "bad" : ""]] : []),
+      ["موجودی فعلی", fmt(t), poor ? "bad" : ""],
+      ...(poor ? [] : [["موجودی بعد از ساخت", fmt(t - pv(b.price))]])
     ],
     warn: poor ? "موجودی کافی نیست" : short ? PW_WARN : "",
     btn: "تأیید و شروع ساخت",
@@ -2310,13 +2266,13 @@ function askUp(id) {
   openCm({
     ic: b.icon, title: "ارتقای " + b.fa, sub: "سطح " + faNum(lv) + " ← سطح " + faNum(lv + 1),
     rows: [
-      ["💰 هزینه ارتقا", priceH(pAt(b, lv + 1))],
-      ["⏱️ زمان ارتقا", buildText(vm(mAt(b, lv + 1)))],
-      ["📈 سود روزانه", fmt(iAt(b, lv)) + " → " + fmt(iAt(b, lv + 1)), "good"],
-      ["⚡ برق مورد نیاز (اضافه)", pf1(nd), short ? "bad" : ""],
-      ...(pw ? [["⚡ برق آزاد", pf1(pw.free), short ? "bad" : ""]] : []),
-      ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""],
-      ...(poor ? [] : [["🧾 موجودی بعد از ارتقا", fmt(t - cost)]])
+      ["هزینه ارتقا", priceH(pAt(b, lv + 1))],
+      ["زمان ارتقا", buildText(vm(mAt(b, lv + 1)))],
+      ["سود روزانه", fmt(iAt(b, lv)) + " → " + fmt(iAt(b, lv + 1)), "good"],
+      ["برق مورد نیاز (اضافه)", pf1(nd), short ? "bad" : ""],
+      ...(pw ? [["برق آزاد", pf1(pw.free), short ? "bad" : ""]] : []),
+      ["موجودی فعلی", fmt(t), poor ? "bad" : ""],
+      ...(poor ? [] : [["موجودی بعد از ارتقا", fmt(t - cost)]])
     ],
     warn: poor ? "موجودی کافی نیست" : short ? PW_WARN : "",
     btn: "تأیید و شروع ارتقا",
@@ -2331,7 +2287,7 @@ async function upgradeBuilding(id, btn) {
     btn.disabled = false;
     return flash(UP_ERR[error.message] || error.message, 5000);
   }
-  flash("⬆ ارتقا شروع شد", 2000);
+  flash("ارتقا شروع شد", 2000);
   await loadCountry();
   render();
   await loadEco();
@@ -2345,7 +2301,7 @@ async function speedUpgrade(id, btn) {
     btn.disabled = false;
     return flash(UP_ERR[error.message] || error.message, 5000);
   }
-  flash("⚡ ارتقا تمام شد", 2000);
+  flash("ارتقا تمام شد", 2000);
   await loadCountry();
   render();
   await loadEco();
@@ -2358,7 +2314,7 @@ async function buyBuilding(id, btn) {
     const E = { NO_POWER: "برق کافی نیست؛ ابتدا زیرساخت برق را تقویت کنید", NO_COUNTRY: "شما کشوری ندارید", BAD_BUILDING: "ساختمان نامعتبر است", ALREADY_OWNED: "این ساختمان را قبلاً خریده‌اید", NO_FUNDS: "موجودی کافی نیست", QUEUE_FULL: "صف ساخت پر است (با VIP دو صف دارید)" };
     return flash(E[error.message] || error.message, 5000);
   }
-  flash("🔨 ساخت شروع شد", 2000);
+  flash("ساخت شروع شد", 2000);
   await loadCountry();
   render();
   await loadEco();
@@ -2416,7 +2372,7 @@ const MIL = [
 MIL.forEach((p) => { p.isMil = true; });
 // ظرفیت پایگاه‌ها: هر سطح +۲۵٪ (باید با infra_cap سرور یکی باشد)
 const capAt = (p, lv) => Math.round(p.cap * (1 + 0.25 * (lv - 1)));
-const MIL_G = { land: "🪖 زمینی", air: "✈️ هوایی", sea: "🚢 دریایی", missile: "🚀 موشکی" };
+const MIL_G = { land: "زمینی", air: "هوایی", sea: "دریایی", missile: "موشکی" };
 const MIL_SLOTS = ["armored_base", "airport", "port", "missile_base"];
 const INF_ALL = PLANTS.concat(FOODS, RESB, MIL);
 // برق مورد نیاز زیرساخت‌های مصرف‌کننده (غذا/منابع): خرید = مصرف پایه، ارتقا = ۲۵٪ مصرف پایه (مثل سرور)
@@ -2455,11 +2411,11 @@ function resEntries(k) {
 }
 const RM_NOTE = { steel: "فولاد برای ساخت یگان‌های ارتش لازم است.", oil: "نفت برای ساخت و سوخت یگان‌های هوایی و دریایی لازم است.", uranium: "نیروگاه هسته‌ای و یگان‌های موشکی اورانیوم مصرف می‌کنند؛ اگر تمام شود نیروگاه‌ها غیرفعال می‌شوند." };
 function rmCard() {
-  const ks = [["steel", "فولاد", "⛏️"], ["oil", "نفت", "🛢️"], ["uranium", "اورانیوم", "☢️"]];
+  const ks = [["steel", "فولاد", ""], ["oil", "نفت", "🛢️"], ["uranium", "اورانیوم", ""]];
   const top = ks.map(([k, fa, ic]) => { const n = resNet(k), v = liveRes(k); return `<div class="rm-l"><span>${ic} ${fa} <b data-res="${k}" data-ab="1">${v == null ? "—" : abbr(v)}</b></span><span class="v ${n < 0 ? "r" : n > 0 ? "g" : ""}">${n > 0 ? "+" : n < 0 ? "−" : ""}${abbr(Math.abs(n))} در روز</span></div>`; }).join("");
   const det = (cls, sg, label, list) => list.length ? `<details class="rm-d" open><summary><span>${label} (${list.length} مورد)</span><b class="${cls}">${sg}${en(list.reduce((a, x) => a + x[1], 0))}</b></summary>${list.map(([n, v]) => `<div class="rm-l"><span>${n}</span><b class="${cls}">${sg}${en(v)}</b></div>`).join("")}</details>` : "";
   const sec = ks.map(([k, fa, ic]) => { const [inp, out] = resEntries(k); return `<div class="rm-s"><h4>${ic} ${fa}</h4>${det("g", "+", "ورودی", inp)}${det("r", "−", "مصرف", out)}${inp.length || out.length ? "" : '<p class="rm-n">هنوز تولیدی ندارید.</p>'}<p class="rm-n">${RM_NOTE[k]}</p></div>`; }).join("");
-  return `<div class="ix-box"><div class="rm-top"><b>🔧 مواد خام</b><small>برای ارتش و صنعت</small></div>${top}${sec}</div>`;
+  return `<div class="ix-box"><div class="rm-top"><b>مواد خام</b><small>برای ارتش و صنعت</small></div>${top}${sec}</div>`;
 }
 const fdAt = (p, lv) => Math.round(p.foodDay * (1 + 0.25 * (lv - 1)));
 const fuAt = (p, lv) => +(p.use * (1 + 0.25 * (lv - 1))).toFixed(1);
@@ -2515,37 +2471,37 @@ function renderInf() {
   const col = cov >= 100 ? "#3ddc97" : cov >= 60 ? "#f0b43a" : "#ff6b6b", R = 54, L = 2 * Math.PI * R;
   $("iGrid").innerHTML = `<div class="ix-g"><div class="ix-ring"><svg viewBox="0 0 132 132"><circle class="ix-t" cx="66" cy="66" r="${R}"/><circle class="ix-p" cx="66" cy="66" r="${R}" style="color:${col};stroke:${col};stroke-dasharray:${((L * cov) / 100).toFixed(1)} ${L.toFixed(1)}"/></svg>
       <div class="ix-rc"><b style="color:${col}">${cov}<i>%</i></b><small>پوشش برق</small></div></div>
-    <div class="ix-gs"><div class="ix-s"><small>⚡ تولید</small><b>${en(pf1(P))}</b></div><div class="ix-s"><small>🏭 مصرف</small><b>${en(pf1(C))}</b></div><div class="ix-s"><small>✨ آزاد</small><b style="color:${P - C < 0 ? "var(--err)" : "var(--ok)"}">${en(pf1(P - C))}</b></div></div></div>`;
-  const tb = (id, ic, fa, list) => `<button class="tab${infTab === id ? " on" : ""}" onclick="setInfTab('${id}')"><span>${ic} ${fa}</span><small>${list.filter((p) => infLv[p.id]).length}/${list.length}</small></button>`;
-  $("iTabs").innerHTML = tb("power", "⚡", "برق", PLANTS) + tb("food", "🌾", "غذا", FOODS) + tb("res", "⛏️", "منابع", RESB)
-    + `<button class="tab" onclick="soon()"><span>👥 رفاه</span><small>به‌زودی</small></button>` + tb("mil", "🛡️", "نظامی", MIL);
+    <div class="ix-gs"><div class="ix-s"><small>تولید</small><b>${en(pf1(P))}</b></div><div class="ix-s"><small>مصرف</small><b>${en(pf1(C))}</b></div><div class="ix-s"><small>آزاد</small><b style="color:${P - C < 0 ? "var(--err)" : "var(--ok)"}">${en(pf1(P - C))}</b></div></div></div>`;
+  const tb = (id, ic, fa, list) => `<button class="tab${infTab === id ? " on" : ""}" onclick="setInfTab('${id}')"><span>${fa}</span><small>${list.filter((p) => infLv[p.id]).length}/${list.length}</small></button>`;
+  $("iTabs").innerHTML = tb("power", "", "برق", PLANTS) + tb("food", "", "غذا", FOODS) + tb("res", "", "منابع", RESB)
+    + `<button class="tab" onclick="soon()"><span>رفاه</span><small>به‌زودی</small></button>` + tb("mil", "", "نظامی", MIL);
   const items = infTab === "food" ? FOODS : infTab === "res" ? RESB : infTab === "mil" ? MIL : PLANTS, lf = liveFood();
-  const foodBox = infTab === "food" ? `<div class="ix-box"><div class="lbl">🌾 انبار غذا</div><b class="ix-rn" data-food="1" style="margin-top:10px">${lf == null ? "—" : en(lf)}</b><small style="color:var(--mut);font-size:12px">${fr > 0 ? "▲ +" + en(fr) + " در روز" : "هنوز غذایی تولید نمی‌شود"}</small></div>` : "";
+  const foodBox = infTab === "food" ? `<div class="ix-box"><div class="lbl">انبار غذا</div><b class="ix-rn" data-food="1" style="margin-top:10px">${lf == null ? "—" : en(lf)}</b><small style="color:var(--mut);font-size:12px">${fr > 0 ? "▲ +" + en(fr) + " در روز" : "هنوز غذایی تولید نمی‌شود"}</small></div>` : "";
   const t = liveT(), now = Date.now();
   $("iList").innerHTML = foodBox + (infTab === "res" ? rmCard() : "") + (infTab === "mil" ? milCard() : "") + items.map((p, ix) => {
     const gh = infTab === "mil" && (!ix || items[ix - 1].grp !== p.grp) ? `<div class="mil-g">${MIL_G[p.grp]}</div>` : "";
     const lv = infLv[p.id] || 0, rdy = infPend[p.id], ur = infUp[p.id], off = !p.isMil && !!infOff[p.id], nx = lv + 1;
     const dots = Array.from({ length: MAXLV }, (_, i) => `<i${i < lv ? ' class="on"' : ""}></i>`).join("");
     const sw = lv && !p.isMil ? `<button class="sw${off ? "" : " on"}" role="switch" aria-checked="${!off}" aria-label="فعال یا غیرفعال" onclick="toggleInf('${p.id}',${off})"></button>` : "";
-    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (p.isMil ? "" : off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>${RES_IC[p.res]} در روز</small></div>` : lv && p.isBase && p.cap ? `<div class="ix-pw"><b style="font-size:22px">${en(capAt(p, lv))}</b><small>ظرفیت</small></div>` : lv && !p.isFood && !p.isMil ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>⚡ برق</small></div>` : ""}${sw}</div>`;
-    const statF = (v) => `<div class="ix-ss f4"><div class="ix-s"><small>🌾 غذا/روز</small><b>${en(fdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
-    const statP = (v) => `<div class="ix-ss"><div class="ix-s"><small>⚡ برق</small><b>${en(pwAt(p, v))}</b></div><div class="ix-s"><small>${p.uran ? "☢️ سوخت/روز" : "🔧 نگهداری/روز"}</small><b>${p.uran ? "−" + en(p.uran * v) : "$" + en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
-    const statR = (v) => `<div class="ix-ss"><div class="ix-s"><small>${RES_IC[p.res]} تولید/روز</small><b>${en(rdAt(p, v))}</b></div><div class="ix-s"><small>⚡ برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
-    const statM = (v) => `<div class="ix-ss${p.cap ? "" : " f4"}"><div class="ix-s"><small>🔧 نگهداری/روز</small><b>$${en(mtAt(p, v))}</b></div>${p.cap ? `<div class="ix-s"><small>🏠 ظرفیت</small><b>${en(capAt(p, v))}</b></div>` : ""}<div class="ix-s"><small>⏱️ زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const head = `<div class="ix-h"><div class="ix-i">${p.icon}</div><div class="ix-t2"><b>${p.fa}</b><div class="dots">${dots}</div><small>${lv ? "Lv " + lv + (p.isMil ? "" : off ? " · غیرفعال" : " · فعال") : "ساخته نشده"}</small></div>${lv && p.isRes ? `<div class="ix-pw"><b style="font-size:22px">+${en(off ? 0 : rdAt(p, lv))}</b><small>در روز</small></div>` : lv && p.isBase && p.cap ? `<div class="ix-pw"><b style="font-size:22px">${en(capAt(p, lv))}</b><small>ظرفیت</small></div>` : lv && !p.isFood && !p.isMil ? `<div class="ix-pw"><b>${en(off ? 0 : pwAt(p, lv))}</b><small>برق</small></div>` : ""}${sw}</div>`;
+    const statF = (v) => `<div class="ix-ss f4"><div class="ix-s"><small>غذا/روز</small><b>${en(fdAt(p, v))}</b></div><div class="ix-s"><small>برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>نگهداری/روز</small><b>$${en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const statP = (v) => `<div class="ix-ss"><div class="ix-s"><small>برق</small><b>${en(pwAt(p, v))}</b></div><div class="ix-s"><small>${p.uran ? "سوخت/روز" : "نگهداری/روز"}</small><b>${p.uran ? "−" + en(p.uran * v) : "$" + en(p.maint ? mtAt(p, v) : 0)}</b></div><div class="ix-s"><small>زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const statR = (v) => `<div class="ix-ss"><div class="ix-s"><small>تولید/روز</small><b>${en(rdAt(p, v))}</b></div><div class="ix-s"><small>برق</small><b>${en(fuAt(p, v))}</b></div><div class="ix-s"><small>زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
+    const statM = (v) => `<div class="ix-ss${p.cap ? "" : " f4"}"><div class="ix-s"><small>نگهداری/روز</small><b>$${en(mtAt(p, v))}</b></div>${p.cap ? `<div class="ix-s"><small>ظرفیت</small><b>${en(capAt(p, v))}</b></div>` : ""}<div class="ix-s"><small>زمان</small><b>${btEn(vm(mAt(p, v)))}</b></div></div>`;
     const stat = p.isMil ? statM : p.isFood ? statF : p.isRes ? statR : statP;
     const cls = `ix-c${lv ? "" : " no"}${off ? " off" : ""}`;
     if (rdy || ur) {
       const end = rdy || ur, to = rdy ? 1 : infUpTo[p.id], st = end - vm(mAt(p, to)) * 60000;
       return gh + `<div class="${cls}" style="${acs(INF_AC[p.id])}" data-rdy="${end}" data-st="${st}">${head}
-        <p class="ix-d">${rdy ? "🔨 در حال ساخت" : "⬆ در حال ارتقا به سطح " + to}</p>
-        <div class="tmr"><small>⏱️ زمان باقی‌مانده</small><b class="cd" dir="ltr">${durEn(end - now)}</b></div>
+        <p class="ix-d">${rdy ? "در حال ساخت" : "در حال ارتقا به سطح " + to}</p>
+        <div class="tmr"><small>زمان باقی‌مانده</small><b class="cd" dir="ltr">${durEn(end - now)}</b></div>
         <div class="pgb big"><u class="pg" style="width:${Math.min(100, Math.max(0, ((now - st) / (end - st)) * 100))}%"></u></div>
-        ${stat(to)}<button class="buy" onclick="speedInf('${p.id}',${end})">⚡ تکمیل سریع — <span class="spc">${en(spCost(end - now))}</span> 💎</button></div>`;
+        ${stat(to)}<button class="buy" onclick="speedInf('${p.id}',${end})">تکمیل سریع — <span class="spc">${en(spCost(end - now))}</span> 💎</button></div>`;
     }
-    return gh + `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? (p.isFood ? " ⏸ غیرفعال: غذا تولید نمی‌کند و هزینه‌ی نگهداری ندارد." : p.isRes ? " ⏸ غیرفعال: تولید نمی‌کند." : " ⏸ غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد.") : ""}</p>
+    return gh + `<div class="${cls}" style="${acs(INF_AC[p.id])}">${head}<p class="ix-d">${p.desc}${off ? (p.isFood ? " غیرفعال: غذا تولید نمی‌کند و هزینه‌ی نگهداری ندارد." : p.isRes ? " غیرفعال: تولید نمی‌کند." : " غیرفعال: برق نمی‌دهد و هزینه‌ی نگهداری ندارد.") : ""}</p>
       ${stat(lv ? Math.min(nx, MAXLV) : 1)}
-      ${lv >= MAXLV ? '<button class="up" disabled>✅ حداکثر سطح</button>'
-        : lv ? `<button class="buy${t < upCost(p, lv) || infShort(p, nx) ? " poor" : ""}" onclick="askInfUp('${p.id}')">⬆ ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
+      ${lv >= MAXLV ? '<button class="up" disabled>حداکثر سطح</button>'
+        : lv ? `<button class="buy${t < upCost(p, lv) || infShort(p, nx) ? " poor" : ""}" onclick="askInfUp('${p.id}')">ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
         : `<button class="buy${t < pv(p.price) || infShort(p, 1) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}</div>`;
   }).join("");
 }
@@ -2555,29 +2511,29 @@ function milCard() {
     const p = MIL.find((x) => x.id === id), lv = infLv[id] || 0;
     return `<div class="mil-s${lv ? "" : " no"}"><div class="mil-h"><i>${p.icon}</i><span>${p.fa}</span></div><b>${lv && p.cap ? en(capAt(p, lv)) : "—"}</b><small>${lv ? (p.cap ? "ظرفیت" : "ساخته شده") : "ساخته نشده"}</small></div>`;
   }).join("");
-  return `<div class="ix-box mil"><div class="mil-t"><b>🛡️ جای نگه‌داری ارتش</b><span dir="ltr">${built}/${MIL.length}</span></div><div class="mil-gr">${slots}</div><p class="rm-n">یگان تازه به جای خالی در پایگاه خودش نیاز دارد، فرمانده.</p></div>`;
+  return `<div class="ix-box mil"><div class="mil-t"><b>جای نگه‌داری ارتش</b><span dir="ltr">${built}/${MIL.length}</span></div><div class="mil-gr">${slots}</div><p class="rm-n">یگان تازه به جای خالی در پایگاه خودش نیاز دارد، فرمانده.</p></div>`;
 }
 function infRows(p, lv, cost, t) {
   const poor = t < cost;
   return {
     warn: poor ? "موجودی کافی نیست" : infShort(p, lv) ? PW_WARN : "",
-    rows: [["💰 هزینه", priceH(pAt(p, lv))], ["⏱️ مدت", btEn(vm(mAt(p, lv)))],
-      ...(p.isFood ? [["🌾 غذا در روز", lv > 1 ? en(fdAt(p, lv - 1)) + " ← " + en(fdAt(p, lv)) : en(fdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
-        : p.isRes ? [[RES_IC[p.res] + " تولید در روز", lv > 1 ? en(rdAt(p, lv - 1)) + " ← " + en(rdAt(p, lv)) : en(rdAt(p, 1)), "good"], ["⚡ مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
-        : p.isMil ? (p.cap ? [["🏠 ظرفیت", lv > 1 ? en(capAt(p, lv - 1)) + " ← " + en(capAt(p, lv)) : en(capAt(p, 1)), "good"]] : [])
-        : [["⚡ برق", lv > 1 ? en(pwAt(p, lv - 1)) + " ← " + en(pwAt(p, lv)) : en(pwAt(p, 1)), "good"]]),
-      ...(p.use ? [["⚡ برق مورد نیاز (اضافه)", pf1(infNeed(p, lv)), infShort(p, lv) ? "bad" : ""], ...(pw ? [["⚡ برق آزاد", pf1(pw.free), infShort(p, lv) ? "bad" : ""]] : [])] : []),
-      ...(p.maint ? [["🔧 نگهداری روزانه", fmt(mtAt(p, lv))]] : []), ...(p.uran ? [["☢️ سوخت روزانه", "−" + en(p.uran * lv)]] : []),
-      ["💼 موجودی فعلی", fmt(t), poor ? "bad" : ""]]
+    rows: [["هزینه", priceH(pAt(p, lv))], ["مدت", btEn(vm(mAt(p, lv)))],
+      ...(p.isFood ? [["غذا در روز", lv > 1 ? en(fdAt(p, lv - 1)) + " ← " + en(fdAt(p, lv)) : en(fdAt(p, 1)), "good"], ["مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
+        : p.isRes ? [["تولید در روز", lv > 1 ? en(rdAt(p, lv - 1)) + " ← " + en(rdAt(p, lv)) : en(rdAt(p, 1)), "good"], ["مصرف برق", lv > 1 ? en(fuAt(p, lv - 1)) + " ← " + en(fuAt(p, lv)) : en(fuAt(p, 1))]]
+        : p.isMil ? (p.cap ? [["ظرفیت", lv > 1 ? en(capAt(p, lv - 1)) + " ← " + en(capAt(p, lv)) : en(capAt(p, 1)), "good"]] : [])
+        : [["برق", lv > 1 ? en(pwAt(p, lv - 1)) + " ← " + en(pwAt(p, lv)) : en(pwAt(p, 1)), "good"]]),
+      ...(p.use ? [["برق مورد نیاز (اضافه)", pf1(infNeed(p, lv)), infShort(p, lv) ? "bad" : ""], ...(pw ? [["برق آزاد", pf1(pw.free), infShort(p, lv) ? "bad" : ""]] : [])] : []),
+      ...(p.maint ? [["نگهداری روزانه", fmt(mtAt(p, lv))]] : []), ...(p.uran ? [["سوخت روزانه", "−" + en(p.uran * lv)]] : []),
+      ["موجودی فعلی", fmt(t), poor ? "bad" : ""]]
   };
 }
 function askInfBuy(id) {
   const p = INF_ALL.find((x) => x.id === id), t = liveT(); if (!p) return;
-  openCm({ ic: p.icon, title: "ساخت " + p.fa, sub: "سطح 1", ...infRows(p, 1, pv(p.price), t), btn: "تأیید و شروع ساخت", ok: () => infDo("buy_infra", id, "🔨 ساخت شروع شد") });
+  openCm({ ic: p.icon, title: "ساخت " + p.fa, sub: "سطح 1", ...infRows(p, 1, pv(p.price), t), btn: "تأیید و شروع ساخت", ok: () => infDo("buy_infra", id, "ساخت شروع شد") });
 }
 function askInfUp(id) {
   const p = INF_ALL.find((x) => x.id === id), lv = infLv[id] || 0, t = liveT(); if (!p || !lv || lv >= MAXLV) return;
-  openCm({ ic: p.icon, title: "ارتقای " + p.fa, sub: "سطح " + en(lv) + " ← سطح " + en(lv + 1), ...infRows(p, lv + 1, upCost(p, lv), t), btn: "تأیید و شروع ارتقا", ok: () => infDo("upgrade_infra", id, "⬆ ارتقا شروع شد") });
+  openCm({ ic: p.icon, title: "ارتقای " + p.fa, sub: "سطح " + en(lv) + " ← سطح " + en(lv + 1), ...infRows(p, lv + 1, upCost(p, lv), t), btn: "تأیید و شروع ارتقا", ok: () => infDo("upgrade_infra", id, "ارتقا شروع شد") });
 }
 const INF_ERR = Object.assign({}, UP_ERR, { ALREADY_OWNED: "این ساختمان را قبلاً ساخته‌اید", BAD_INFRA: "ساختمان نامعتبر است", NO_URANIUM: "اورانیوم کافی نیست", NO_SEA: "کشور شما دریا ندارد؛ بندر و کارخانه کشتی فقط برای کشور ساحلی است", NOT_TOGGLEABLE: "این ساختمان قابل خاموش‌کردن نیست" });
 async function infDo(fn, id, ok) {
