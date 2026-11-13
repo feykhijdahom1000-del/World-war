@@ -131,6 +131,15 @@ nav{z-index:10}
 #worldmap.sheet-open .mctl,#worldmap.sheet-open #fPanel{display:none}
 .mk{cursor:pointer}
 .mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:10.5px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
+.hx.mine,.hx.taken,.hx.free{width:21px;height:23px}
+.hx.mine b,.hx.taken b,.hx.free b{font-size:10.5px}
+.mk.lb.sea{color:#bfe6ff;font-weight:600;font-size:11px;opacity:.9;text-shadow:0 0 3px #04121f,0 0 7px #04121f}
+.mk.lb.sea.oc{font-size:15px;color:#8fcdf5;font-weight:700;word-spacing:8px;opacity:.85}
+.capk{display:flex;align-items:center;gap:5px;color:#fff;font-size:12px;font-weight:800;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
+.capk .cfl{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;line-height:1;background:#0e1828;border:1.5px solid #e9dfc0}
+.capk.mine .cfl{border-color:#d4a73a;box-shadow:0 0 0 2px #d4a73a55,0 0 10px #d4a73a}
+.capk.mine .nm{color:#ffd978}
+.capk.mine .nm::before{content:"★ ";font-size:11px}
 #dlOv{position:fixed;inset:0;z-index:3000;background:#060d1a;display:flex;align-items:center;justify-content:center;padding:24px}
 #dlOv[hidden]{display:none}
 #dlOv .dlb{width:100%;max-width:380px;text-align:center}
@@ -1182,6 +1191,218 @@ const unitFlag = (h, code) => { const f = document.createElement("em"); f.classN
 
 let lmap = null, mapReady = null;
 const FILTER = { labels: true, flags: true, straits: true, resources: true, taken: true, free: true };
+/* ---------- پایتخت‌ها و برچسب آب‌ها (فقط نمایش؛ مختصات بازی homeLL دست‌نخورده می‌ماند) ---------- */
+const CAPZ = 4; // از این زوم به بالا اسم کشور جایش را به پایتخت می‌دهد
+const CAPS = {};
+`AF|کابل|69.18|34.53
+AL|تیرانا|19.82|41.33
+DZ|الجزایر|3.06|36.75
+AD|آندورا لا وِلا|1.52|42.51
+AO|لواندا|13.23|-8.84
+AG|سنت جانز|-61.85|17.12
+AR|بوئنوس آیرس|-58.38|-34.60
+AM|ایروان|44.51|40.18
+AU|کانبرا|149.13|-35.28
+AT|وین|16.37|48.21
+AZ|باکو|49.87|40.41
+BS|ناسائو|-77.35|25.05
+BH|منامه|50.58|26.23
+BD|داکا|90.41|23.81
+BB|بریج‌تاون|-59.62|13.10
+BY|مینسک|27.57|53.90
+BE|بروکسل|4.35|50.85
+BZ|بلموپان|-88.77|17.25
+BJ|پورتو نوو|2.63|6.50
+BT|تیمفو|89.64|27.47
+BO|لاپاز|-68.15|-16.50
+BA|سارایوو|18.41|43.86
+BW|گابورون|25.91|-24.65
+BR|برازیلیا|-47.93|-15.78
+BN|بندر سری بگاوان|114.94|4.89
+BG|صوفیه|23.32|42.70
+BF|اوآگادوگو|-1.52|12.37
+BI|گیتگا|29.92|-3.43
+KH|پنوم‌پن|104.92|11.56
+CM|یائونده|11.52|3.85
+CA|اتاوا|-75.70|45.42
+CV|پرایا|-23.51|14.93
+CF|بانگی|18.56|4.36
+TD|انجامنا|15.04|12.13
+CL|سانتیاگو|-70.65|-33.45
+CN|پکن|116.41|39.90
+CO|بوگوتا|-74.07|4.71
+KM|مورونی|43.26|-11.70
+CG|برازاویل|15.28|-4.27
+CD|کینشاسا|15.31|-4.32
+CR|سن‌خوزه|-84.08|9.93
+CI|یاموسوکرو|-5.28|6.82
+HR|زاگرب|15.98|45.81
+CU|هاوانا|-82.37|23.11
+CY|نیکوزیا|33.38|35.17
+CZ|پراگ|14.42|50.08
+DK|کپنهاگ|12.57|55.68
+DJ|جیبوتی|43.15|11.59
+DM|روسو|-61.39|15.30
+DO|سانتو دومینگو|-69.93|18.49
+EC|کیتو|-78.47|-0.18
+EG|قاهره|31.24|30.04
+SV|سن‌سالوادور|-89.22|13.69
+GQ|مالابو|8.78|3.75
+ER|اسمره|38.93|15.32
+EE|تالین|24.75|59.44
+SZ|مبابانه|31.13|-26.31
+ET|آدیس‌آبابا|38.75|9.03
+FJ|سووا|178.44|-18.14
+FI|هلسینکی|24.94|60.17
+FR|پاریس|2.35|48.86
+GA|لیبرویل|9.45|0.39
+GM|بانجول|-16.58|13.45
+GE|تفلیس|44.83|41.72
+DE|برلین|13.40|52.52
+GH|آکرا|-0.19|5.60
+GR|آتن|23.73|37.98
+GD|سنت جورج|-61.75|12.05
+GT|گواتمالا|-90.51|14.63
+GN|کوناکری|-13.68|9.64
+GW|بیسائو|-15.60|11.86
+GY|جورج‌تاون|-58.16|6.80
+HT|پورتو پرنس|-72.34|18.54
+HN|تگوسیگالپا|-87.20|14.07
+HU|بوداپست|19.04|47.50
+IS|ریکیاویک|-21.94|64.15
+IN|دهلی نو|77.21|28.61
+ID|جاکارتا|106.85|-6.21
+IR|تهران|51.39|35.69
+IQ|بغداد|44.37|33.31
+IE|دوبلین|-6.26|53.35
+IL|اورشلیم|35.22|31.77
+IT|رم|12.50|41.90
+JM|کینگستون|-76.79|18.00
+JP|توکیو|139.69|35.69
+JO|عمان|35.93|31.95
+KZ|آستانه|71.43|51.17
+KE|نایروبی|36.82|-1.29
+KI|تاراوا|173.03|1.45
+KP|پیونگ‌یانگ|125.75|39.02
+KR|سئول|126.98|37.57
+XK|پریشتینا|21.17|42.67
+KW|کویت|47.98|29.38
+KG|بیشکک|74.59|42.87
+LA|وینتیان|102.63|17.97
+LV|ریگا|24.11|56.95
+LB|بیروت|35.50|33.89
+LS|ماسرو|27.48|-29.31
+LR|مونروویا|-10.80|6.30
+LY|طرابلس|13.19|32.89
+LI|فادوتس|9.52|47.14
+LT|ویلنیوس|25.28|54.69
+LU|لوکزامبورگ|6.13|49.61
+MG|آنتاناناریوو|47.52|-18.88
+MW|لیلونگوه|33.78|-13.96
+MY|کوالالامپور|101.69|3.14
+MV|مالـه|73.51|4.18
+ML|باماکو|-8.00|12.64
+MT|والتا|14.51|35.90
+MH|ماجورو|171.38|7.09
+MR|نواکشوط|-15.98|18.08
+MU|پورت‌لوئیس|57.50|-20.16
+MX|مکزیکوسیتی|-99.13|19.43
+FM|پالیکیر|158.16|6.92
+MD|کیشینیف|28.86|47.01
+MC|موناکو|7.42|43.74
+MN|اولان‌باتور|106.92|47.89
+ME|پودگوریتسا|19.26|42.44
+MA|رباط|-6.84|34.02
+MZ|ماپوتو|32.57|-25.97
+MM|نی‌پیداو|96.08|19.76
+NA|ویندهوک|17.08|-22.56
+NR|یارن|166.92|-0.55
+NP|کاتماندو|85.32|27.72
+NL|آمستردام|4.90|52.37
+NZ|ولینگتون|174.78|-41.29
+NI|ماناگوا|-86.25|12.11
+NE|نیامی|2.11|13.51
+NG|آبوجا|7.49|9.06
+MK|اسکوپیه|21.43|42.00
+NO|اسلو|10.75|59.91
+OM|مسقط|58.41|23.59
+PK|اسلام‌آباد|73.05|33.68
+PW|انگرولمود|134.62|7.50
+PA|پاناما|-79.52|8.98
+PG|پورت‌مورسبی|147.18|-9.44
+PY|آسونسیون|-57.58|-25.26
+PE|لیما|-77.04|-12.05
+PH|مانیل|120.98|14.60
+PL|ورشو|21.01|52.23
+PT|لیسبون|-9.14|38.72
+QA|دوحه|51.53|25.29
+RO|بخارست|26.10|44.43
+RU|مسکو|37.62|55.76
+RW|کیگالی|30.06|-1.95
+KN|باستر|-62.72|17.30
+LC|کاستریز|-61.00|14.01
+VC|کینگزتاون|-61.22|13.16
+WS|آپیا|-171.76|-13.83
+SM|سن‌مارینو|12.45|43.94
+ST|سائوتومه|6.73|0.34
+SA|ریاض|46.68|24.71
+SN|داکار|-17.47|14.72
+RS|بلگراد|20.46|44.79
+SC|ویکتوریا|55.45|-4.62
+SL|فری‌تاون|-13.23|8.48
+SG|سنگاپور|103.82|1.35
+SK|براتیسلاوا|17.11|48.15
+SI|لیوبلیانا|14.51|46.06
+SB|هونیارا|159.95|-9.43
+SO|مقدیشو|45.34|2.05
+ZA|پرتوریا|28.19|-25.75
+SS|جوبا|31.58|4.85
+ES|مادرید|-3.70|40.42
+LK|کلمبو|79.86|6.93
+SD|خارطوم|32.53|15.50
+SR|پاراماریبو|-55.20|5.85
+SE|استکهلم|18.07|59.33
+CH|برن|7.45|46.95
+SY|دمشق|36.29|33.51
+TW|تایپه|121.57|25.03
+TJ|دوشنبه|68.77|38.56
+TZ|دودوما|35.74|-6.16
+TH|بانکوک|100.50|13.76
+TL|دیلی|125.57|-8.56
+TG|لومه|1.22|6.13
+TO|نوکوالوفا|-175.20|-21.14
+TT|پورت آو اسپین|-61.51|10.65
+TN|تونس|10.18|36.81
+TR|آنکارا|32.85|39.93
+TM|عشق‌آباد|58.38|37.95
+TV|فونافوتی|179.19|-8.52
+UG|کامپالا|32.58|0.35
+UA|کی‌یف|30.52|50.45
+AE|ابوظبی|54.37|24.45
+GB|لندن|-0.13|51.51
+US|واشینگتن|-77.04|38.91
+UY|مونته‌ویدئو|-56.16|-34.90
+UZ|تاشکند|69.24|41.30
+VU|پورت‌ویلا|168.32|-17.73
+VE|کاراکاس|-66.90|10.48
+VN|هانوی|105.85|21.03
+YE|صنعا|44.21|15.37
+ZM|لوزاکا|28.28|-15.39
+ZW|هراره|31.05|-17.83`.trim().split("\n").forEach((r) => { const a = r.split("|"); CAPS[a[0]] = [a[1], +a[2], +a[3]]; });
+const SEAS = [["اقیانوس هند",78,-18,1.2,1,4.6],["اقیانوس آرام",-140,8,1.2,1,4.6],["اقیانوس آرام",165,-8,1.2,1,4.6],["اقیانوس اطلس",-38,30,1.2,1,4.6],["اقیانوس اطلس",-12,-20,1.2,1,4.6],
+["دریای کاسپین",50.8,41.5,2.8,0,7.5],["خلیج فارس",51.8,27.3,3.5,0,7.5],["دریای عمان",58.8,24.6,4.2,0,7.5],["دریای عرب",64,15.5,2.8,0,7.5],["دریای سرخ",38.5,20.5,3.2,0,7.5],["دریای مدیترانه",18,34.5,2.8,0,7.5],["دریای سیاه",34,43.3,3,0,7.5],["دریای شمال",3,56,3.2,0,7.5],["دریای بالتیک",19.5,58,3.6,0,7.5],["خلیج بنگال",88,14,2.8,0,7.5],["دریای چین جنوبی",114,13,2.8,0,7.5],["دریای ژاپن",135,40,3.2,0,7.5],["دریای کارائیب",-75,15,3,0,7.5],["خلیج مکزیک",-90,25,3,0,7.5]];
+const fsOf = (a) => +(9 + 2.6 * Math.log10(1 + a)).toFixed(1); // اندازه‌ی اسم بر اساس مساحت کشور
+const stOk = (st) => st === "mine" || (st === "taken" ? FILTER.taken : FILTER.free);
+function addCapital(code, st, prio) {
+  const k = CAPS[code]; if (!k) return;
+  const el = document.createElement("div"); el.className = "mk capk" + (country && country.code === code ? " mine" : "");
+  const f = document.createElement("span"); f.className = "cfl"; f.textContent = flagOf(code);
+  const n = document.createElement("span"); n.className = "nm"; n.textContent = k[0];
+  el.append(f, n);
+  el.addEventListener("click", (ev) => { ev.stopPropagation(); pickOnMap(code); });
+  const ll = [k[1], k[2]];
+  ents.push({ kind: "k", key: "k:" + code, code, st, ll, prio: prio + 5, lw: k[0].length * 7 + 34, mm: addMarker(el, ll), lm: null });
+}
 const STRAITS = [
   { id: "hormuz", ll: [56.4, 26.6], fa: "تنگه‌ی هرمز", kind: "تنگه", by: ["IR", "OM", "AE"], note: "گذرگاه اصلی نفت خلیج فارس به اقیانوس" },
   { id: "bab", ll: [43.3, 12.6], fa: "تنگه‌ی باب‌المندب", kind: "تنگه", by: ["YE", "DJ", "ER"], note: "مدخل دریای سرخ و کانال سوئز" },
@@ -1591,10 +1812,11 @@ function buildMarkers() {
     const { m, h } = hexEl(flagOf(code), st + (pp ? " pp" : pr ? " pr" : ""));
     if (pp) { const e = document.createElement("em"); e.textContent = "👑"; h.append(e); }
     m.addEventListener("click", (ev) => { ev.stopPropagation(); pickOnMap(code); });
-    const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa;
-    const mm = addMarker(m, ll), lm = addMarker(lb, ll, { anchor: "top", offset: [0, 17] });
+    const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = c.name_fa; const fs = fsOf(bp.area); lb.style.fontSize = fs + "px";
+    const mm = addMarker(m, ll), lm = addMarker(lb, ll, { anchor: "top", offset: [0, 14] });
     const prio = { mine: 1000, taken: 300, free: 100, none: 0 }[st] + (pp ? 200 : pr ? 100 : 0) + Math.min(bp.area, 400) / 10;
-    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * 6.5 + 10, h, mm, lm, alts: candPoints(bp, ll) });
+    ents.push({ kind: "c", key: code, code, st, ll, prio, m, lb, lw: c.name_fa.length * fs * 0.62 + 10, lh: fs + 4, cap: !!CAPS[code], h, mm, lm, alts: candPoints(bp, ll) });
+    addCapital(code, st, prio);
   });
   STRAITS.forEach((s) => {
     const { m, h } = hexEl("⚓", "strait");
@@ -1611,6 +1833,11 @@ function buildMarkers() {
     const lb = document.createElement("div"); lb.className = "mk lb"; lb.textContent = r.fa;
     const mm = addMarker(m, r.ll), lm = addMarker(lb, r.ll, { anchor: "top", offset: [0, 13] });
     ents.push({ kind: "r", key: "r:" + r.id, code: r.id, ll: r.ll, prio: 350, minZ: 0, m, lb, lw: r.fa.length * 6.5 + 10, h, mm, lm });
+  });
+  SEAS.forEach((w, i) => {
+    const el = document.createElement("div"); el.className = "mk lb sea" + (w[4] ? " oc" : ""); el.textContent = w[0];
+    const ll = [w[1], w[2]];
+    ents.push({ kind: "w", key: "w:" + i, code: "w" + i, ll, prio: 50, z0: w[3], z1: w[5], lw: w[0].length * (w[4] ? 12 : 7.5) + 14, mm: addMarker(el, ll), lm: null });
   });
   ents.sort((a, b) => b.prio - a.prio);
   declutter();
@@ -1636,7 +1863,7 @@ function declutter() {
   const placed = [];
   let shown = 0;
   for (const e of ents) {
-    let on = e.kind === "u" ? true : e.kind === "s" ? FILTER.straits : e.kind === "r" ? FILTER.resources : FILTER.flags && (e.st === "mine" || (e.st === "taken" ? FILTER.taken : FILTER.free));
+    let on = e.kind === "w" ? (FILTER.labels && z >= e.z0 && z <= e.z1) : e.kind === "k" ? (FILTER.labels && z >= CAPZ && stOk(e.st)) : e.kind === "u" ? true : e.kind === "s" ? FILTER.straits : e.kind === "r" ? FILTER.resources : FILTER.flags && (e.st === "mine" || (e.st === "taken" ? FILTER.taken : FILTER.free));
     let lbl = false;
     if (on && z < (e.minZ || 0)) on = false;
     if (on && angDist(ctr, e.ll) > 78) on = false;
@@ -1645,25 +1872,26 @@ function declutter() {
       if (p0.x < -40 || p0.y < -40 || p0.x > W + 40 || p0.y > H + 40) on = false;
       else {
         const sm = e.kind === "r" || e.kind === "u";
-        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 3.5 : 2.2);
+        const wantL = FILTER.labels && z >= (e.kind === "s" ? 3 : e.kind === "r" ? 3.5 : 2.2) && !(e.kind === "c" && e.cap && z >= CAPZ);
         const spots = e.alts ? [e.ll].concat(e.alts) : [e.ll];
         let at = -1;
         for (let k = 0; k < spots.length && at < 0; k++) {
           const p = k ? lmap.project(spots[k]) : p0;
           if (p.x < -20 || p.y < -20 || p.x > W + 20 || p.y > H + 20) continue;
           const o = e.off || [0, 0];
-          const hr = sm ? { x: p.x - 12 + o[0], y: p.y - 13 + o[1], w: 24, h: 26 } : { x: p.x - 18, y: p.y - 20, w: 36, h: 40 };
-          const lr = { x: p.x - e.lw / 2 + o[0], y: p.y + (sm ? 12 : 16) + o[1], w: e.lw, h: 14 };
+          if (e.kind === "k" || e.kind === "w") { const q = { x: p.x - e.lw / 2, y: p.y - 9, w: e.lw, h: 18 }; if (!placed.some((r) => hit(r, q))) { placed.push(q); at = k; } continue; }
+          const hr = sm ? { x: p.x - 12 + o[0], y: p.y - 13 + o[1], w: 24, h: 26 } : { x: p.x - 14, y: p.y - 16, w: 28, h: 32 };
+          const lr = { x: p.x - e.lw / 2 + o[0], y: p.y + (sm ? 12 : 13) + o[1], w: e.lw, h: e.lh || 14 };
           if (wantL && !placed.some((q) => hit(q, hr) || hit(q, lr))) { placed.push(hr, lr); lbl = true; at = k; }
           else if (!placed.some((q) => hit(q, hr))) { placed.push(hr); at = k; }
         }
         if (at < 0) on = false;
-        else if (e.at !== at) { e.at = at; const ll = spots[at]; e.mm.setLngLat(ll); e.lm.setLngLat(ll); }
+        else if (e.at !== at) { e.at = at; const ll = spots[at]; e.mm.setLngLat(ll); if (e.lm) e.lm.setLngLat(ll); }
       }
     }
     showMk(e.mm, on);
-    showMk(e.lm, on && lbl);
-    if (on) shown++;
+    if (e.lm) showMk(e.lm, on && lbl);
+    if (on && e.kind !== "k" && e.kind !== "w") shown++;
   }
   $("fCnt").textContent = shown;
 }
@@ -1702,7 +1930,7 @@ function setSel(code) {
   markEnt(code);
 }
 function markEnt(key) {
-  ents.forEach((e) => e.h.classList.toggle("sel", e.key === key));
+  ents.forEach((e) => { if (e.h) e.h.classList.toggle("sel", e.key === key); });
 }
 function pickOnMap(code) {
   const c = byCode[code];
