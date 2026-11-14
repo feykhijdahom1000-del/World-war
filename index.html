@@ -131,6 +131,8 @@ nav{z-index:10}
 #worldmap.sheet-open .mctl,#worldmap.sheet-open #fPanel{display:none}
 .mk{cursor:pointer}
 .mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:10.5px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
+#portHint{position:fixed;top:calc(env(safe-area-inset-top,0px) + 74px);inset-inline:12px;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:16px;background:#0d1626ee;border:1px solid #38bdf8;color:#fff;font-size:13px;font-weight:700;box-shadow:0 8px 24px #000a}
+#portHint button{flex:none;border:0;border-radius:10px;padding:6px 12px;background:#ffffff22;color:#fff;font-weight:700}
 .hx.mine,.hx.taken,.hx.free{width:21px;height:23px}
 .hx.mine b,.hx.taken b,.hx.free b{font-size:10.5px}
 .mk.lb.sea{color:#bfe6ff;font-weight:600;font-size:11px;opacity:.9;text-shadow:0 0 3px #04121f,0 0 7px #04121f}
@@ -1409,6 +1411,58 @@ function addCapital(code, st, prio) {
   const ll = [k[1], k[2]];
   ents.push({ kind: "k", key: "k:" + code, code, st, ll, prio: prio + 5, lw: k[0].length * 7 + 34, mm: addMarker(el, ll), lm: null });
 }
+/* ---------- بندر قابل‌تعیین توسط بازیکن (سرور: set_base_location / my_bases / loc_pos) ---------- */
+let MYPORT = null, portPick = false, myPortLoaded = false;
+async function loadMyPort() {
+  try {
+    const r = await sb.rpc("my_bases"); if (r.error) return;
+    MYPORT = null;
+    (r.data || []).forEach((b) => { if (b.infra_id === "port" && b.lng != null && b.lat != null) MYPORT = [Number(b.lng), Number(b.lat)]; });
+  } catch (e) { console.warn("my_bases", e); }
+}
+const PORT_ERR = { NOT_OWNED: "اول بندر را بسازید", STILL_BUILDING: "بندر هنوز ساخته نشده", OUTSIDE_BORDER: "نقطه باید داخل مرز کشور شما باشد", NO_FUNDS: "موجودی برای جابه‌جایی بندر کافی نیست", BAD_COORD: "مختصات نامعتبر است", NO_COUNTRY: "شما کشوری ندارید" };
+function portBtn(p, lv) {
+  return p.id === "port" && lv ? `<button class="buy" onclick="startPortPick()">📍 ${MYPORT ? "تغییر محل بندر — $۱٬۰۰۰٬۰۰۰" : "تعیین محل بندر"}</button>` : "";
+}
+function portHint(on) {
+  let h = document.getElementById("portHint");
+  if (!on) { if (h) h.remove(); return; }
+  if (!h) { h = document.createElement("div"); h.id = "portHint"; h.innerHTML = '<span>⚓ روی ساحل کشور خودتان بزنید تا بندر همان‌جا قرار بگیرد</span><button onclick="stopPortPick()">انصراف</button>'; document.body.append(h); }
+}
+function stopPortPick() { portPick = false; portHint(false); }
+async function startPortPick() {
+  if (!country) return;
+  await warToMap();
+  portPick = true; portHint(true);
+  setTimeout(() => { try { const c = homeLL(country.code); if (c && lmap) lmap.flyTo({ center: c, zoom: 4.6 }); } catch (e) {} }, 500);
+}
+function ptInCountry(code, ll) {
+  const x = geoBase && geoBase.find((y) => y.code === code); if (!x) return true;
+  const g = x.geometry, polys = g.type === "MultiPolygon" ? g.coordinates : [g.coordinates];
+  return polys.some((q) => inRing(q[0], ll[0], ll[1]) && !q.slice(1).some((h) => inRing(h, ll[0], ll[1])));
+}
+function portSeaCheck(ll) {
+  if (!buildMask()) return true;
+  const [cx, cy] = pCell(ll), sc = pSnap("sea", cx, cy, 3);
+  if (!sc) return "این نقطه به دریا نزدیک نیست؛ نزدیک ساحل بزنید";
+  const lng = sc[0] / MRES - 180 + 0.125, lat = 90 - sc[1] / MRES - 0.125;
+  if (lng > 46.5 && lng < 55 && lat > 36.4 && lat < 47.3) return "دریای خزر به اقیانوس راه ندارد؛ ساحل دیگری را انتخاب کنید";
+  return true;
+}
+async function portCapture(ev) {
+  if (!portPick || !lmap || !country) return;
+  ev.stopPropagation(); ev.preventDefault();
+  const r = lmap.getCanvas().getBoundingClientRect(), q = lmap.unproject([ev.clientX - r.left, ev.clientY - r.top]), ll = [+q.lng.toFixed(3), +q.lat.toFixed(3)];
+  if (!ptInCountry(country.code, ll)) return flash("نقطه باید داخل خاک کشور شما باشد", 2400);
+  const sc = portSeaCheck(ll); if (sc !== true) return flash(sc, 3000);
+  if (!confirm(MYPORT ? "بندر به این نقطه منتقل شود؟ هزینه‌ی جابه‌جایی ۱٬۰۰۰٬۰۰۰ دلار است." : "بندر در این نقطه ساخته شود؟ (بار اول رایگان است)")) return;
+  stopPortPick();
+  const { error } = await sb.rpc("set_base_location", { p_id: "port", p_lat: ll[1], p_lng: ll[0] });
+  if (error) return flash(PORT_ERR[error.message] || error.message, 3200);
+  await loadMyPort();
+  try { if (typeof renderUnitMarkers === "function") renderUnitMarkers(); } catch (e) {}
+  flash("محل بندر تعیین شد ⚓", 2200);
+}
 const STRAITS = [
   { id: "hormuz", ll: [56.4, 26.6], fa: "تنگه‌ی هرمز", kind: "تنگه", by: ["IR", "OM", "AE"], note: "گذرگاه اصلی نفت خلیج فارس به اقیانوس" },
   { id: "bab", ll: [43.3, 12.6], fa: "تنگه‌ی باب‌المندب", kind: "تنگه", by: ["YE", "DJ", "ER"], note: "مدخل دریای سرخ و کانال سوئز" },
@@ -1642,6 +1696,7 @@ function showMap() {
       if (f.length) pickOnMap(f[0].properties.code); else closeMapSheet();
     });
     lmap.getCanvasContainer().addEventListener("click", (ev) => { if (typeof mvCapture === "function") mvCapture(ev); }, true);
+    lmap.getCanvasContainer().addEventListener("click", portCapture, true);
     lmap.on("move", scheduleDeclutter);
     lmap.on("resize", scheduleDeclutter);
   }
@@ -2311,7 +2366,7 @@ function setVip(until) {
   if (vipOn) $("vipBdT").textContent = "فعال تا " + new Date(t).toLocaleDateString("fa-IR-u-ca-persian", { year: "numeric", month: "long", day: "numeric" });
 }
 // زمان ساخت سطح ۱ (دقیقه)؛ مقدار اصلی از ستون build_minutes سرور خوانده می‌شود
-const BUILD_MIN = {bank: 5, tourism: 7, insurance: 10, retail: 10, realestate: 15, telecom: 14, transport: 16, media: 18, stock: 20, shipping: 22, auto: 24, fund: 25, airline: 25, tech: 30, pharma: 30};
+const BUILD_MIN = {bank: 7, tourism: 10, insurance: 14, retail: 14, realestate: 21, telecom: 20, transport: 22, media: 25, stock: 28, shipping: 31, auto: 34, fund: 35, airline: 35, tech: 42, pharma: 42};
 BLD.forEach((b) => { b.mins = BUILD_MIN[b.id]; });
 let pending = {}, upg = {}, upgTo = {}, settling = false;
 let pw = null; // وضعیت برق از سرور: {prod, used, free}
@@ -2708,7 +2763,7 @@ function renderInf() {
       ${stat(lv ? Math.min(nx, MAXLV) : 1)}
       ${lv >= MAXLV ? '<button class="up" disabled>حداکثر سطح</button>'
         : lv ? `<button class="buy${t < upCost(p, lv) || infShort(p, nx) ? " poor" : ""}" onclick="askInfUp('${p.id}')">ارتقا به سطح ${nx} — <span dir="ltr">${priceH(pAt(p, nx))}</span></button>`
-        : `<button class="buy${t < pv(p.price) || infShort(p, 1) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}</div>`;
+        : `<button class="buy${t < pv(p.price) || infShort(p, 1) ? " poor" : ""}" onclick="askInfBuy('${p.id}')">ساخت — <span dir="ltr">${priceH(p.price)}</span></button>`}${portBtn(p, lv)}</div>`;
   }).join("");
 }
 function milCard() {
@@ -3218,7 +3273,7 @@ function spawnPt(code, kind) {
   return v;
 }
 const airLL = (code) => spawnPt(code, "a") || homeLL(code);
-const portLL = (code) => spawnPt(code, "p") || homeLL(code);
+const portLL = (code) => (MYPORT && country && code === country.code ? MYPORT : spawnPt(code, "p")) || homeLL(code);
 /* مختصات و فاصله (همان فرمول سرور: حداقل ۱ دقیقه، بدون مختصات ۱۰ دقیقه) */
 const HOMELL = {};
 function homeLL(code) {
@@ -3976,6 +4031,7 @@ function setC(id, n, f) { const el = $(id); el.textContent = f(n); el.dataset.f 
 document.addEventListener("click", (e) => { const t = e.target.closest && e.target.closest("[data-f]"); if (t) flash(t.dataset.f, 2200); });
 function render() {
   if (!country) return;
+  if (!myPortLoaded) { myPortLoaded = true; loadMyPort(); }
   const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
   setC("treasury", live, fmtT);
