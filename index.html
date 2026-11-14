@@ -131,8 +131,9 @@ nav{z-index:10}
 #worldmap.sheet-open .mctl,#worldmap.sheet-open #fPanel{display:none}
 .mk{cursor:pointer}
 .mk.lb{cursor:default;pointer-events:none;color:#fff;font-size:10.5px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 8px #000}
-#portHint{position:fixed;top:calc(env(safe-area-inset-top,0px) + 74px);inset-inline:12px;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:16px;background:#0d1626ee;border:1px solid #38bdf8;color:#fff;font-size:13px;font-weight:700;box-shadow:0 8px 24px #000a}
-#portHint button{flex:none;border:0;border-radius:10px;padding:6px 12px;background:#ffffff22;color:#fff;font-weight:700}
+#portHint{position:fixed;top:calc(env(safe-area-inset-top,0px) + 74px);inset-inline:12px;z-index:40;display:flex;flex-direction:row;align-items:center;gap:10px;padding:9px 12px;border-radius:16px;background:#0d1626ee;border:1px solid #38bdf8;color:#fff;font-size:13px;font-weight:700;line-height:1.7;box-shadow:0 8px 24px #000a}
+#portHint span{flex:1 1 auto;min-width:0;text-align:right;white-space:normal}
+#portHint button{flex:0 0 auto!important;width:auto!important;min-width:0!important;margin:0!important;padding:6px 14px!important;border:0;border-radius:10px;background:#ffffff26;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
 .hx.mine,.hx.taken,.hx.free{width:21px;height:23px}
 .hx.mine b,.hx.taken b,.hx.free b{font-size:10.5px}
 .mk.lb.sea{color:#bfe6ff;font-weight:600;font-size:11px;opacity:.9;text-shadow:0 0 3px #04121f,0 0 7px #04121f}
