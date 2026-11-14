@@ -476,6 +476,12 @@ input:not([type=checkbox]):focus-visible,textarea:focus-visible{outline:0}
 .gp{background:#0a1426b0;border-radius:24px;border-color:#ffffff22}
 .trow .big{font-size:32px;font-weight:800}
 .cr{color:#7ddcff;text-shadow:0 0 18px #4fc3ff66}
+.trow{flex-wrap:wrap;row-gap:6px}
+.trow .big{flex:1 1 100%;min-width:0;white-space:nowrap}
+.trow .vl{display:none}
+.trow .cr{font-size:21px}
+.stats b{white-space:nowrap}
+[data-f]{cursor:pointer}
 .gp .stats{gap:10px}
 .gp .stats>div{flex:1;background:#ffffff0a;border:1px solid #ffffff14;border-radius:16px;padding:10px 12px}
 .gp .stats b{font-size:24px}
@@ -3963,19 +3969,24 @@ async function loadCountry(silent) {
   try { const pf = await sb.from("profiles").select("vip_until").maybeSingle(); setVip(pf.data && pf.data.vip_until); } catch (e) {}
   return true;
 }
+/* نمایش فشرده‌ی اعداد: M میلیون، K هزار؛ با لمس عدد کامل در پیام کوتاه دیده می‌شود */
+const fmtC = (n) => { n = Math.round(Number(n) || 0); const r = (v) => String(+v.toFixed(1)); return "$" + (n >= 1e6 ? r(n / 1e6) + "M" : n >= 1e5 ? r(n / 1e3) + "K" : n.toLocaleString("en-US")); };
+const fmtT = fmtC;
+function setC(id, n, f) { const el = $(id); el.textContent = f(n); el.dataset.f = "$" + Number(n).toLocaleString("en-US"); }
+document.addEventListener("click", (e) => { const t = e.target.closest && e.target.closest("[data-f]"); if (t) flash(t.dataset.f, 2200); });
 function render() {
   if (!country) return;
   const secs = (Date.now() - new Date(country.last_tick).getTime()) / 1000;
   const live = Math.floor(Number(country.treasury) + (Number(country.daily_income) * secs) / 86400);
-  $("treasury").textContent = "$" + live.toLocaleString("en-US");
+  setC("treasury", live, fmtT);
   $("crystals").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
   $("hFlag").textContent = flagOf(country.code);
   $("hName").textContent = country.name;
-  $("hT").textContent = "$" + live.toLocaleString("en-US");
+  setC("hT", live, fmtT);
   $("eBal").textContent = "$" + live.toLocaleString("en-US");
   $("eNet").textContent = "+$" + Number(country.daily_income).toLocaleString("en-US");
-  $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
-  $("hourly").textContent = "$" + Math.round(Number(country.daily_income) / 24).toLocaleString("en-US");
+  setC("income", country.daily_income, fmtC);
+  setC("hourly", Math.round(Number(country.daily_income) / 24), fmtC);
   $("hC").textContent = "💎 " + Number(country.crystals || 0).toLocaleString("en-US");
 }
 // route ها پشت‌سرهم اجرا می‌شن تا رویداد تکراری auth چیزی را دوبار ثبت نکند
@@ -4004,7 +4015,7 @@ async function doRoute(session) {
     $("pno").textContent = pf.data ? pf.data.player_no : "—";
     $("flag").textContent = flagOf(country.code);
     $("name").textContent = country.name;
-    $("income").textContent = "$" + Number(country.daily_income).toLocaleString("en-US");
+    setC("income", country.daily_income, fmtC);
     $("power").textContent = country.military_power;
     armPower();
     render();
