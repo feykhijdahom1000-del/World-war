@@ -758,6 +758,11 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 #enm .dpsch{display:inline-block;margin:2px}
 #enm .ep{margin:8px 0;color:var(--mut);font-size:14px}#enm .ep b{color:#ff8a8a;font-size:18px}
 #enm .wrow button{min-width:0}
+#msl{position:fixed;inset-inline:8px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:34;max-width:520px;margin-inline:auto;padding:14px;background:#0a1322f2;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid #ff6b6b66;border-radius:20px;display:flex;flex-direction:column;gap:10px}
+#msl .mslh{display:flex;align-items:center;justify-content:space-between}
+#msl .mslt{padding:10px 12px;border-radius:14px;background:#ff6b6b14;border:1px solid #ff6b6b40;line-height:1.9;font-size:14px}
+#msl .mslq{display:flex;align-items:center;justify-content:center;gap:14px}
+#msl .mslq b{min-width:44px;text-align:center;font-size:20px}
 </style>
 </head>
 <body>
@@ -2940,8 +2945,8 @@ function renderArmy() {
       : `<button class="buy${I.max < 1 ? " poor" : ""}" onclick="openPm('${u.id}')">⚙️ تولید</button>`;
     const udots = Array.from({ length: MAXLV }, (_, i) => `<i${n > 0 && i < Math.min(MAXLV, Math.ceil(Math.log10(n + 1) * 1.5)) ? ' class="on"' : ""}></i>`).join("");
     return `<div class="ix-c${n ? "" : " no"}" style="${acs(g.ac)}"><div class="ix-h"><div class="ix-i">${unitIc(u.id)}</div><div class="ix-t2"><b>${unitFa(u.id)}</b><div class="dots">${udots}</div><small>${n ? en(n) + " یگان · قدرت کل " + en(n * u.power) : "تولید نشده"}</small></div><div class="ix-pw"><b>${en(n)}</b><small>واحد</small></div></div>
-      <div class="ix-ss f4"><div class="ix-s"><small>❤️ جان</small><b>${en(u.hp)}</b></div><div class="ix-s"><small>⚔️ آسیب</small><b>${en(u.attack)}</b></div><div class="ix-s"><small>🎯 برد</small><b>${en(u.range_km)} km</b></div><div class="ix-s"><small>💰 هزینه</small><b>${fmt(pv(u.price))}</b></div></div>
-      ${btn}</div>`;
+      <div class="ix-ss f4"><div class="ix-s"><small>❤️ جان</small><b>${en(u.hp)}</b></div><div class="ix-s"><small>⚔️ آسیب</small><b>${en(u.attack)}</b></div><div class="ix-s"><small>🎯 برد</small><b>${u.id === "missile" ? "∞" : en(u.range_km) + " km"}</b></div><div class="ix-s"><small>💰 هزینه</small><b>${fmt(pv(u.price))}</b></div></div>
+      ${btn}${armExtra(u, n)}</div>`;
   }).join("");
   $("aBody").innerHTML = h;
 }
@@ -3510,12 +3515,25 @@ function mvErr0(u, to) {
   const s = SITES.find((x) => x.id === to); return s && SITE_OK[s.type].includes(u.grp) ? "" : "برای این یگان مجاز نیست";
 }
 const shN = (n) => { n = Math.round(Number(n) || 0); return n >= 1e6 ? (n / 1e6).toFixed(1).replace(".0", "") + "M" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".0", "") + "k" : String(n); };
+/* قوانین نبرد: زمینی→زمینی | هوایی→هوایی+زمینی+دریایی | دریایی→دریایی+هوایی */
+const GRP_HITS = { land: ["land"], air: ["air", "land", "sea"], sea: ["sea", "air"] };
+const MULT = { tank: { missile_launcher: 1.3 }, fighter: { air: 1.5, land: 0.7, sea: 0.5 }, bomber: { land: 1.8, sea: 1.5, air: 0.3 }, helicopter: { land: 1.3, sea: 0.8, air: 0.6 }, destroyer: { sea: 1, air: 1.4 }, submarine: { sea: 1.6, air: 0 }, carrier: { sea: 1, air: 1.2 } };
+const multOf = (a, tid, tg) => { const m = MULT[a]; if (!m) return 1; return m[tid] !== undefined ? m[tid] : m[tg] !== undefined ? m[tg] : 1; };
+/* برآورد قدرت (میانگین؛ در نبرد واقعی شانس ±۱۵٪ و ضربه‌ی کاری هم دارد) */
+function effPow(attRows, defRows) {
+  const ok = (r) => GRP_HITS[ucOf(r.id).grp] && Number(r.q) > 0, A = attRows.filter(ok), D = defRows.filter(ok);
+  const dmg = (from, to) => { let tot = 0; from.forEach(({ id, q }) => { const u = ucOf(id), el = to.filter((t) => GRP_HITS[u.grp].includes(ucOf(t.id).grp) && multOf(id, t.id, ucOf(t.id).grp) > 0), w = el.reduce((x, t) => x + t.q * Number(ucOf(t.id).hp), 0); if (w <= 0) return; tot += el.reduce((x, t) => x + q * Number(u.attack || 0) * ((t.q * Number(ucOf(t.id).hp)) / w) * multOf(id, t.id, ucOf(t.id).grp), 0); }); return tot; };
+  const hitHp = (side, foe) => side.reduce((x, { id, q }) => x + (foe.some((f) => GRP_HITS[ucOf(f.id).grp].includes(ucOf(id).grp) && multOf(f.id, id, ucOf(id).grp) > 0) ? q * Number(ucOf(id).hp) : 0), 0);
+  const a = dmg(A, D), d = dmg(D, A);
+  return { a, d, mp: Math.round(Math.sqrt(a * hitHp(A, D))), ep: Math.round(Math.sqrt(d * hitHp(D, A))) };
+}
 const forcePow = (rows) => { let a = 0, h = 0; rows.forEach(({ id, q }) => { const u = ucOf(id); a += q * Number(u.attack || 0); h += q * Number(u.hp || 0); }); return { a, h, p: Math.round(Math.sqrt(a * h)) }; };
 /* قدرت = جذر (حمله × جان) ؛ مهاجم وقتی می‌برد که قدرتش از مدافع بیشتر باشد */
 function dpsPower(ref) {
   const el = $("dpsPw"); if (!el) return;
   if (mvSel && mvSel.atk) {
-    const at = (ref || []).filter((u) => dpsEff(u) > 0).map((u) => ({ id: u.id, q: dpsEff(u) })), mp = forcePow(at).p, ep = forcePow(enemyRows(mvSel.atk).map((r) => ({ id: r.unit_id, q: Number(r.qty) }))).p;
+    const at = (ref || []).filter((u) => dpsEff(u) > 0).map((u) => ({ id: u.id, q: dpsEff(u) })), er = enemyRows(mvSel.atk).map((r) => ({ id: r.unit_id, q: Number(r.qty) })), ef = effPow(at, er), mp = ef.mp, ep = ef.ep;
+    if (at.length && ef.a <= 0) { el.innerHTML = `🚫 این یگان‌ها نمی‌توانند به هدف آسیب بزنند<small>تانک فقط نیروی زمینی؛ ناو فقط دریایی و هوایی؛ جنگنده و هوایی همه را می‌زند</small>`; el.hidden = false; return; }
     el.innerHTML = `⚔️ قدرت حمله‌ی شما: <b class="${mp > ep ? "g" : ""}">${en(mp)}</b> · قدرت دشمن: <b>${en(ep)}</b><small>${mp > ep ? "برتری با شماست" : "قدرت شما کمتر است؛ نیروی بیشتری بفرستید"}</small>`; el.hidden = false; return;
   }
   const st = mvTo && !mvTo.startsWith("p:") && SITES.find((x) => x.id === mvTo);
@@ -3585,7 +3603,7 @@ function renderUnitMarkers() {
     const gs = perLoc[loc], gi = gs.indexOf(g), SPo = String(loc).startsWith("c:") ? [46, 0, 1] : { home: [46, 0, 1], airfield: [46, -30, 1], port: [-46, 0, -1] }[loc];
     const uoff = SPo ? [SPo[0] + SPo[2] * gi * 34, SPo[1]] : [(gi - (gs.length - 1) / 2) * 34, -26];
     const oc = country ? country.code : "", { m, h } = hexEl(mapIc(g), "unit g-" + g + " rel-" + relOf(oc)), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b); if (oc) unitFlag(h, oc);
-    m.addEventListener("click", (ev) => { ev.stopPropagation(); openDp(loc); });
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); if (g === "missile") missileOpen(); else openDp(loc); });
     addUnitEnt(m, h, ll, "u:" + k, uoff, "نیروی " + ((GR[g] || {}).fa || ""));
   });
   UM.forEach((mv) => {
@@ -4512,7 +4530,8 @@ function repTxt(r, me, won) {
 /* ===== نیروهای سایر کشورها روی نقشه ===== */
 // سرور باید RPC به نام list_world_units بدهد: {units:[{code,unit_id,loc,qty}], moves:[{id,code,unit_id,qty,from_loc,to_loc,depart_at,arrive_at,path}]}
 let WU = { units: [], moves: [] };
-Object.assign(ARM_ERR, { NO_ATK_RPC: "سرور هنوز حمله به یگان‌های دیگران را پشتیبانی نمی‌کند (باید SQL مربوطه اجرا شود)", NO_ENEMY: "این نیرو دیگر آن‌جا نیست", NOT_VISIBLE: "نیروی در حال حرکت یا مستقر روی پایتخت کشور دیگر قابل حمله نیست" });
+Object.assign(ARM_ERR, { NO_ATK_RPC: "سرور هنوز حمله به یگان‌های دیگران را پشتیبانی نمی‌کند (باید SQL مربوطه اجرا شود)", NO_ENEMY: "این نیرو دیگر آن‌جا نیست", NOT_VISIBLE: "نیروی در حال حرکت یا مستقر روی پایتخت کشور دیگر قابل حمله نیست",
+  NO_LAUNCHER: "لانچر بساز! بدون «لانچر موشک» موشک قابل شلیک نیست", NO_MISSILE: "موشک کافی ندارید", LAUNCHER_LIMIT: "هر لانچر فقط ۵ موشک؛ تعداد را کم کنید یا لانچر بیشتری بسازید", BAD_TARGET: "هدف نامعتبر است", OUT_OF_RANGE: "هدف خارج از برد موشک است", NO_FIRE_RPC: "سرور شلیک موشک را پشتیبانی نمی‌کند (فایل SQL موشک را اجرا کنید)" });
 async function loadWorldUnits() {
   if (!country) return;
   try {
@@ -4543,7 +4562,7 @@ function renderForeign() {
     const gs = per[code + "|" + loc], gi = gs.indexOf(g);
     const off = loc === "port" ? [-46 - gi * 34, 0] : loc === "airfield" ? [46 + gi * 34, -30] : loc === "home" || loc.startsWith("c:") ? [46 + gi * 34, 0] : [(gi - (gs.length - 1) / 2) * 34, -26];
     const { m, h } = hexEl(mapIc(g), "unit g-" + g + " rel-" + relOf(code)), b = document.createElement("em"); b.className = "fb"; b.textContent = en(n); h.append(b); unitFlag(h, code);
-    m.addEventListener("click", (ev) => { ev.stopPropagation(); openEnemy({ code, loc }); });
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); if (MS) missileTarget({ code, loc, g }); else openEnemy({ code, loc }); });
     addUnitEnt(m, h, ll, "w:" + k, off, cNameOf(code));
   });
   WU.moves.forEach((mv) => {
@@ -4553,7 +4572,7 @@ function renderForeign() {
     const ang = Math.round((Math.atan2(dl * Math.cos(((a[1] + b[1]) / 2) * rad), b[1] - a[1]) * 180) / Math.PI);
     const { m, h } = hexEl(mapIc(g, g === "air" ? "rotate(" + ang + "deg)" : p0.dir < 0 ? "scaleX(-1)" : ""), "move g-" + g + " rel-" + relOf(mv.code)), em = document.createElement("em"); em.className = "fb"; em.textContent = en(mv.qty); h.append(em); unitFlag(h, mv.code);
     const t1 = new Date(mv.arrive_at).getTime();
-    m.addEventListener("click", (ev) => { ev.stopPropagation(); openEnemy({ code: mv.code, move: mv.id }); });
+    m.addEventListener("click", (ev) => { ev.stopPropagation(); if (MS) missileTarget({ code: mv.code, move: mv.id }); else openEnemy({ code: mv.code, move: mv.id }); });
     addUnitEnt(m, h, a, "w:m" + mv.id, [0, 0], "", { mv: 1, pts, cum, a, b, grp: g, svg: h.querySelector("svg"), flip: p0.dir < 0, t0: new Date(mv.depart_at || mv.arrive_at).getTime(), t1 });
   });
 }
@@ -4565,7 +4584,7 @@ function openEnemy(a) {
   const relTxt = { ally: "متحد", enemy: "دشمن", other: "کشور دیگر" }[rel] || "";
   const chips = rows.map((r) => `<span class="dpsch">${unitIc(r.unit_id)} ${en(r.qty)} ${frEsc(unitFa(r.unit_id))}</span>`).join("");
   const where = a.move ? "در حال حرکت" : enLoc(a.loc);
-  $("enm").innerHTML = `<div class="eh2"><div class="fl">${flagOf(code)}</div><div><b>${frEsc(cNameOf(code))}</b><small>${relTxt} · ${frEsc(where)}</small></div><button class="ic" onclick="closeEnemy()" aria-label="بستن">✕</button></div><div>${chips}</div><div class="ep">قدرت این نیرو: <b>${en(pw)}</b></div>${a.move ? '<div class="ep">نیروی در حال حرکت قابل حمله نیست؛ وقتی به مقصد رسید و مستقر شد حمله کنید.</div>' : ""}<div class="wrow">${a.move ? "" : '<button onclick="enemyAttack()">⚔️ انتخاب نیرو و حمله</button>'}<button class="ghost" onclick="closeEnemy()">بستن</button></div>`;
+  $("enm").innerHTML = `<div class="eh2"><div class="fl">${flagOf(code)}</div><div><b>${frEsc(cNameOf(code))}</b><small>${relTxt} · ${frEsc(where)}</small></div><button class="ic" onclick="closeEnemy()" aria-label="بستن">✕</button></div><div>${chips}</div><div class="ep">قدرت این نیرو: <b>${en(pw)}</b></div>${a.move ? '<div class="ep">نیروی در حال حرکت قابل حمله نیست؛ وقتی به مقصد رسید و مستقر شد حمله کنید.</div>' : ""}<div class="wrow">${a.move ? "" : '<button onclick="enemyAttack()">⚔️ انتخاب نیرو و حمله</button><button onclick="enemyMissile()">🚀 شلیک موشک</button>'}<button class="ghost" onclick="closeEnemy()">بستن</button></div>`;
   window.ENM = a; $("enm").hidden = false;
 }
 async function enemyAttack() {
@@ -4580,6 +4599,102 @@ async function enemyAttack() {
   closeEnemy();
   await openDp(null, tgt);
   if (mvSel) { mvSel.atk = { code: a.code, loc: a.loc || null, move: a.move || null }; dpsRender(); }
+}
+/* ===== موشک و لانچر ===== */
+const MSL_PER_LAUNCHER = 5;
+let MS = null;
+const homeQty = (id) => UL.filter((r) => r.unit_id === id && r.loc === "home" && Number(r.qty) > 0).reduce((a, r) => a + Number(r.qty), 0);
+function armExtra(u, n) {
+  const note = (t) => `<small class="lbl" style="display:block;margin-top:8px;line-height:1.8">${t}</small>`;
+  if (u.id === "missile") return (n > 0 ? `<button class="buy" style="margin-top:8px" onclick="missileOpen()">🚀 شلیک موشک</button>` : "") + note(`بدون «لانچر موشک» قابل شلیک نیست · هر لانچر ${MSL_PER_LAUNCHER} موشک · برد نامحدود · فقط نیروی زمینی و دریایی را می‌زند · پدافند هوایی دشمن رهگیری می‌کند`);
+  if (u.id === "missile_launcher") return note(`🚀 ظرفیت شلیک فعلی: ${en(n * MSL_PER_LAUNCHER)} موشک در هر شلیک`);
+  return "";
+}
+function missileOpen(pre) {
+  if (!UC) return;
+  const lau = homeQty("missile_launcher"), mis = homeQty("missile");
+  if (mis < 1) return flash("موشکی ندارید؛ اول موشک تولید کنید", 3500);
+  if (lau < 1) { flash("🚀 " + ARM_ERR.NO_LAUNCHER, 5000); if (!$("army").hidden) setArmTab("land"); return; }
+  mvCancel(); closeEnemy();
+  MS = { max: Math.min(mis, lau * MSL_PER_LAUNCHER), n: 1, mis, lau, target: null, mk: null, busy: false };
+  MS.n = MS.max;
+  if ($("worldmap").hidden) screen("worldmap");
+  loadWorldUnits().then(() => { renderUnitMarkers(); if (pre && MS) missileTarget(pre); }).catch(() => {});
+  msRender();
+}
+function missileCancel() {
+  if (MS && MS.mk) MS.mk.remove();
+  MS = null; const el = $("msl"); if (el) el.remove();
+}
+function msAdj(d) { if (!MS || MS.busy) return; MS.n = Math.max(1, Math.min(MS.max, MS.n + d)); msRender(); }
+function msRender() {
+  let el = $("msl");
+  if (!MS) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement("div"); el.id = "msl"; document.body.append(el); }
+  const t = MS.target;
+  let tgt = '<div class="mslt">🎯 <b>هدف را مشخص کنید</b><br>روی نیروی زمینی یا دریایی دشمن روی نقشه بزنید.</div>', warn = "";
+  if (t) {
+    const rows = enemyRows({ code: t.code, loc: t.loc }).filter((r) => ["land", "sea"].includes(ucOf(r.unit_id).grp));
+    const chips = rows.map((r) => `${unitIc(r.unit_id)} ${en(r.qty)}`).join(" ");
+    const a = homeLL(country.code), km = a && t.ll ? Math.round(kmBetween(a, t.ll)) : 0;
+    tgt = `<div class="mslt">🎯 هدف: <b>${frEsc(cNameOf(t.code))}</b> · ${frEsc(enLoc(t.loc))}<br>${chips}<br><small>فاصله: ${en(km)} km · برد: ∞ · پدافند هوایی دشمن بخشی را رهگیری می‌کند</small></div>${warn}`;
+  }
+  el.innerHTML = `<div class="mslh"><b>🚀 شلیک موشک</b><button class="ic" onclick="missileCancel()" aria-label="بستن">✕</button></div>
+    <div class="lbl">🎯 ${en(MS.mis)} موشک · 🏗️ ${en(MS.lau)} لانچر (هر لانچر ${MSL_PER_LAUNCHER} موشک) · حداکثر ${en(MS.max)} موشک در هر شلیک</div>${tgt}
+    <div class="mslq"><button class="pmb" onclick="msAdj(-1)" ${MS.n <= 1 ? "disabled" : ""}>−</button><b>${en(MS.n)}</b><button class="pmb" onclick="msAdj(1)" ${MS.n >= MS.max ? "disabled" : ""}>+</button><button class="pmb dpsz" onclick="msAdj(${MS.n >= MS.max ? -9999 : 9999})">${MS.n >= MS.max ? "حداقل" : "حداکثر"}</button></div>
+    <button class="buy" id="mslGo" onclick="missileFire()" ${t && !warn && !MS.busy ? "" : "disabled"}>🚀 شلیک ${en(MS.n)} موشک</button>`;
+}
+function missileTarget(a) {
+  if (!MS || MS.busy) return;
+  if (a.move) return flash(ARM_ERR.NOT_VISIBLE, 3000);
+  if (a.g && !["land", "sea"].includes(a.g)) return flash("موشک فقط نیروی زمینی و دریایی را می‌زند", 3000);
+  const rows = enemyRows(a).filter((r) => ["land", "sea"].includes(ucOf(r.unit_id).grp));
+  if (!rows.length) return flash("اینجا نیروی زمینی یا دریایی برای موشک نیست", 3000);
+  const ll = locLLc(a.loc, a.code); if (!ll) return;
+  MS.target = { code: a.code, loc: a.loc, ll };
+  if (!MS.mk) { const el = document.createElement("div"); el.className = "mvt"; el.innerHTML = "<i></i><u></u><span></span>"; MS.mk = new maplibregl.Marker({ element: el }); }
+  MS.mk.setLngLat(ll).addTo(lmap);
+  msRender();
+}
+function enemyMissile() { const a = window.ENM; closeEnemy(); if (a) missileOpen({ code: a.code, loc: a.loc }); }
+function missileAnim(a, b, km) {
+  return new Promise((res) => {
+    if (!lmap || !a || !b) return res();
+    const spd = Number(ucOf("missile").speed_kmh) || 1e5, dur = Math.min(6000, Math.max(1800, (km / spd) * 3600 * 1000));
+    let dx = b[0] - a[0]; if (dx > 180) dx -= 360; if (dx < -180) dx += 360;
+    const ang = Math.round((Math.atan2(dx * Math.cos(((a[1] + b[1]) / 2) * rad), b[1] - a[1]) * 180) / Math.PI) - 45;
+    const el = document.createElement("div"); el.textContent = "🚀"; el.style.cssText = "font-size:28px;pointer-events:none;filter:drop-shadow(0 0 8px #ff6b6b);transform:rotate(" + ang + "deg)";
+    const mk = new maplibregl.Marker({ element: el }).setLngLat(a).addTo(lmap), t0 = performance.now();
+    const step = (t) => {
+      const f = Math.min(1, (t - t0) / dur);
+      mk.setLngLat([a[0] + dx * f, a[1] + (b[1] - a[1]) * f]);
+      if (f < 1) return requestAnimationFrame(step);
+      mk.remove();
+      const bm = document.createElement("div"); bm.textContent = "💥"; bm.style.cssText = "font-size:40px;pointer-events:none";
+      const bk = new maplibregl.Marker({ element: bm }).setLngLat(b).addTo(lmap); setTimeout(() => bk.remove(), 1400); res();
+    };
+    requestAnimationFrame(step);
+  });
+}
+async function missileFire() {
+  if (!MS || !MS.target || MS.busy) return;
+  const t = MS.target, n = MS.n, a = homeLL(country.code), b = t.ll, km = a && b ? kmBetween(a, b) : 0;
+  MS.busy = true; msRender();
+  const res = await sb.rpc("fire_missiles", { p_qty: n, p_target_code: t.code, p_target_loc: t.loc || null });
+  if (res.error) {
+    const m = String(res.error.message || "") + String(res.error.code || "");
+    flash(/function|schema cache|PGRST202/i.test(m) ? ARM_ERR.NO_FIRE_RPC : (ARM_ERR[res.error.message] || res.error.message), 5000);
+    await loadArmy(); const lau = homeQty("missile_launcher"), mis = homeQty("missile");
+    if (!MS) return;
+    MS.busy = false; MS.lau = lau; MS.mis = mis; MS.max = Math.min(mis, lau * MSL_PER_LAUNCHER);
+    if (MS.max < 1) return missileCancel();
+    MS.n = Math.min(MS.n, MS.max); msRender(); return;
+  }
+  await missileAnim(a, b, km);
+  const k = (res.data && res.data.killed) || {}, txt = Object.entries(k).map(([id, q]) => unitIc(id) + " " + en(q)).join(" ");
+  missileCancel();
+  const ic = res.data && Number(res.data.intercepted) || 0; flash((txt ? "💥 اصابت موشک — نابود شد: " + txt : "💥 موشک‌ها شلیک شدند ولی یگانی نابود نشد") + (ic ? " · 📡 " + en(ic) + " رهگیری شد" : ""), 6000);
+  await loadArmy(); await loadWorldUnits(); renderUnitMarkers();
 }
 setInterval(() => { if (!$("worldmap").hidden && country && UC && !document.hidden) loadWorldUnits().then(renderUnitMarkers).catch(() => {}); }, 15000);
 </script>
