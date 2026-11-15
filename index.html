@@ -763,6 +763,26 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 #msl .mslt{padding:10px 12px;border-radius:14px;background:#ff6b6b14;border:1px solid #ff6b6b40;line-height:1.9;font-size:14px}
 #msl .mslq{display:flex;align-items:center;justify-content:center;gap:14px}
 #msl .mslq b{min-width:44px;text-align:center;font-size:20px}
+
+/* نبرد زنده */
+.lbm{position:relative;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff6b6b,#8f1d22);border:2px solid #ffd7d7;display:grid;place-items:center;font-size:24px;cursor:pointer;animation:lbpulse 1.4s infinite}
+.lbm small{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:#0d1626;border:1px solid #ff6b6b;color:#ffd7d7;border-radius:10px;padding:0 6px;font-size:11px;font-weight:700;line-height:16px}
+@keyframes lbpulse{0%{box-shadow:0 0 0 0 #ff4d4dcc}100%{box-shadow:0 0 0 24px #ff4d4d00}}
+#lbp{position:fixed;inset-inline:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:1200;background:#0d1626f7;border-top:1px solid #ff6b6b;border-radius:18px 18px 0 0;padding:12px 16px 14px;box-shadow:0 -10px 30px #000a;max-height:70vh;overflow:auto}
+#lbp .in{max-width:460px;margin:auto}
+#lbp .lbh{display:flex;align-items:center;gap:10px}
+#lbp .lbh b{flex:1;font-size:18px}
+#lbp .lbh .ic{width:34px;height:34px;font-size:14px}
+#lbp .lbs{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px;background:var(--card)}
+#lbp .lbs.me{border-color:var(--gold)}
+#lbp .lbs .t{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+#lbp .lbs .t span{color:var(--mut);font-weight:400;font-size:13px}
+#lbp .lbs .ch{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+#lbp .lbs i{color:var(--err);font-style:normal;font-size:12px;margin-inline-start:4px}
+#lbp .lbbar{height:10px;border-radius:6px;background:#3a8f68;overflow:hidden;margin:10px 0 4px}
+#lbp .lbbar u{display:block;height:100%;background:#ff6b6b;transition:width .8s}
+#lbp .lbcd{color:var(--mut);font-size:13px;text-align:center;margin:6px 0}
+#lbp button.rt{background:transparent;color:var(--err);border:1px solid var(--err)}
 </style>
 </head>
 <body>
@@ -4733,6 +4753,94 @@ async function missileFire() {
   await loadArmy(); await loadWorldUnits(); renderUnitMarkers();
 }
 setInterval(() => { if (!$("worldmap").hidden && country && UC && !document.hidden) loadWorldUnits().then(renderUnitMarkers).catch(() => {}); }, 15000);
+/* ===== نبرد زنده روی نقشه ===== */
+Object.assign(ARM_ERR, { NOT_ATTACKER: "فقط مهاجم می‌تواند عقب‌نشینی کند", NO_BATTLE: "این نبرد تمام شده است" });
+let LB = [], LBM = {}, lbOpen = null, lbAt = 0, lbBusy = false, lbSure = false, lbSureT = 0;
+const lbLL = (b) => (b.kind === "country" ? homeLL(b.def_code) : locLL(b.loc));
+async function loadBattles() {
+  if (lbBusy || !country || typeof sb === "undefined") return;
+  lbBusy = true;
+  try {
+    const r = await sb.rpc("live_status");
+    if (r.error || !Array.isArray(r.data)) return;
+    const prev = new Map(LB.map((b) => [b.id, b]));
+    LB = r.data; lbAt = Date.now();
+    let ended = false;
+    LB.forEach((b) => {
+      const p = prev.get(b.id);
+      if (b.status === "done" && p && p.status !== "done") {
+        const w = b.result, me = b.mine_att ? "att" : b.mine_def ? "def" : "";
+        if (me) { ended = true; flash(w === "retreat" ? "🏳️ نبرد با عقب‌نشینی پایان یافت" : w === "none" ? "⚔️ نبرد بدون نتیجه پایان یافت" : (w === "attacker") === (me === "att") ? "🏆 نبرد را بردید" : "💥 نبرد را باختید", 5000); }
+      }
+    });
+    lbMarkers(); lbPanel();
+    if (ended) { try { await loadArmy(); await loadWorldUnits(); renderUnitMarkers(); } catch (_) {} }
+  } catch (e) { console.warn("loadBattles", e); } finally { lbBusy = false; }
+}
+function lbMarkers() {
+  if (!lmap) return;
+  const live = new Set();
+  LB.forEach((b) => {
+    if (b.status !== "active") return;
+    const ll = lbLL(b); if (!ll) return; live.add(String(b.id));
+    let m = LBM[b.id];
+    if (!m) {
+      const el = document.createElement("div"); el.className = "lbm"; el.innerHTML = "⚔️<small></small>";
+      el.addEventListener("click", (ev) => { ev.stopPropagation(); lbSure = false; lbOpen = b.id; lbPanel(); });
+      m = LBM[b.id] = new maplibregl.Marker({ element: el, offset: [0, -34] }).setLngLat(ll).addTo(lmap);
+    } else m.setLngLat(ll);
+    m.getElement().querySelector("small").textContent = "نوبت " + en(b.round);
+  });
+  Object.keys(LBM).forEach((id) => { if (!live.has(id)) { LBM[id].remove(); delete LBM[id]; } });
+}
+function lbChips(before, now) {
+  const ids = [...new Set([...Object.keys(before || {}), ...Object.keys(now || {})])];
+  return ids.map((id) => { const b0 = +(before || {})[id] || 0, n0 = +(now || {})[id] || 0, lost = Math.max(0, b0 - n0); return `<span class="dpsch">${unitIc(id)} <b>${en(n0)}</b>${lost ? "<i>−" + en(lost) + "</i>" : ""}</span>`; }).join("") || '<span class="lbl">همه نابود شدند</span>';
+}
+function lbSum(o) { return Object.values(o || {}).reduce((a, x) => a + (+x || 0), 0); }
+function lbPanel() {
+  let el = $("lbp");
+  const b = LB.find((x) => x.id === lbOpen);
+  if (!b) { if (el) el.hidden = true; return; }
+  if (!el) { el = document.createElement("div"); el.id = "lbp"; document.body.append(el); }
+  const tot = (+b.a_pow || 0) + (+b.d_pow || 0), pa = tot > 0 ? Math.round((b.a_pow / tot) * 100) : 50;
+  const where = b.kind === "country" ? "🏰 پایتخت " + frEsc(cNameOf(b.def_code)) : frEsc(siteName(b.loc));
+  const done = b.status === "done";
+  const res = done ? (b.result === "retreat" ? "🏳️ مهاجم عقب‌نشینی کرد" : b.result === "none" ? "⚔️ نبرد بدون نتیجه تمام شد" : b.result === "attacker" ? "🏆 مهاجم پیروز شد" : "🛡 مدافع پیروز شد") : "";
+  el.innerHTML = `<div class="in"><div class="lbh"><b>⚔️ نبرد · ${where}</b><button class="ic" onclick="lbClose()" aria-label="بستن">✕</button></div>
+    <div class="lbcd" id="lbCd">${done ? res : ""}</div>
+    <div class="lbs${b.mine_att ? " me" : ""}"><div class="t"><b>${flagOf(b.att_code)} ${frEsc(cNameOf(b.att_code))} · مهاجم</b><span>قدرت ${en(Math.round(b.a_pow))}</span></div><div class="ch">${lbChips(b.att_before, b.att_now)}</div></div>
+    <div class="lbbar"><u style="width:${pa}%"></u></div>
+    <div class="lbs${b.mine_def ? " me" : ""}"><div class="t"><b>${flagOf(b.def_code)} ${frEsc(cNameOf(b.def_code))} · مدافع</b><span>قدرت ${en(Math.round(b.d_pow))}</span></div><div class="ch">${lbChips(b.def_before, b.def_now)}</div></div>
+    ${!done && b.mine_att ? `<button class="rt" style="margin-top:10px" onclick="lbRetreat(${b.id})">${lbSure ? "مطمئنید؟ دوباره بزنید" : "🏳️ عقب‌نشینی"}</button>` : ""}</div>`;
+  el.hidden = false; lbCd();
+}
+function lbCd() {
+  const b = LB.find((x) => x.id === lbOpen), c = $("lbCd"); if (!b || !c || b.status === "done") return;
+  if (!b.open) { c.textContent = "⏸ ساعت جنگ نیست؛ نبرد متوقف است"; return; }
+  const left = Math.max(0, b.next_in - Math.floor((Date.now() - lbAt) / 1000));
+  c.textContent = "نوبت " + en(b.round) + " · نوبت بعدی تا " + en(left) + " ثانیه";
+}
+function lbClose() { lbOpen = null; lbSure = false; const el = $("lbp"); if (el) el.hidden = true; }
+async function lbRetreat(id) {
+  if (!lbSure) { lbSure = true; clearTimeout(lbSureT); lbSureT = setTimeout(() => { lbSure = false; lbPanel(); }, 4000); lbPanel(); return; }
+  lbSure = false; clearTimeout(lbSureT);
+  const r = await sb.rpc("live_retreat", { p_id: id });
+  if (r.error) { flash(ARM_ERR[r.error.message] || r.error.message, 4000); await loadBattles(); return; }
+  flash("🏳️ عقب‌نشینی انجام شد؛ یگان‌ها به پایگاه برگشتند", 3500);
+  lbClose();
+  try { await loadArmy(); await loadBattles(); await loadWorldUnits(); renderUnitMarkers(); } catch (_) {}
+}
+setInterval(() => {
+  if (document.hidden || !authed || !country) return;
+  if ((!$("worldmap").hidden || lbOpen != null) && Date.now() - lbAt > 5500) loadBattles();
+}, 1000);
+setInterval(() => {
+  lbCd();
+  const b = LB.find((x) => x.id === lbOpen);
+  if (b && b.status === "active" && b.open && b.next_in - Math.floor((Date.now() - lbAt) / 1000) <= 0 && Date.now() - lbAt > 3000) loadBattles();
+}, 1000);
+
 </script>
 </body>
 </html>
