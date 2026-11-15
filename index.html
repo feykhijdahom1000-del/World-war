@@ -730,7 +730,7 @@ nav button[data-t=home].on{box-shadow:0 8px 22px #e2b64e66,0 0 0 6px #060b15,ins
 .wcard.gld{border-color:var(--gold)}
 .wcard .wt{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px}
 .wbar{height:12px;border-radius:8px;background:#ffffff1f;overflow:hidden;margin:8px 0}
-.wbar u{display:block;height:100%;background:repeating-linear-gradient(45deg,#ff6b6b,#ff6b6b 8px,#d94a4a 8px,#d94a4a 16px);transition:width .6s}
+.wbar u{display:block;height:100%;background:repeating-linear-gradient(45deg,#ff6b6b,#ff6b6b 8px,#d94a4a 8px,#d94a4a 16px);transition:width 1s linear}
 .wbar.g u{background:repeating-linear-gradient(45deg,#3ddc97,#3ddc97 8px,#2bb87b 8px,#2bb87b 16px)}
 .wrow{display:flex;gap:8px;flex-wrap:wrap}
 .wrow button{flex:1;margin:4px 0;padding:10px;font-size:15px;min-width:130px}
@@ -3469,7 +3469,7 @@ async function openCoordsTool() {
 
 /* پنجره‌ی اعزام: از هر محل (خانه یا معدن) به هر مقصد مجاز، با زمان بر پایه‌ی فاصله و سرعت */
 let dpFrom = "home";
-const dpRows = (id) => UL.filter((r) => r.unit_id === id && Number(r.qty) > 0 && (mvSel && mvSel.cargo ? r.loc === "cargo" && +r.grp_id === mvSel.grp : r.loc === dpFrom && (mvSel && mvSel.grp != null ? +r.grp_id === mvSel.grp : true)));
+const dpRows = (id) => UL.filter((r) => r.unit_id === id && Number(r.qty) > 0 && (mvSel && mvSel.cargo ? r.loc === "cargo" && +r.grp_id === mvSel.grp : (mvSel && mvSel.all ? r.loc !== "transit" && r.loc !== "cargo" && r.loc !== mvSel.atkLoc : r.loc === dpFrom) && (mvSel && mvSel.grp != null && !mvSel.all ? +r.grp_id === mvSel.grp : true)));
 const dpQ = (id) => dpRows(id).reduce((a, r) => a + Number(r.qty), 0);
 const gName = (g) => (UG.find((x) => x.id === g) || {}).name || "";
 const dpList = () => UC.filter((u) => u.grp !== "missile" && dpQ(u.id) > 0);
@@ -3495,6 +3495,7 @@ async function openDp(from, to, grp) {
   mvSel = { from: "home", grp: grp == null ? null : grp, q: {} };
   dpFrom = from || SPAWNS.find((l) => UC.some((u) => u.grp !== "missile" && (!st || SITE_OK[st.type].includes(u.grp)) && UL.some((r) => r.unit_id === u.id && r.loc === l && Number(r.qty) > 0))) || "home";
   mvSel.from = dpFrom;
+  if (to && String(to).startsWith("c:") && !(country && to.slice(2) === country.code)) { mvSel.all = true; mvSel.atkLoc = to; }
   const l = dpList(); if (!l.length) { mvSel = null; return flash("اینجا یگان آماده‌ای نیست", 2500); }
   l.forEach((u) => { mvSel.q[u.id] = dpQ(u.id); });
   $("dps").hidden = false; $("dps").classList.remove("min");
@@ -3504,12 +3505,12 @@ function closeDp() { mvCancel(); }
 function mvErr(u, to) {
   const e = mvErr0(u, to); if (e) return e;
   if (!mvSel || mvSel.cargo || u.grp === "air") return "";
-  return routeFor(u.grp, mvSel.from, to) ? "" : u.grp === "land" ? "مسیر زمینی وجود ندارد؛ با ناو حمل کنید" : "مسیر دریایی وجود ندارد";
+  return (mvSel.all ? dpRows(u.id).every((r) => routeFor(u.grp, r.loc, to)) : routeFor(u.grp, mvSel.from, to)) ? "" : u.grp === "land" ? "مسیر زمینی وجود ندارد؛ با ناو حمل کنید" : "مسیر دریایی وجود ندارد";
 }
 function mvErr0(u, to) {
   const ll = locLL(to); if (!ll) return "مقصد نامعتبر";
   if (mvSel.cargo) { if (!to.startsWith("p:")) return "فقط روی نقطه‌ی ساحل"; if (!landAt(ll)) return "مقصد باید خشکی باشد"; const a = locLL(mvSel.from); return a && kmBetween(a, ll) > 50 ? "بیش از ۵۰ کیلومتر از ناو" : ""; }
-  if (to === mvSel.from) return "مبدأ و مقصد یکی است";
+  if (to === mvSel.from && !mvSel.all) return "مبدأ و مقصد یکی است";
   if (to.startsWith("c:")) { const cc = byCode[to.slice(2)]; return !cc || !cc.taken || (country && cc.code === country.code) ? "این کشور فرمانده ندارد" : ""; }
   if (to.startsWith("p:")) { const land = landAt(ll); return u.grp === "land" && !land ? "نیروی زمینی روی آب نمی‌رود" : u.grp === "sea" && land ? "ناو روی خشکی نمی‌رود" : ""; }
   const s = SITES.find((x) => x.id === to); return s && SITE_OK[s.type].includes(u.grp) ? "" : "برای این یگان مجاز نیست";
@@ -3557,15 +3558,16 @@ function dpsRender() {
   if (!mvSel) return;
   const l = dpList(), here = mvSel.from === "home" ? "پایتخت" : siteName(mvSel.from);
   $("dpsT").textContent = mvSel.cargo ? "پیاده کردن · " + gName(mvSel.grp) : mvSel.grp > 0 ? gName(mvSel.grp) : mvSel.from === "home" ? "ارتش پایتخت" : siteName(mvSel.from);
-  $("dpsS").textContent = en(l.reduce((a, u) => a + dpQ(u.id), 0)) + " یگان آماده فرمان";
+  $("dpsS").textContent = en(l.reduce((a, u) => a + dpQ(u.id), 0)) + " یگان آماده فرمان" + (mvSel.all ? " (از همه‌ی مکان‌ها)" : "");
   $("dpsC").innerHTML = l.map((u) => `<span class="dpsch">${unitIc(u.id)} <b>${en(dpQ(u.id))}</b> ${unitFa(u.id)}</span>`).join("");
   $("dpsC").hidden = $("dpsP").hidden = $("dpsA").hidden = !!mvTo; $("dpsD").hidden = !mvTo; $("dpsF").hidden = !mvTo; if (mvTo) $("dpsB").hidden = true;
   $("dpsP").textContent = mvSel.cargo ? "🏖 ساحل نزدیک ناو را روی نقشه بزنید (حداکثر ۵۰ km)" : "🎯 مقصد یا هدف را روی نقشه بزنید";
   $("dpsBd").hidden = mvSel.cargo || mvSel.from !== "home"; $("dpsA").style.display = mvSel.cargo ? "none" : "";
   if (!mvTo) return;
   const tot = l.reduce((a, u) => a + dpsEff(u), 0), sel = l.filter((u) => dpsEff(u) > 0), ref = sel.length ? sel : l.filter((u) => !mvErr(u, mvTo));
-  const sec = Math.max(0, ...ref.map((u) => etaSecs(u, mvSel.from, mvTo))), a = locLL(mvSel.from), b = locLL(mvTo);
-  $("dpsN").textContent = mvTo.startsWith("p:") ? "نقطه روی نقشه" : siteName(mvTo);
+  const sec = Math.max(0, ...ref.flatMap((u) => (mvSel.all ? [...new Set(dpRows(u.id).map((r) => r.loc))] : [mvSel.from]).map((f) => etaSecs(u, f, mvTo)))), a = locLL(mvSel.from), b = locLL(mvTo);
+  const isAtk = !!(mvSel.atk || (mvTo.startsWith("c:") && !(country && mvTo.slice(2) === country.code)));
+  $("dpsN").textContent = (isAtk ? "⚔️ حمله به " : "") + (mvTo.startsWith("p:") ? "نقطه روی نقشه" : siteName(mvTo));
   $("dpsE").textContent = ref.length ? durEn(sec * 1000) : "—";
   {
     const rts = ref.map((u) => routeFor(u.grp, mvSel.from, mvTo)).filter(Boolean);
@@ -3576,7 +3578,7 @@ function dpsRender() {
   }
   $("dpsR").innerHTML = l.map((u) => { const e = mvErr(u, mvTo), q = dpsEff(u), mx = dpQ(u.id);
     return `<div class="dpsrow${e ? " off" : ""}"><span class="dpsi">${unitIc(u.id)}</span><div><b>${unitFa(u.id)}</b><small>${e || en(mx) + " در " + here}</small></div><div class="dpsst"><button class="pmb" onclick="dpsAdj('${u.id}',-1)" ${e || q < 1 ? "disabled" : ""}>−</button><b class="dpsq">${en(q)}</b><button class="pmb" onclick="dpsAdj('${u.id}',1)" ${e || q >= mx ? "disabled" : ""}>+</button></div><button class="pmb dpsz" onclick="dpsAdj('${u.id}',${q >= mx ? -9999 : 9999})" ${e ? "disabled" : ""}>${q >= mx ? "هیچ" : "همه"}</button></div>`; }).join("");
-  $("dpsGo").textContent = (mvSel.cargo ? "پیاده کنید · " : "اعزام کنید · ") + en(tot) + " یگان"; $("dpsGo").disabled = tot < 1;
+  $("dpsGo").textContent = (mvSel.cargo ? "پیاده کنید · " : isAtk ? "⚔️ حمله کنید · " : "اعزام کنید · ") + en(tot) + " یگان"; $("dpsGo").disabled = tot < 1;
   if (mvMk) mvMk.getElement().querySelector("span").textContent = ref.length ? durEn(sec * 1000) : "";
 }
 
@@ -3677,11 +3679,11 @@ async function mvGo() {
         let left = dpsEff(u);
         for (const r of dpRows(u.id)) {
           if (left < 1) break; const q = Math.min(left, +r.qty);
-          const a = { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst };
+          const fl = mvSel.all ? r.loc : mvSel.from, a = { p_unit: u.id, p_qty: q, p_from: fl, p_to: mvTo, p_src: +r.grp_id || 0, p_dst: dst };
           if (dst < 0) a.p_kind = kind;
-          { const rt = u.grp !== "air" ? routeFor(u.grp, mvSel.from, mvTo) : null; if (rt && rt.pts.length > 1) a.p_path = rt.pts.map((q) => [Math.round(q[0] * 1000) / 1000, Math.round(q[1] * 1000) / 1000]); }
+          { const rt = u.grp !== "air" ? routeFor(u.grp, fl, mvTo) : null; if (rt && rt.pts.length > 1) a.p_path = rt.pts.map((q) => [Math.round(q[0] * 1000) / 1000, Math.round(q[1] * 1000) / 1000]); }
           let res;
-          if (mvSel.atk) res = await sb.rpc("attack_units", { p_unit: u.id, p_qty: q, p_from: mvSel.from, p_target_code: mvSel.atk.code, p_target_loc: mvSel.atk.loc || null, p_target_move: mvSel.atk.move || null, p_src: +r.grp_id || 0, p_dst: dst, p_path: a.p_path || null, p_kind: dst < 0 ? kind : null });
+          if (mvSel.atk) res = await sb.rpc("attack_units", { p_unit: u.id, p_qty: q, p_from: fl, p_target_code: mvSel.atk.code, p_target_loc: mvSel.atk.loc || null, p_target_move: mvSel.atk.move || null, p_src: +r.grp_id || 0, p_dst: dst, p_path: a.p_path || null, p_kind: dst < 0 ? kind : null });
           else res = await dispatchRpc(a);
           const { data, error } = res;
           if (error) { err = error; break outer; }
@@ -3701,6 +3703,10 @@ function mvCapture(ev) {
   ev.stopPropagation(); ev.preventDefault();
   const site = ents.find((e) => e.kind === "r" && e.m && e.m.contains(ev.target));
   if (site) return mvSet(site.code);
+  const en1 = ents.find((e) => e.kind === "u" && String(e.key).startsWith("w:") && e.m && e.m.contains(ev.target));
+  if (en1) { if (en1.mv) return flash("نیروی در حال حرکت قابل حمله نیست", 2500); const [cd, lc] = String(en1.key).slice(2).split("|"); if (mvAttackAt(cd, lc)) return; }
+  const cp = ents.find((e) => e.kind === "c" && e.m && e.m.contains(ev.target));
+  if (cp && mvAttackAt(cp.code, "home")) return;
   const r = lmap.getCanvas().getBoundingClientRect(), p = lmap.unproject([ev.clientX - r.left, ev.clientY - r.top]);
   mvSet("p:" + (((p.lng + 540) % 360) - 180).toFixed(3) + "," + p.lat.toFixed(3));
 }
@@ -4373,6 +4379,21 @@ const wName = (code, nm) => wFlag(code) + frEsc(nm || (byCode[code] && byCode[co
 const wTime = (t) => new Date(t).toLocaleString("fa-IR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 const warAt = (code) => !!(WAR && (WAR.wars || []).some((w) => w.enemy_code === code));
 function warLeft(o) { const open = WAR && WAR.clock && WAR.clock.open; return Math.max(0, Number(o.seconds_left) - (open ? (Date.now() - WAR._at) / 1000 : 0)); }
+const wDurS = (s) => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60; return (h ? wFa(h) + " ساعت و " : "") + (h || m ? wFa(m) + " دقیقه و " : "") + wFa(r) + " ثانیه"; };
+const wPct = (p) => Number(p).toLocaleString("fa-IR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "٪";
+function warTick() {
+  if (!WAR || $("war").hidden || document.hidden) return;
+  const ck = WAR.clock || {};
+  if (ck.next_change && Date.now() > new Date(ck.next_change).getTime() && Date.now() - warPollAt > 5000) { warPoll(true); return; }
+  const upd = (k, o) => {
+    const p = warPct(o), l = warLeft(o);
+    const a = document.querySelector('[data-wp="' + k + '"]'), b = document.querySelector('[data-wu="' + k + '"]'), c = document.querySelector('[data-wl="' + k + '"]');
+    if (a) a.textContent = wPct(p); if (b) b.style.width = p.toFixed(2) + "%"; if (c) c.textContent = wDurS(l);
+  };
+  if (WAR.my_capital) upd("m", WAR.my_capital);
+  (WAR.holding || []).forEach((o) => upd("h:" + o.target_code, o));
+}
+setInterval(warTick, 1000);
 function warPct(o) { const tot = ((WAR && WAR.occupy_hours) || 6) * 3600; return Math.max(0, Math.min(100, (1 - warLeft(o) / tot) * 100)); }
 
 async function warPoll(force) {
@@ -4425,14 +4446,14 @@ function warRender() {
   if (mc) {
     const p = warPct(mc);
     h += `<div class="wcard red"><div class="wt">⚔️ پایتخت سقوط کرد</div><div><b>پایتخت در دست ${wName(mc.by_code, mc.by_name)}</b></div>`
-      + `<div class="lbl" style="display:flex;justify-content:space-between"><span>دشمن پایتخت را در دست دارد</span><b style="color:#ff8a8a">${wFa(Math.round(p))}٪</b></div><div class="wbar"><u style="width:${p.toFixed(1)}%"></u></div>`
-      + `<div class="lbl">${wDur(warLeft(mc))} زمان جنگ دیگر تا سقوط کامل کشور${ck.open ? "" : " (الان متوقف است)"}</div>`
+      + `<div class="lbl" style="display:flex;justify-content:space-between"><span>دشمن پایتخت را در دست دارد</span><b style="color:#ff8a8a" data-wp="m">${wPct(p)}</b></div><div class="wbar"><u data-wu="m" style="width:${p.toFixed(2)}%"></u></div>`
+      + `<div class="lbl"><span data-wl="m">${wDurS(warLeft(mc))}</span> زمان جنگ دیگر تا سقوط کامل کشور${ck.open ? "" : " (الان متوقف است)"}</div>`
       + `<p class="lbl" style="color:#ff8a8a;line-height:1.9">پایتخت را با یگان‌های خودتان یا با آتش‌بس پس بگیرید، فرمانده. تا آن موقع ۳۰٪ درآمد روزانه‌ی شما به او می‌رسد.</p>`
       + `<div class="wrow"><button onclick="warRetake(this)">🛡 پس‌گرفتن پایتخت</button></div></div>`;
   }
   (WAR.holding || []).forEach((o) => {
     const p = warPct(o);
-    h += `<div class="wcard grn"><div class="wt">🏰 پایتخت ${wName(o.target_code, o.target_name)} در اشغال شماست</div><div class="lbl" style="display:flex;justify-content:space-between"><span>پیشرفت تسخیر</span><b>${wFa(Math.round(p))}٪</b></div><div class="wbar g"><u style="width:${p.toFixed(1)}%"></u></div><div class="lbl">${wDur(warLeft(o))} زمان جنگ تا سقوط کشور · تا آن موقع ۳۰٪ درآمد روزانه‌ی او مال شماست. یگان زمینی را از پایتخت خارج نکنید.</div><div class="wrow"><button onclick="warRecall('${o.target_code}')">↩️ بازگشت یگان‌ها</button></div></div>`;
+    h += `<div class="wcard grn"><div class="wt">🏰 پایتخت ${wName(o.target_code, o.target_name)} در اشغال شماست</div><div class="lbl" style="display:flex;justify-content:space-between"><span>پیشرفت تسخیر</span><b data-wp="h:${o.target_code}">${wPct(p)}</b></div><div class="wbar g"><u data-wu="h:${o.target_code}" style="width:${p.toFixed(2)}%"></u></div><div class="lbl"><span data-wl="h:${o.target_code}">${wDurS(warLeft(o))}</span> زمان جنگ تا سقوط کشور · تا آن موقع ۳۰٪ درآمد روزانه‌ی او مال شماست. یگان زمینی را از پایتخت خارج نکنید.</div><div class="wrow"><button onclick="warRecall('${o.target_code}')">↩️ بازگشت یگان‌ها</button></div></div>`;
   });
   if ((WAR.ruled || []).length) h += `<div class="wcard gld"><div class="wt">🏴 کشورهای تسخیرشده‌ی شما</div>` + WAR.ruled.map((x) => `<div class="wit"><b>${wName(x.code, x.name)}</b><span class="lbl">+$${wFa(x.per_day)} در روز</span></div>`).join("") + `<div class="lbl">تا پایان فصل تمام درآمد این کشورها به شما می‌رسد.</div></div>`;
 
@@ -4598,7 +4619,22 @@ async function enemyAttack() {
   } else { const ll = locLLc(a.loc, a.code); if (!ll) return; tgt = ["home", "airfield", "port"].includes(a.loc) ? "c:" + a.code : a.loc.startsWith("c:") ? a.loc : SITES.some((x) => x.id === a.loc) ? a.loc : "p:" + ll[0].toFixed(3) + "," + ll[1].toFixed(3); }
   closeEnemy();
   await openDp(null, tgt);
-  if (mvSel) { mvSel.atk = { code: a.code, loc: a.loc || null, move: a.move || null }; dpsRender(); }
+  if (mvSel) { mvSel.atk = { code: a.code, loc: a.loc || null, move: a.move || null }; mvAll(); dpsRender(); }
+}
+/* حمله: نیروهای آزاد از «همه‌ی» مکان‌ها (مرز، معدن، فرودگاه، بندر، پایتخت) در لیست بیایند */
+function mvAll() {
+  if (!mvSel || mvSel.cargo) return;
+  mvSel.all = true; mvSel.grp = null; mvSel.atkLoc = mvTo || null;
+  mvSel.q = {}; dpList().forEach((u) => { mvSel.q[u.id] = dpQ(u.id); });
+}
+/* تشخیص حمله وقتی روی نیرو یا پایتخت دشمن زده می‌شود */
+function mvAttackAt(code, loc) {
+  if (!mvSel || mvSel.cargo || !code || (country && code === country.code)) return false;
+  const isH = ["home", "airfield", "port"].includes(loc || "home"), tgt = isH ? "c:" + code : String(loc).startsWith("c:") ? loc : SITES.some((x) => x.id === loc) ? loc : null;
+  if (!tgt) return false;
+  mvSel.atk = { code, loc: loc || "home", move: null };
+  mvSet(tgt, true); mvAll(); dpsRender();
+  return true;
 }
 /* ===== موشک و لانچر ===== */
 const MSL_PER_LAUNCHER = 5;
