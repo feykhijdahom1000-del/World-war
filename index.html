@@ -3506,6 +3506,41 @@ function routeSet(id, feats) {
     if (!lmap.getLayer(id)) lmap.addLayer({ id, type: "line", source: id, layout: { "line-cap": "butt", "line-join": "round" }, paint: { "line-color": "#ffd23f", "line-width": 3, "line-opacity": 1, "line-dasharray": [2, 1.5] } });
   } catch (e) { console.warn("routeSet", id, e); }
 }
+/* ===== دایره‌ی برد یگان‌ها (range_km) ===== */
+const RANGE_COL = { land: "#e0b84a", air: "#5ec8ff", sea: "#4f8cff", missile: "#ff7a59" };
+function rangeCircle(ll, km, g) {
+  const n = 72, la = ll[1] * rad, d = km / 6371, pts = [];
+  for (let i = 0; i <= n; i++) {
+    const b = (2 * Math.PI * i) / n, la2 = Math.asin(Math.sin(la) * Math.cos(d) + Math.cos(la) * Math.sin(d) * Math.cos(b));
+    const dl = Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(la), Math.cos(d) - Math.sin(la) * Math.sin(la2));
+    pts.push([ll[0] + (dl * 180) / Math.PI, (la2 * 180) / Math.PI]);
+  }
+  return { type: "Feature", properties: { g }, geometry: { type: "Polygon", coordinates: [pts] } };
+}
+let RANGE_F = [];
+function rangeSet(feats) {
+  if (!lmap) return;
+  RANGE_F = feats;
+  const d = { type: "FeatureCollection", features: feats }, col = ["match", ["get", "g"], ...Object.entries(RANGE_COL).flat(), "#ffffff"];
+  try {
+    if (!lmap.isStyleLoaded()) { lmap.once("idle", () => rangeSet(RANGE_F)); return; }
+    if (lmap.getSource("urange")) lmap.getSource("urange").setData(d); else lmap.addSource("urange", { type: "geojson", data: d });
+    if (!lmap.getLayer("urange-fill")) lmap.addLayer({ id: "urange-fill", type: "fill", source: "urange", paint: { "fill-color": col, "fill-opacity": 0.07 } });
+    if (!lmap.getLayer("urange-line")) lmap.addLayer({ id: "urange-line", type: "line", source: "urange", paint: { "line-color": col, "line-width": 1.6, "line-opacity": 0.9, "line-dasharray": [3, 2] } });
+  } catch (e) { console.warn("rangeSet", e); }
+}
+/* دایره‌ی برد یگان‌های رزمیِ مستقر در یک محل (موشک بی‌نهایت است و نشان داده نمی‌شود) */
+function rangeShow(loc) {
+  const ll = loc ? locLL(loc) : null; if (!ll || !UC) return rangeSet([]);
+  const seen = new Set(), feats = [];
+  UL.forEach((r) => {
+    if (r.loc !== loc || !(Number(r.qty) > 0) || seen.has(r.unit_id)) return;
+    const u = ucOf(r.unit_id), km = Number(u.range_km);
+    if (!u.id || u.id === "missile" || !(Number(u.attack) > 0) || !(km > 0) || km > 5000) return;
+    seen.add(r.unit_id); feats.push(rangeCircle(ll, km, u.grp === "missile" ? "air" : u.grp));
+  });
+  rangeSet(feats);
+}
 async function openDp(from, to, grp) {
   if (!UC) await loadArmy();
   if (!UC) return flash("اطلاعات ارتش بارگذاری نشد", 3000);
@@ -3519,6 +3554,7 @@ async function openDp(from, to, grp) {
   const l = dpList(); if (!l.length) { mvSel = null; return flash("اینجا یگان آماده‌ای نیست", 2500); }
   l.forEach((u) => { mvSel.q[u.id] = dpQ(u.id); });
   $("dps").hidden = false; $("dps").classList.remove("min");
+  rangeShow(dpFrom);
   if (to) mvSet(to); else dpsRender();
 }
 function closeDp() { mvCancel(); }
@@ -3669,6 +3705,7 @@ function mvCancel() {
   mvSel = null; mvTo = null; $("dps").hidden = true;
   if (mvMk) { mvMk.remove(); mvMk = null; }
   routeSet("mvroute", []);
+  rangeSet([]);
 }
 function mvSet(to, keep) {
   const ll = locLL(to); if (!ll || !mvSel) return;
